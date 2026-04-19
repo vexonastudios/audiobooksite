@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
-import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon } from 'lucide-react';
 import { BookCard } from '@/components/ui/BookCard';
 import { ReadAlongPanel } from '@/components/ui/ReadAlongPanel';
 import { QuoteModal } from '@/components/ui/QuoteModal';
@@ -31,17 +31,26 @@ export default function AudiobookPage() {
   
   // Stores
   const { currentBook, isPlaying, currentTime, duration, playbackSpeed, 
+          sleepTimerMode, sleepTimerEndsAt, setSleepTimer, clearSleepTimer,
           loadBook, setPlaying, setPlaybackSpeed, skipForward, skipBackward, jumpToChapter } = usePlayerStore();
   const { history, addBookmark, getBookmarksByBook, removeBookmark, skipInterval } = useUserStore();
 
   // Local state
-  const [activeTab, setActiveTab] = useState<'chapters' | 'bookmarks' | 'share'>('chapters');
+  const [activeTab, setActiveTab] = useState<'chapters' | 'bookmarks' | 'share' | 'timer'>('chapters');
   const [bookmarkNote, setBookmarkNote] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
   const [readAlongOpen, setReadAlongOpen] = useState(false);
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [loadedCues, setLoadedCues] = useState<TranscriptCue[]>([]);
   const [transcriptStatus, setTranscriptStatus] = useState<'loading' | 'available' | 'unavailable'>('loading');
+  const [timerTick, setTimerTick] = useState(0);
+
+  // Tick for Sleep Timer Countdown UI
+  useEffect(() => {
+    if (sleepTimerMode !== 'minutes') return;
+    const interval = setInterval(() => setTimerTick(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [sleepTimerMode]);
 
   // Load VTT cues for bookmark context (preloaded when panel first opens or book plays)
   useEffect(() => {
@@ -375,6 +384,9 @@ export default function AudiobookPage() {
                 <button className={`tab ${activeTab === 'share' ? 'active' : ''}`} onClick={() => setActiveTab('share')}>
                   <Share2 size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: '-3px' }}/> Share
                 </button>
+                <button className={`tab ${activeTab === 'timer' ? 'active' : ''}`} onClick={() => setActiveTab('timer')}>
+                  <Moon size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: '-3px' }}/> Timer
+                </button>
               </div>
 
               <div style={{ maxHeight: 400, overflowY: 'auto', paddingRight: 8 }}>
@@ -468,6 +480,38 @@ export default function AudiobookPage() {
                     <button className="btn btn-primary" onClick={handleShare} style={{ minWidth: 200 }}>
                        {copiedLink ? 'Link Copied!' : 'Copy Link'}
                     </button>
+                  </div>
+                )}
+
+                {/* TIMER TAB */}
+                {activeTab === 'timer' && (
+                  <div style={{ padding: '8px 0' }}>
+                    <h3 style={{ marginBottom: 16 }}>Sleep Timer</h3>
+                    
+                    {sleepTimerMode ? (
+                      <div style={{ background: 'var(--color-surface-2)', padding: '20px', borderRadius: 'var(--radius-md)', textAlign: 'center', marginBottom: 20 }}>
+                        <Moon size={32} style={{ color: 'var(--color-brand)', margin: '0 auto 12px', opacity: 0.8 }} />
+                        <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: 4 }}>
+                          {sleepTimerMode === 'chapter' ? 'Pausing at End of Chapter' : (
+                            sleepTimerEndsAt ? formatTime(Math.max(0, (sleepTimerEndsAt - Date.now()) / 1000)) : ''
+                          )}
+                        </div>
+                        <div className="text-muted text-sm" style={{ marginBottom: 16 }}>
+                          {sleepTimerMode === 'minutes' ? 'until playback stops' : 'The player will pause when this chapter concludes.'}
+                        </div>
+                        <button className="btn btn-secondary" onClick={clearSleepTimer} style={{ width: '100%', padding: '10px' }}>
+                          Turn Off Timer
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div className="text-muted text-sm" style={{ marginBottom: 8 }}>Select an option to automatically pause playback:</div>
+                        <button className="btn btn-secondary" onClick={() => setSleepTimer(15)} style={{ padding: '12px', justifyContent: 'flex-start', fontWeight: 500 }}>15 Minutes</button>
+                        <button className="btn btn-secondary" onClick={() => setSleepTimer(30)} style={{ padding: '12px', justifyContent: 'flex-start', fontWeight: 500 }}>30 Minutes</button>
+                        <button className="btn btn-secondary" onClick={() => setSleepTimer(60)} style={{ padding: '12px', justifyContent: 'flex-start', fontWeight: 500 }}>60 Minutes</button>
+                        <button className="btn btn-secondary" onClick={() => setSleepTimer('chapter')} style={{ padding: '12px', justifyContent: 'flex-start', fontWeight: 500 }}>End of current chapter</button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

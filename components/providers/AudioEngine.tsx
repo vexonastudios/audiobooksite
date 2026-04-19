@@ -33,6 +33,30 @@ export function AudioEngine() {
         saveTimerRef.current = null;
         saveCurrentPosition();
       }, 10_000);
+
+      // Sleep Timer Evaluation
+      const state = usePlayerStore.getState();
+      if (state.sleepTimerMode === 'minutes' && state.sleepTimerEndsAt) {
+        if (Date.now() >= state.sleepTimerEndsAt) {
+          audio.pause();
+          usePlayerStore.getState().setPlaying(false);
+          usePlayerStore.getState().clearSleepTimer();
+        }
+      } else if (state.sleepTimerMode === 'chapter') {
+        const book = state.currentBook;
+        if (book && book.chapters[state.activeChapterIndex]) {
+          const ch = book.chapters[state.activeChapterIndex];
+          // Determine the End of the Chapter.
+          // If the chapter has a duration, it's startTime + duration.
+          // If not, we try reaching the next chapter's startTime. If it's the last chapter, the audio ended naturally anyway.
+          const endOfChapter = ch.duration ? ch.startTime + ch.duration : (book.chapters[state.activeChapterIndex + 1]?.startTime || audio.duration);
+          if (audio.currentTime >= endOfChapter - 0.5) {
+            audio.pause();
+            usePlayerStore.getState().setPlaying(false);
+            usePlayerStore.getState().clearSleepTimer();
+          }
+        }
+      }
     };
 
     const onDuration = () => setDuration(audio.duration || 0);

@@ -15,6 +15,10 @@ interface PlayerState {
   activeChapterIndex: number;
   volume: number;
 
+  // Sleep Timer
+  sleepTimerMode: 'minutes' | 'chapter' | null;
+  sleepTimerEndsAt: number | null; // epoch ms if mode === 'minutes'
+
   // Actions
   loadBook: (book: Audiobook, startTime?: number) => void;
   setPlaying: (playing: boolean) => void;
@@ -25,6 +29,8 @@ interface PlayerState {
   skipForward: () => void;
   skipBackward: () => void;
   jumpToChapter: (index: number) => void;
+  setSleepTimer: (minutes: number | 'chapter') => void;
+  clearSleepTimer: () => void;
   close: () => void;
 }
 
@@ -64,6 +70,9 @@ export const usePlayerStore = create<PlayerState>()((set, get) => ({
   playbackSpeed: 1.0,
   activeChapterIndex: 0,
   volume: 1.0,
+
+  sleepTimerMode: null,
+  sleepTimerEndsAt: null,
 
   loadBook: (book, startTime = 0) => {
     const audio = getAudioElement();
@@ -140,6 +149,18 @@ export const usePlayerStore = create<PlayerState>()((set, get) => ({
     }
   },
 
+  setSleepTimer: (val) => {
+    if (val === 'chapter') {
+      set({ sleepTimerMode: 'chapter', sleepTimerEndsAt: null });
+    } else {
+      set({ sleepTimerMode: 'minutes', sleepTimerEndsAt: Date.now() + val * 60000 });
+    }
+  },
+
+  clearSleepTimer: () => {
+    set({ sleepTimerMode: null, sleepTimerEndsAt: null });
+  },
+
   close: () => {
     const audio = getAudioElement();
     audio.pause();
@@ -150,6 +171,8 @@ export const usePlayerStore = create<PlayerState>()((set, get) => ({
       currentTime: 0,
       duration: 0,
       activeChapterIndex: 0,
+      sleepTimerMode: null,
+      sleepTimerEndsAt: null,
     });
   },
 }));
