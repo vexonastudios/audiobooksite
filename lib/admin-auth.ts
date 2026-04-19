@@ -1,10 +1,14 @@
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 export async function requireAdmin() {
-  const { sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== 'admin') {
+  const { userId } = await auth();
+  if (!userId) throw new Error('Forbidden');
+
+  const client = await clerkClient();
+  const user = await client.users.getUser(userId);
+
+  if (user.publicMetadata?.role !== 'admin') {
     throw new Error('Forbidden');
   }
 }

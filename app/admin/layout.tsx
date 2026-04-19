@@ -1,11 +1,22 @@
 import { redirect } from 'next/navigation';
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
 import Link from 'next/link';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  if (role !== 'admin') redirect('/sign-in');
+  const { userId } = await auth();
+  if (!userId) redirect('/sign-in');
+
+  const client = await clerkClient();
+  const user = await client.users.getUser(userId);
+  if (user.publicMetadata?.role !== 'admin') {
+    return (
+      <div style={{ padding: 40, color: '#fff', background: '#0f0f0f', minHeight: '100vh', fontFamily: 'system-ui' }}>
+        <h1 style={{ fontSize: 24, fontWeight: 'bold' }}>Access Denied</h1>
+        <p style={{ color: '#888', marginTop: 12 }}>You do not have administrative privileges.</p>
+        <Link href="/" style={{ display: 'inline-block', marginTop: 24, color: '#3b82f6', textDecoration: 'none' }}>← Back to site</Link>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#0f0f0f', color: '#e8e8e8', fontFamily: 'system-ui, sans-serif' }}>
