@@ -4,8 +4,7 @@ import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useUserStore } from '@/lib/store/userStore';
 import { Quote, X, Search, Share2, Copy, Check, BookOpen, ExternalLink, Play, CheckSquare, Square, ChevronDown, ChevronRight, Settings, Image as ImageIcon } from 'lucide-react';
-import { toPng } from 'html-to-image';
-import { QuoteImageRenderer } from '@/components/ui/QuoteImageRenderer';
+import { generateQuoteImage } from '@/lib/generateQuoteImage';
 import type { SavedQuote } from '@/lib/types';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
@@ -13,7 +12,6 @@ import { useLibraryStore } from '@/lib/store/libraryStore';
 function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
   const [copied, setCopied] = useState(false);
   const [isRenderingImage, setIsRenderingImage] = useState(false);
-  const [coverBase64, setCoverBase64] = useState('');
   const imageRef = useRef<HTMLDivElement>(null);
   const loadBook = usePlayerStore(s => s.loadBook);
   const { currentBook } = usePlayerStore();
@@ -57,23 +55,15 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
   }
 
   const handleExportImage = async () => {
-    if (!imageRef.current) return;
     try {
       setIsRenderingImage(true);
-      // 1. Fetch cover as base64 data URL via our proxy
-      const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(q.bookCover || '')}`;
-      const resp = await fetch(proxyUrl);
-      const blob = await resp.blob();
-      const coverDataUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(blob);
+      const dataUrl = await generateQuoteImage({
+        quoteText: q.text,
+        bookAuthor: q.bookAuthor,
+        bookTitle: q.bookTitle,
+        chapterTitle: q.chapterTitle,
+        bookCoverUrl: q.bookCover || '',
       });
-      setCoverBase64(coverDataUrl);
-      // 2. Wait for React to re-render with the data URL, then wait for <img> to load
-      await new Promise(r => setTimeout(r, 200));
-      // 3. Capture
-      const dataUrl = await toPng(imageRef.current, { cacheBust: true, quality: 0.95, pixelRatio: 2 });
       const link = document.createElement('a');
       link.download = `quote-${q.bookSlug}-${Math.floor(q.time)}.png`;
       link.href = dataUrl;
@@ -144,14 +134,6 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
         </button>
       </div>
 
-      <QuoteImageRenderer
-        ref={imageRef}
-        quoteText={q.text}
-        bookAuthor={q.bookAuthor}
-        bookTitle={q.bookTitle}
-        chapterTitle={q.chapterTitle}
-        coverDataUrl={coverBase64}
-      />
     </div>
   );
 }

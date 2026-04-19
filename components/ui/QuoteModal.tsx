@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { X, ChevronLeft, ChevronRight, Copy, Check, Bookmark, Share2, Image as ImageIcon } from 'lucide-react';
-import { toPng } from 'html-to-image';
-import { QuoteImageRenderer } from './QuoteImageRenderer';
+import { generateQuoteImage } from '@/lib/generateQuoteImage';
 import type { TranscriptCue } from '@/lib/parseVTT';
 import { useUserStore } from '@/lib/store/userStore';
 
@@ -40,7 +39,6 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isRenderingImage, setIsRenderingImage] = useState(false);
-  const [coverBase64, setCoverBase64] = useState('');
   const imageRef = useRef<HTMLDivElement>(null);
 
   // Replace getCuesInRange logic to snap to sentence boundaries enclosing currentTime
@@ -142,23 +140,15 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
   }
 
   const handleExportImage = async () => {
-    if (!imageRef.current) return;
     try {
       setIsRenderingImage(true);
-      // 1. Fetch cover as base64 data URL via our proxy
-      const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(bookCover || '')}`;
-      const resp = await fetch(proxyUrl);
-      const blob = await resp.blob();
-      const b64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(blob);
+      const dataUrl = await generateQuoteImage({
+        quoteText,
+        bookAuthor,
+        bookTitle,
+        chapterTitle,
+        bookCoverUrl: bookCover || '',
       });
-      setCoverBase64(b64);
-      // 2. Wait for React re-render + img load
-      await new Promise(r => setTimeout(r, 200));
-      // 3. Capture
-      const dataUrl = await toPng(imageRef.current, { cacheBust: true, quality: 0.95, pixelRatio: 2 });
       const link = document.createElement('a');
       link.download = `quote-${bookSlug}-${Math.floor(currentTime)}.png`;
       link.href = dataUrl;
@@ -318,14 +308,6 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
             </div>
             
             {/* Hidden renderer for image exports */}
-            <QuoteImageRenderer
-              ref={imageRef}
-              quoteText={quoteText}
-              bookAuthor={bookAuthor}
-              bookTitle={bookTitle}
-              chapterTitle={chapterTitle}
-              coverDataUrl={coverBase64}
-            />
           </>
         )}
         </div>
