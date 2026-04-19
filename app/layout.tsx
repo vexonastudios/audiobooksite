@@ -25,12 +25,10 @@ export const metadata: Metadata = {
     url: 'https://scrollreader.com',
   },
   manifest: '/manifest.json',
+};
+
+export const viewport = {
   themeColor: '#5B4CF5',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'ScrollReader',
-  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
