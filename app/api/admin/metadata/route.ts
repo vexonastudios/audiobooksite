@@ -17,9 +17,9 @@ export async function GET() {
     ]);
 
     return NextResponse.json({
-      categories: catRows.map((r: { val: string }) => r.val).filter(Boolean),
-      topics:     topicRows.map((r: { val: string }) => r.val).filter(Boolean),
-      authors:    authorRows.map((r: { val: string }) => r.val).filter(Boolean),
+      categories: catRows.map((r: unknown) => (r as { val: string }).val).filter(Boolean),
+      topics:     topicRows.map((r: unknown) => (r as { val: string }).val).filter(Boolean),
+      authors:    authorRows.map((r: unknown) => (r as { val: string }).val).filter(Boolean),
     });
   } catch (err: unknown) {
     if (err instanceof Error && err.message === 'Forbidden') return adminForbidden();
