@@ -31,7 +31,7 @@ export default function AudiobookPage() {
   // Stores
   const { currentBook, isPlaying, currentTime, duration, playbackSpeed, 
           loadBook, setPlaying, setPlaybackSpeed, skipForward, skipBackward, jumpToChapter } = usePlayerStore();
-  const { addBookmark, getBookmarksByBook, removeBookmark, skipInterval } = useUserStore();
+  const { history, addBookmark, getBookmarksByBook, removeBookmark, skipInterval } = useUserStore();
 
   // Local state
   const [activeTab, setActiveTab] = useState<'chapters' | 'bookmarks' | 'share'>('chapters');
@@ -89,7 +89,8 @@ export default function AudiobookPage() {
     if (isCurrent) {
       setPlaying(!isPlaying);
     } else {
-      loadBook(book);
+      const hist = history.find(h => h.bookId === book.id);
+      loadBook(book, hist?.position || 0);
     }
   };
 

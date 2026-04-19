@@ -17,30 +17,41 @@ export function AudioEngine() {
   useEffect(() => {
     const audio = getAudioElement();
 
+    const saveCurrentPosition = () => {
+      const book = usePlayerStore.getState().currentBook;
+      if (book && audio.currentTime > 0) {
+        addToHistory(book.id, audio.currentTime);
+      }
+    };
+
     const onTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
 
-      // Save position to history every 10 seconds while playing
+      // Save position to history every 10 seconds
       if (saveTimerRef.current) return;
       saveTimerRef.current = setTimeout(() => {
         saveTimerRef.current = null;
-        const book = usePlayerStore.getState().currentBook;
-        if (book) {
-          addToHistory(book.id, audio.currentTime);
-        }
+        saveCurrentPosition();
       }, 10_000);
     };
 
     const onDuration = () => setDuration(audio.duration || 0);
     const onPlay = () => setPlaying(true);
-    const onPause = () => setPlaying(false);
-    const onEnded = () => setPlaying(false);
+    const onPause = () => {
+      setPlaying(false);
+      saveCurrentPosition();
+    };
+    const onEnded = () => {
+      setPlaying(false);
+      saveCurrentPosition();
+    };
 
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('durationchange', onDuration);
     audio.addEventListener('play', onPlay);
     audio.addEventListener('pause', onPause);
     audio.addEventListener('ended', onEnded);
+    window.addEventListener('beforeunload', saveCurrentPosition);
 
     // Media Session API — lock-screen controls for PWA & native apps
     if ('mediaSession' in navigator) {
@@ -87,12 +98,15 @@ export function AudioEngine() {
     window.addEventListener('keydown', onKeyDown);
 
     return () => {
+      saveCurrentPosition();
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('durationchange', onDuration);
       audio.removeEventListener('play', onPlay);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('ended', onEnded);
       window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('beforeunload', saveCurrentPosition);
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
   }, [setCurrentTime, setDuration, setPlaying, addToHistory]);
 
