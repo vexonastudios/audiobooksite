@@ -9,63 +9,7 @@ import Link from 'next/link';
 import { Play, Headphones } from 'lucide-react';
 
 const BOOK_CARD_WIDTH = 168;
-
-function BookCard({ book }: { book: Audiobook }) {
-  const loadBook = usePlayerStore((s) => s.loadBook);
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      className="book-card"
-      style={{ width: BOOK_CARD_WIDTH, flexShrink: 0 }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <Link href={`/audiobook/${book.slug}`} style={{ display: 'block', position: 'relative' }}>
-        {book.coverImage ? (
-          <img
-            src={book.thumbnailUrl || book.coverImage}
-            alt={book.title}
-            className="book-card-img"
-            loading="lazy"
-          />
-        ) : (
-          <div className="book-card-img cover-placeholder">
-            {book.title.charAt(0)}
-          </div>
-        )}
-        {hovered && (
-          <button
-            onClick={(e) => { e.preventDefault(); loadBook(book); }}
-            style={{
-              position: 'absolute',
-              bottom: 8, right: 8,
-              width: 40, height: 40,
-              borderRadius: '50%',
-              background: 'var(--color-brand)',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: 'var(--shadow-md)',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'transform var(--transition-fast)',
-            }}
-            title={`Play ${book.title}`}
-          >
-            <Play size={18} style={{ marginLeft: 2 }} />
-          </button>
-        )}
-      </Link>
-      <div className="book-card-body">
-        <div className="book-card-title">{book.title}</div>
-        <div className="book-card-author">{book.authorName}</div>
-        {book.length && <div className="book-card-length">{book.length}</div>}
-      </div>
-    </div>
-  );
-}
+import { BookCard } from '@/components/ui/BookCard';
 
 function ScrollRow({ books }: { books: Audiobook[] }) {
   return (

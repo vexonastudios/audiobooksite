@@ -7,6 +7,7 @@ import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
 import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle } from 'lucide-react';
+import { BookCard } from '@/components/ui/BookCard';
 
 function formatTime(s: number) {
   if (isNaN(s) || !isFinite(s)) return '0:00';
@@ -355,15 +356,7 @@ export default function AudiobookPage() {
             </div>
             <div className="scroll-row">
               {related.map(rBook => (
-                 <div key={rBook.id} className="book-card" style={{ width: 168, flexShrink: 0 }}>
-                   <Link href={`/audiobook/${rBook.slug}`} style={{ display: 'block' }}>
-                     <img src={rBook.thumbnailUrl || rBook.coverImage} alt={rBook.title} className="book-card-img" />
-                   </Link>
-                   <div className="book-card-body">
-                     <div className="book-card-title">{rBook.title}</div>
-                     <div className="book-card-author">{rBook.authorName}</div>
-                   </div>
-                 </div>
+                 <BookCard key={rBook.id} book={rBook} />
               ))}
             </div>
           </div>

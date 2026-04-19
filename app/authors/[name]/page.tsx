@@ -3,6 +3,7 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
+import { BookCard } from '@/components/ui/BookCard';
 
 export default function AuthorDetail() {
   const params = useParams();
@@ -22,15 +23,7 @@ export default function AuthorDetail() {
 
       <div className="book-grid">
         {books.map(book => (
-          <div key={book.id} className="book-card">
-            <Link href={`/audiobook/${book.slug}`} style={{ display: 'block' }}>
-              <img src={book.thumbnailUrl || book.coverImage} alt={book.title} className="book-card-img" />
-            </Link>
-            <div className="book-card-body">
-              <div className="book-card-title">{book.title}</div>
-              {book.length && <div className="book-card-length">{book.length}</div>}
-            </div>
-          </div>
+          <BookCard key={book.id} book={book} width="100%" />
         ))}
       </div>
     </div>

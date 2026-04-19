@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
+import { BookCard } from '@/components/ui/BookCard';
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -27,15 +28,7 @@ function SearchContent() {
       {results.length > 0 ? (
         <div className="book-grid">
           {results.map(book => (
-            <div key={book.id} className="book-card">
-              <Link href={`/audiobook/${book.slug}`} style={{ display: 'block' }}>
-                <img src={book.thumbnailUrl || book.coverImage} alt={book.title} className="book-card-img" />
-              </Link>
-              <div className="book-card-body">
-                <div className="book-card-title">{book.title}</div>
-                <div className="book-card-author">{book.authorName}</div>
-              </div>
-            </div>
+            <BookCard key={book.id} book={book} width="100%" />
           ))}
         </div>
       ) : query ? (
