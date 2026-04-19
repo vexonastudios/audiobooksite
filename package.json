@@ -9,7 +9,7 @@
     "parse": "node scripts/parse-wp-xml.js"
   },
   "dependencies": {
-    "@clerk/nextjs": "^5.1.0",
+    "@clerk/nextjs": "^7.2.3",
     "fast-xml-parser": "^4.3.6",
     "fuse.js": "^7.0.0",
     "lucide-react": "^0.378.0",
