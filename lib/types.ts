@@ -61,3 +61,16 @@ export interface HistoryEntry {
   position: number; // seconds
   lastListened: number; // timestamp
 }
+
+export interface SavedQuote {
+  id: string;
+  text: string;
+  bookId: string;
+  bookTitle: string;
+  bookSlug: string;
+  bookAuthor: string;
+  bookCover?: string;
+  chapterTitle?: string;
+  time: number;
+  createdAt: number;
+}

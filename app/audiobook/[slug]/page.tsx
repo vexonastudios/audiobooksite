@@ -6,9 +6,10 @@ import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
-import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote } from 'lucide-react';
 import { BookCard } from '@/components/ui/BookCard';
 import { ReadAlongPanel } from '@/components/ui/ReadAlongPanel';
+import { QuoteModal } from '@/components/ui/QuoteModal';
 import { parseVTT, getContextText } from '@/lib/parseVTT';
 import type { TranscriptCue } from '@/lib/parseVTT';
 
@@ -37,6 +38,7 @@ export default function AudiobookPage() {
   const [bookmarkNote, setBookmarkNote] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
   const [readAlongOpen, setReadAlongOpen] = useState(false);
+  const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [loadedCues, setLoadedCues] = useState<TranscriptCue[]>([]);
 
   // Load VTT cues for bookmark context (preloaded when panel first opens or book plays)
@@ -204,6 +206,15 @@ export default function AudiobookPage() {
                   {loadedCues.length > 0 && (
                     <span style={{ background: 'var(--color-brand)', color: 'white', borderRadius: 20, padding: '1px 8px', fontSize: '0.7rem', fontWeight: 700 }}>Live Sync</span>
                   )}
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem' }}
+                  onClick={() => setQuoteModalOpen(true)}
+                >
+                  <Quote size={16} />
+                  Share Quote
+                  {!loadedCues.length && <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>No transcript</span>}
                 </button>
               </div>
             </div>
@@ -492,6 +503,20 @@ export default function AudiobookPage() {
         }}
         bookTitle={book.title}
         authorName={book.authorName}
+      />
+
+      {/* Quote Modal */}
+      <QuoteModal
+        isOpen={quoteModalOpen}
+        onClose={() => setQuoteModalOpen(false)}
+        allCues={loadedCues}
+        currentTime={isCurrent ? currentTime : 0}
+        bookId={book.id}
+        bookTitle={book.title}
+        bookSlug={book.slug}
+        bookAuthor={book.authorName}
+        bookCover={book.coverImage}
+        chapterTitle={book.chapters[currentChapterIdx]?.title}
       />
     </div>
   );
