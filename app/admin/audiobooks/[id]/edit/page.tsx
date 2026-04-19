@@ -14,7 +14,7 @@ export default async function EditAudiobook({ params }: { params: Promise<{ id: 
     slug: book.slug,
     authorName: book.authorName,
     originalYear: book.originalYear ?? '',
-    pubDate: typeof book.pubDate === 'string' ? book.pubDate : '',
+    pubDate: book.pubDate ? new Date(book.pubDate).toISOString().split('T')[0] : '',
     published: (book as { published?: boolean }).published !== false,
     excerpt: book.excerpt ?? '',
     description: book.description ?? '',

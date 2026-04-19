@@ -4,18 +4,30 @@ import { create } from 'zustand';
 import Fuse from 'fuse.js';
 import type { Audiobook, Article } from '@/lib/types';
 
+export interface AuthorProfile {
+  id: string;
+  slug: string;
+  name: string;
+  birthYear: number | null;
+  deathYear: number | null;
+  description: string | null;
+  imageUrl: string | null;
+}
+
 interface LibraryState {
   audiobooks: Audiobook[];
   articles: Article[];
+  authors: AuthorProfile[];
   isLoaded: boolean;
   fuse: Fuse<Audiobook> | null;
 
   // Initialize with fetched data
-  setData: (audiobooks: Audiobook[], articles: Article[]) => void;
+  setData: (audiobooks: Audiobook[], articles: Article[], authors?: AuthorProfile[]) => void;
 
   // Selectors
   getBySlug: (slug: string) => Audiobook | undefined;
   getArticleBySlug: (slug: string) => Article | undefined;
+  getAuthorBySlug: (slug: string) => AuthorProfile | undefined;
   getByCategory: (category: string) => Audiobook[];
   getByTopic: (topic: string) => Audiobook[];
   getByAuthor: (name: string) => Audiobook[];
@@ -42,17 +54,20 @@ const fuseOptions = {
 export const useLibraryStore = create<LibraryState>()((set, get) => ({
   audiobooks: [],
   articles: [],
+  authors: [],
   isLoaded: false,
   fuse: null,
 
-  setData: (audiobooks, articles) => {
+  setData: (audiobooks, articles, authors = []) => {
     const fuse = new Fuse(audiobooks, fuseOptions);
-    set({ audiobooks, articles, isLoaded: true, fuse });
+    set({ audiobooks, articles, authors, isLoaded: true, fuse });
   },
 
   getBySlug: (slug) => get().audiobooks.find((b) => b.slug === slug),
 
   getArticleBySlug: (slug) => get().articles.find((a) => a.slug === slug),
+
+  getAuthorBySlug: (slug) => get().authors.find((a) => a.slug === slug),
 
   getByCategory: (category) =>
     get().audiobooks.filter((b) =>
