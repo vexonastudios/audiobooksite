@@ -190,7 +190,7 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
             </div>
 
             {/* Quote preview */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '24px 24px 16px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '24px 24px 16px', minHeight: 0 }}>
               {/* Show individual selectable cues dimmed out for context */}
               <div style={{ marginBottom: 20 }}>
                 {allCues.slice(Math.max(0, startIdx - 2), startIdx).map(c => (
