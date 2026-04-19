@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { requireAdmin, adminForbidden } from '@/lib/admin-auth';
 import sharp from 'sharp';
+import { Readable } from 'stream';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -16,39 +20,59 @@ const r2 = new S3Client({
 });
 
 /**
- * POST /api/admin/upload-cover
- * Accepts multipart/form-data with a `file` field (image).
- * Produces:
- *   - Portrait cover: 800×1200 WebP → {slug}-cover.webp
- *   - Square thumbnail: 400×400 WebP → {slug}-thumb.webp
- * Returns: { coverImage, thumbnailUrl }
+ * POST /api/admin/process-cover
+ * Body: { key: "covers/temp-filename.jpg", slug: "book-slug" }
+ *
+ * The browser first uploads the original image directly to R2 via presigned URL.
+ * Then calls this endpoint which:
+ *  1. Downloads the original from R2
+ *  2. Resizes to portrait 800×1200 WebP → covers/{slug}-cover.webp
+ *  3. Resizes to square 400×400 WebP   → covers/{slug}-thumb.webp
+ *  4. Deletes the temp original
+ *  5. Returns { coverImage, thumbnailUrl }
  */
 export async function POST(req: NextRequest) {
+  let tmpDir: string | null = null;
+
   try {
     await requireAdmin();
-    const form = await req.formData();
-    const file = form.get('file') as File | null;
-    const slug = (form.get('slug') as string | null) || `cover-${Date.now()}`;
+    const { key, slug } = await req.json();
+    if (!key || !slug) return NextResponse.json({ error: 'key and slug required' }, { status: 400 });
 
-    if (!file) return NextResponse.json({ error: 'file required' }, { status: 400 });
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scrollreader-cover-'));
+    const inputPath = path.join(tmpDir, 'input');
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+    // 1. Download original from R2
+    const { Body } = await r2.send(new GetObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME!,
+      Key: key,
+    }));
+    if (!Body) throw new Error('Empty R2 response');
 
-    // Portrait cover 800×1200
-    const portraitBuf = await sharp(buffer)
+    await new Promise<void>((resolve, reject) => {
+      const ws = fs.createWriteStream(inputPath);
+      (Body as Readable).pipe(ws).on('finish', resolve).on('error', reject);
+    });
+
+    const inputBuf = fs.readFileSync(inputPath);
+
+    // 2. Portrait cover 800×1200
+    const portraitBuf = await sharp(inputBuf)
       .resize(800, 1200, { fit: 'cover', position: 'top' })
       .webp({ quality: 88 })
       .toBuffer();
 
-    // Square thumbnail 400×400
-    const thumbBuf = await sharp(buffer)
+    // 3. Square thumbnail 400×400
+    const thumbBuf = await sharp(inputBuf)
       .resize(400, 400, { fit: 'cover' })
       .webp({ quality: 85 })
       .toBuffer();
 
-    const coverKey = `covers/${slug}-cover.webp`;
-    const thumbKey = `covers/${slug}-thumb.webp`;
+    const cleanSlug = slug.replace(/[^a-z0-9-]/g, '-').toLowerCase();
+    const coverKey = `covers/${cleanSlug}-cover.webp`;
+    const thumbKey = `covers/${cleanSlug}-thumb.webp`;
 
+    // 4. Upload both to R2
     await r2.send(new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME!,
       Key: coverKey,
@@ -63,14 +87,16 @@ export async function POST(req: NextRequest) {
       ContentType: 'image/webp',
     }));
 
-    const publicBase = process.env.R2_PUBLIC_URL!;
+    const base = process.env.R2_PUBLIC_URL!;
     return NextResponse.json({
-      coverImage:   `${publicBase}/${coverKey}`,
-      thumbnailUrl: `${publicBase}/${thumbKey}`,
+      coverImage: `${base}/${coverKey}`,
+      thumbnailUrl: `${base}/${thumbKey}`,
     });
   } catch (err: unknown) {
     if (err instanceof Error && err.message === 'Forbidden') return adminForbidden();
-    console.error('upload-cover error:', err);
+    console.error('process-cover error:', err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
+  } finally {
+    if (tmpDir) fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 }

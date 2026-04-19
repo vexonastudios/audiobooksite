@@ -154,14 +154,31 @@ export function AudiobookForm({ initialData, mode }: Props) {
     }
   };
 
-  // ── Cover upload ──────────────────────────────────────────────────────────
+  // ── Cover upload (browser → R2 directly → server-side resize) ────────────
   const handleCoverUpload = async (file: File) => {
     try {
       setCoverUploading(true);
-      const fd = new FormData();
-      fd.append('file', file);
-      fd.append('slug', form.slug || slugify(form.title) || 'cover');
-      const res = await fetch('/api/admin/upload-cover', { method: 'POST', body: fd });
+      const slug = form.slug || slugify(form.title) || `cover-${Date.now()}`;
+
+      // 1. Get presigned upload URL for the original
+      const ext = file.name.split('.').pop() || 'jpg';
+      const tempKey = `covers/temp-${slug}-${Date.now()}.${ext}`;
+      const { uploadUrl } = await uploadFileToR2(file, tempKey);
+
+      // 2. Upload original directly to R2 from browser
+      const uploadRes = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type },
+      });
+      if (!uploadRes.ok) throw new Error(`R2 upload failed: ${uploadRes.status}`);
+
+      // 3. Call server to resize + produce portrait + thumbnail
+      const res = await fetch('/api/admin/upload-cover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: tempKey, slug }),
+      });
       if (!res.ok) throw new Error(await res.text());
       const { coverImage, thumbnailUrl } = await res.json();
       setForm(f => ({ ...f, coverImage, thumbnailUrl }));
