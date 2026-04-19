@@ -3,20 +3,20 @@
 /* ─── Design Tokens ─────────────────────────────────────────────────────────── */
 :root {
   /* Brand colors */
-  --color-brand:        #5B4CF5;   /* deep purple — primary accent  */
-  --color-brand-light:  #7C6FF5;
-  --color-brand-dark:   #3D30D4;
+  --color-brand:        #2e6aa7;   /* deep blue — primary accent  */
+  --color-brand-light:  #3a84cf;
+  --color-brand-dark:   #23507e;
 
   /* Neutrals (light mode) */
-  --color-bg:           #F8F7FC;
+  --color-bg:           #F8F9FA;
   --color-surface:      #FFFFFF;
-  --color-surface-2:    #F0EEF9;
-  --color-border:       #E4E1F5;
+  --color-surface-2:    #F0F4F8;
+  --color-border:       #E2E8F0;
 
   /* Text */
-  --color-text-primary:   #1A1535;
-  --color-text-secondary: #5C5880;
-  --color-text-muted:     #9C98B8;
+  --color-text-primary:   #1A202C;
+  --color-text-secondary: #4A5568;
+  --color-text-muted:     #718096;
 
   /* Semantic */
   --color-success:  #22C55E;
@@ -29,10 +29,10 @@
   --tab-bar-height:       60px;
 
   /* Elevation */
-  --shadow-sm:  0 1px 3px rgba(91,76,245,0.08);
-  --shadow-md:  0 4px 16px rgba(91,76,245,0.12);
-  --shadow-lg:  0 8px 32px rgba(91,76,245,0.18);
-  --shadow-xl:  0 16px 48px rgba(91,76,245,0.22);
+  --shadow-sm:  0 1px 3px rgba(46,106,167,0.08);
+  --shadow-md:  0 4px 16px rgba(46,106,167,0.12);
+  --shadow-lg:  0 8px 32px rgba(46,106,167,0.18);
+  --shadow-xl:  0 16px 48px rgba(46,106,167,0.22);
 
   /* Radius */
   --radius-sm:  6px;
@@ -381,12 +381,12 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
   border-radius: 50%;
   background: var(--color-brand);
   color: white;
-  box-shadow: 0 4px 16px rgba(91,76,245,0.4);
+  box-shadow: 0 4px 16px rgba(46,106,167,0.4);
 }
 .btn-play-large:hover {
   background: var(--color-brand-dark);
   transform: scale(1.06);
-  box-shadow: 0 6px 24px rgba(91,76,245,0.5);
+  box-shadow: 0 6px 24px rgba(46,106,167,0.5);
 }
 
 /* Progress / Scrubber */
@@ -490,7 +490,7 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
 
 .search-input:focus {
   border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px rgba(91,76,245,0.12);
+  box-shadow: 0 0 0 3px rgba(46,106,167,0.12);
 }
 
 .search-icon {

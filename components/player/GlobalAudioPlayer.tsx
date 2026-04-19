@@ -100,7 +100,10 @@ export function GlobalAudioPlayer() {
             value={progress}
             onChange={handleScrub}
             className="scrubber"
-            style={{ flex: 1 }}
+            style={{ 
+              flex: 1,
+              background: `linear-gradient(to right, var(--color-brand) ${progress}%, var(--color-surface-2) ${progress}%)`
+            }}
           />
           <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', minWidth: 36 }}>
             {formatTime(duration)}

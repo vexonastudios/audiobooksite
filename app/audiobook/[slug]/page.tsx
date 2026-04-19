@@ -104,7 +104,7 @@ export default function AudiobookPage() {
 
   // Set background color globally based on book
   const bgStyle = book.generatedColors 
-    ? { background: book.generatedColors, opacity: 0.1, position: 'absolute' as const, inset: 0, zIndex: -1 } 
+    ? { background: `linear-gradient(to bottom, ${book.generatedColors}40 0%, var(--color-bg) 600px)`, position: 'absolute' as const, inset: 0, zIndex: -1 } 
     : {};
 
   return (
@@ -171,36 +171,61 @@ export default function AudiobookPage() {
               )}
 
               {/* Scrubber Area */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                <input
-                  type="range"
-                  min={0}
-                  max={isCurrent && book.chapters[currentChapterIdx+1] ? book.chapters[currentChapterIdx+1].startTime - book.chapters[currentChapterIdx].startTime : isCurrent ? duration - book.chapters[currentChapterIdx].startTime : 100}
-                  step={0.1}
-                  value={isCurrent ? currentTime - book.chapters[currentChapterIdx].startTime : 0}
-                  onChange={(e) => {
-                    if (!isCurrent) return;
-                    const { getAudioElement } = require('@/lib/store/playerStore');
-                    getAudioElement().currentTime = book.chapters[currentChapterIdx].startTime + parseFloat(e.target.value);
-                  }}
-                  disabled={!isCurrent || duration === 0}
-                  className="scrubber"
-                  style={{ flex: 1 }}
-                />
+              {(() => {
+                const cMax = isCurrent && book.chapters[currentChapterIdx+1] ? book.chapters[currentChapterIdx+1].startTime - book.chapters[currentChapterIdx].startTime : isCurrent ? duration - book.chapters[currentChapterIdx].startTime : 100;
+                const cVal = isCurrent ? currentTime - book.chapters[currentChapterIdx].startTime : 0;
+                const pPct = cMax > 0 ? (cVal / cMax) * 100 : 0;
                 
-                <select 
-                  value={playbackSpeed}
-                  onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
-                  className="btn btn-secondary" 
-                  style={{ padding: '4px 10px', fontSize: '0.875rem', borderRadius: 16, backgroundColor: 'var(--color-brand)', color: 'white', border: 'none', appearance: 'none', MozAppearance: 'none', WebkitAppearance: 'none', cursor: 'pointer' }}
-                >
-                  <option value="0.75">0.75x</option>
-                  <option value="1">1x</option>
-                  <option value="1.25">1.25x</option>
-                  <option value="1.5">1.5x</option>
-                  <option value="2">2x</option>
-                </select>
-              </div>
+                return (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <input
+                      type="range"
+                      min={0}
+                      max={cMax}
+                      step={0.1}
+                      value={cVal}
+                      onChange={(e) => {
+                        if (!isCurrent) return;
+                        const { getAudioElement } = require('@/lib/store/playerStore');
+                        getAudioElement().currentTime = book.chapters[currentChapterIdx].startTime + parseFloat(e.target.value);
+                      }}
+                      disabled={!isCurrent || duration === 0}
+                      className="scrubber"
+                      style={{ 
+                        flex: 1, 
+                        background: `linear-gradient(to right, var(--color-brand) ${pPct}%, var(--color-surface-2) ${pPct}%)`
+                      }}
+                    />
+                    
+                    <div style={{ position: 'relative' }}>
+                      <select 
+                        value={playbackSpeed}
+                        onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
+                        style={{ 
+                          padding: '6px 16px', 
+                          fontSize: '0.875rem',
+                          fontWeight: 700, 
+                          borderRadius: 20, 
+                          backgroundColor: 'var(--color-brand-dark)', 
+                          color: 'white', 
+                          border: 'none', 
+                          appearance: 'none', 
+                          MozAppearance: 'none', 
+                          WebkitAppearance: 'none', 
+                          cursor: 'pointer',
+                          boxShadow: 'var(--shadow-sm)'
+                        }}
+                      >
+                        <option value="0.75">0.75x</option>
+                        <option value="1">1x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                      </select>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Time displays */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, marginBottom: 24, fontSize: '0.875rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
