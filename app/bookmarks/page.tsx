@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useUserStore } from '@/lib/store/userStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
-import { Bookmark, Play, X, Search, Clock, BookOpen, Quote, Share2, Copy, Check } from 'lucide-react';
+import { Bookmark, Play, X, Search, Clock, BookOpen, Quote, Share2, Copy, Check, Edit3 } from 'lucide-react';
 import type { Bookmark as BookmarkType } from '@/lib/types';
 
 function formatTime(s: number) {
@@ -18,8 +18,10 @@ function formatTime(s: number) {
   return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
 }
 
-function BookmarkCard({ bm, onDelete, onPlay }: { bm: BookmarkType; onDelete: () => void; onPlay: () => void }) {
+function BookmarkCard({ bm, onDelete, onPlay, onUpdate }: { bm: BookmarkType; onDelete: () => void; onPlay: () => void; onUpdate: (partial: Partial<BookmarkType>) => void }) {
   const [copied, setCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editNote, setEditNote] = useState(bm.note || '');
 
   function shareQuote() {
     if (!bm.transcriptContext) return;
@@ -87,10 +89,41 @@ function BookmarkCard({ bm, onDelete, onPlay }: { bm: BookmarkType; onDelete: ()
         )}
 
         {/* User note */}
-        {bm.note && (
-          <div style={{ marginBottom: 14, fontSize: '0.875rem', color: 'var(--color-text-secondary)', display: 'flex', gap: 8 }}>
+        {isEditing ? (
+          <div style={{ marginBottom: 14 }}>
+            <input 
+              type="text" 
+              className="search-input" 
+              value={editNote} 
+              onChange={e => setEditNote(e.target.value)} 
+              style={{ width: '100%', marginBottom: 8, padding: '8px 12px', fontSize: '0.875rem' }} 
+              placeholder="Add a note..."
+              autoFocus
+            />
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button 
+                className="btn btn-primary" 
+                onClick={() => { onUpdate({ note: editNote }); setIsEditing(false); }} 
+                style={{ padding: '4px 10px', fontSize: '0.8rem' }}
+              >
+                Save
+              </button>
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => { setIsEditing(false); setEditNote(bm.note || ''); }} 
+                style={{ padding: '4px 10px', fontSize: '0.8rem' }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ marginBottom: 14, fontSize: '0.875rem', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ opacity: 0.5 }}>📝</span>
-            <span>{bm.note}</span>
+            <span style={{ flex: 1 }}>{bm.note || <span style={{ opacity: 0.5, fontStyle: 'italic' }}>No note attached</span>}</span>
+            <button className="btn btn-icon" onClick={() => setIsEditing(true)} style={{ width: 28, height: 28, opacity: 0.7 }} title="Edit note">
+              <Edit3 size={14} />
+            </button>
           </div>
         )}
 
@@ -226,6 +259,10 @@ export default function BookmarksPage() {
                       bm={bm}
                       onDelete={() => removeBookmark(bm.id)}
                       onPlay={() => handlePlay(bm)}
+                      onUpdate={(partial) => {
+                        const { updateBookmark } = useUserStore.getState();
+                        updateBookmark(bm.id, partial);
+                      }}
                     />
                   ))}
                 </div>

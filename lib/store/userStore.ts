@@ -31,6 +31,7 @@ interface UserState {
     bookAuthor?: string;
   }) => void;
   removeBookmark: (id: string) => void;
+  updateBookmark: (id: string, partial: Partial<Bookmark>) => void;
   getBookmarksByBook: (bookId: string) => Bookmark[];
 
   // Quotes
@@ -80,6 +81,12 @@ export const useUserStore = create<UserState>()(
       removeBookmark: (id) => {
         set((state) => ({
           bookmarks: state.bookmarks.filter((b) => b.id !== id),
+        }));
+      },
+
+      updateBookmark: (id, partial) => {
+        set((state) => ({
+          bookmarks: state.bookmarks.map((b) => (b.id === id ? { ...b, ...partial } : b)),
         }));
       },
 
