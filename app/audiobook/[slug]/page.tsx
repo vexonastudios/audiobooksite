@@ -66,6 +66,24 @@ export default function AudiobookPage() {
   }, [book?.slug]);
 
   const isCurrent = currentBook?.id === book?.id;
+  
+  // Computed values for standby display
+  const historyEntry = history.find(h => h.bookId === book?.id);
+  const standbyTime = historyEntry ? historyEntry.position : 0;
+  
+  let standbyChapterIdx = 0;
+  if (book) {
+    for (let i = 0; i < book.chapters.length; i++) {
+      if (book.chapters[i].startTime <= standbyTime) {
+        standbyChapterIdx = i;
+      } else {
+        break;
+      }
+    }
+  }
+
+  const displayTime = isCurrent ? currentTime : standbyTime;
+  
   const displayProgress = isCurrent && duration > 0 ? (currentTime / duration) * 100 : 0;
   
   // Find matching author mapped from authors.json
@@ -73,7 +91,7 @@ export default function AudiobookPage() {
   
   // Find active chapter index for display
   const activeChapterIndex = usePlayerStore(s => s.activeChapterIndex);
-  const currentChapterIdx = isCurrent ? activeChapterIndex : 0;
+  const currentChapterIdx = isCurrent ? activeChapterIndex : standbyChapterIdx;
   const bookmarks = book ? getBookmarksByBook(book.id) : [];
 
   if (!isLoaded) {
@@ -256,20 +274,25 @@ export default function AudiobookPage() {
 
             {/* CARD 1: Player Controls */}
             <div className="card" style={{ padding: '24px' }}>
-              {isCurrent && book.chapters[currentChapterIdx] ? (
+              {book.chapters[currentChapterIdx] ? (
                 <div style={{ textAlign: 'center', marginBottom: 12, fontWeight: 600, fontSize: '1.25rem' }}>
                   {book.chapters[currentChapterIdx].title}
                 </div>
-              ) : (
-                <div style={{ textAlign: 'center', marginBottom: 12, fontWeight: 600, fontSize: '1.25rem', opacity: 0.5 }}>
-                  Not Playing
-                </div>
-              )}
+              ) : null}
 
               {/* Scrubber Area */}
               {(() => {
-                const cMax = isCurrent && book.chapters[currentChapterIdx+1] ? book.chapters[currentChapterIdx+1].startTime - book.chapters[currentChapterIdx].startTime : isCurrent ? duration - book.chapters[currentChapterIdx].startTime : 100;
-                const cVal = isCurrent ? currentTime - book.chapters[currentChapterIdx].startTime : 0;
+                let currentMax = 100;
+                const displayChapter = book.chapters[currentChapterIdx];
+                if (displayChapter) {
+                   if (book.chapters[currentChapterIdx+1]) {
+                      currentMax = book.chapters[currentChapterIdx+1].startTime - displayChapter.startTime;
+                   } else if (duration > 0 || displayChapter.duration) {
+                      currentMax = isCurrent ? duration - displayChapter.startTime : (displayChapter.duration || 100);
+                   }
+                }
+                const cMax = currentMax;
+                const cVal = displayChapter ? Math.min(Math.max(0, displayTime - displayChapter.startTime), cMax) : 0;
                 const pPct = cMax > 0 ? (cVal / cMax) * 100 : 0;
                 
                 return (
@@ -326,15 +349,16 @@ export default function AudiobookPage() {
               {/* Time displays */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, marginBottom: 24, fontSize: '0.875rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
                 <div style={{ width: 80, textAlign: 'left' }}>
-                  {isCurrent ? formatTime(currentTime - book.chapters[currentChapterIdx].startTime) : '0:00'}
+                  {book.chapters[currentChapterIdx] ? formatTime(displayTime - book.chapters[currentChapterIdx].startTime) : '0:00'}
                 </div>
                 <div style={{ flex: 1, textAlign: 'center', color: 'var(--color-text-primary)' }}>
-                  {isCurrent && duration > 0 ? formatTime(duration - currentTime) + ' left in book' : ''}
+                  {!isCurrent ? (standbyTime > 0 ? 'Resume where you left off' : 'Ready to start') : (duration > 0 ? formatTime(duration - currentTime) + ' left in book' : '')}
                 </div>
                 <div style={{ width: 80, textAlign: 'right' }}>
-                  {isCurrent && book.chapters[currentChapterIdx+1] ? 
-                    `- ${formatTime(book.chapters[currentChapterIdx+1].startTime - currentTime)}` : 
-                    isCurrent && duration > 0 ? `- ${formatTime(duration - currentTime)}` : '0:00'}
+                  {book.chapters[currentChapterIdx] && book.chapters[currentChapterIdx+1] ? 
+                    `- ${formatTime(book.chapters[currentChapterIdx+1].startTime - displayTime)}` : 
+                    book.chapters[currentChapterIdx] && (duration > 0 || book.chapters[currentChapterIdx].duration) ? 
+                    `- ${formatTime((isCurrent ? duration : (book.chapters[currentChapterIdx].startTime + (book.chapters[currentChapterIdx].duration||0))) - displayTime)}` : '0:00'}
                 </div>
               </div>
 
@@ -405,11 +429,11 @@ export default function AudiobookPage() {
                           style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             padding: '12px 16px', borderRadius: 'var(--radius-md)',
-                            background: isActive ? 'var(--color-surface-2)' : 'transparent',
+                            background: isActive ? 'var(--color-surface-2)' : (!isCurrent && currentChapterIdx === idx ? 'rgba(0,0,0,0.03)' : 'transparent'),
                             textAlign: 'left', transition: 'background var(--transition-fast)'
                           }}
                           onMouseEnter={e => !isActive && (e.currentTarget.style.background = 'var(--color-border)')}
-                          onMouseLeave={e => !isActive && (e.currentTarget.style.background = 'transparent')}
+                          onMouseLeave={e => !isActive && (e.currentTarget.style.background = !isCurrent && currentChapterIdx === idx ? 'rgba(0,0,0,0.03)' : 'transparent')}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                             {isActive ? <Headphones size={18} color="var(--color-brand)" /> : <span className="text-muted" style={{ width: 18, fontSize: '0.875rem' }}>{idx+1}</span>}
