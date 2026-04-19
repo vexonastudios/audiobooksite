@@ -8,3 +8,5 @@ out/
 Thumbs.db
 android/
 ios/
+
+.vercel
