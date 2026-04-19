@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight, Copy, Check, Bookmark, Share2 } from 'lucide-react';
-import { getCuesInRange } from '@/lib/parseVTT';
 import type { TranscriptCue } from '@/lib/parseVTT';
 import { useUserStore } from '@/lib/store/userStore';
 
@@ -24,6 +23,12 @@ function fmt(s: number) {
   return h > 0 ? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}` : `${m}:${String(sec).padStart(2,'0')}`;
 }
 
+function isSentenceEnd(text: string) {
+  const t = text.trim();
+  if (/(?:Mr|Mrs|Ms|Dr|St|Rev)\.$/i.test(t)) return false;
+  return /[.!?]["']?$/.test(t);
+}
+
 export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, bookTitle, bookSlug, bookAuthor, bookCover, chapterTitle }: Props) {
   const saveQuote = useUserStore(s => s.saveQuote);
 
@@ -33,20 +38,30 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  // Seed window around currentTime when modal opens
+  // Replace getCuesInRange logic to snap to sentence boundaries enclosing currentTime
   useEffect(() => {
     if (!isOpen || allCues.length === 0) return;
-    // Find cues in ±10s around current time
-    const window = getCuesInRange(allCues, Math.max(0, currentTime - 2), currentTime + 12);
-    if (window.length === 0) {
-      setStartIdx(0);
-      setEndIdx(Math.min(4, allCues.length - 1));
-      return;
+    
+    // 1. Find the cue corresponding to currentTime
+    let currentIndex = allCues.findIndex(c => currentTime >= c.start && currentTime <= c.end);
+    if (currentIndex === -1) {
+      currentIndex = allCues.findIndex(c => c.start >= currentTime);
+      if (currentIndex === -1) currentIndex = allCues.length - 1;
     }
-    const si = allCues.findIndex(c => c.id === window[0].id);
-    const ei = allCues.findIndex(c => c.id === window[window.length - 1].id);
-    setStartIdx(Math.max(0, si));
-    setEndIdx(Math.min(allCues.length - 1, ei));
+
+    // 2. Expand outwards to form a full sentence
+    let start = currentIndex;
+    while (start > 0 && !isSentenceEnd(allCues[start - 1].text)) {
+      start--;
+    }
+    
+    let end = currentIndex;
+    while (end < allCues.length - 1 && !isSentenceEnd(allCues[end].text)) {
+      end++;
+    }
+    
+    setStartIdx(start);
+    setEndIdx(end);
     setCopied(false);
     setSaved(false);
   }, [isOpen, currentTime, allCues]);
@@ -56,10 +71,38 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
 
   const formattedQuote = `"${quoteText}"\n\n— ${bookAuthor}, ${bookTitle}${chapterTitle ? ` (${chapterTitle})` : ''}\n\nListen at scrollreader.com/audiobook/${bookSlug}?t=${Math.floor(currentTime)}`;
 
-  function expandBefore() { setStartIdx(i => Math.max(0, i - 1)); }
-  function shrinkBefore() { setStartIdx(i => Math.min(i + 1, endIdx)); }
-  function expandAfter() { setEndIdx(i => Math.min(allCues.length - 1, i + 1)); }
-  function shrinkAfter() { setEndIdx(i => Math.max(i - 1, startIdx)); }
+  function expandBefore() {
+    setStartIdx(i => {
+      if (i <= 0) return 0;
+      let nextI = i - 1;
+      while (nextI > 0 && !isSentenceEnd(allCues[nextI - 1].text)) nextI--;
+      return nextI;
+    });
+  }
+  
+  function shrinkBefore() {
+    setStartIdx(i => {
+      let nextI = i;
+      while (nextI < endIdx && !isSentenceEnd(allCues[nextI].text)) nextI++;
+      return Math.min(nextI + 1, endIdx);
+    });
+  }
+
+  function expandAfter() {
+    setEndIdx(i => {
+      let nextI = i + 1;
+      while (nextI < allCues.length - 1 && !isSentenceEnd(allCues[nextI].text)) nextI++;
+      return Math.min(nextI, allCues.length - 1);
+    });
+  }
+
+  function shrinkAfter() {
+    setEndIdx(i => {
+      let nextI = i - 1;
+      while (nextI > startIdx && !isSentenceEnd(allCues[nextI].text)) nextI--;
+      return Math.max(nextI, startIdx);
+    });
+  }
 
   function handleCopy() {
     navigator.clipboard.writeText(formattedQuote).then(() => {
@@ -151,21 +194,25 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
               {/* Show individual selectable cues dimmed out for context */}
               <div style={{ marginBottom: 20 }}>
                 {allCues.slice(Math.max(0, startIdx - 2), startIdx).map(c => (
-                  <p key={c.id} style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-muted)', opacity: 0.4, lineHeight: 1.7 }}>{c.text}</p>
+                  <span key={c.id} style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', opacity: 0.4, lineHeight: 1.7, marginRight: 4 }}>{c.text}</span>
                 ))}
+                
                 <div style={{
                   background: 'rgba(46,106,167,0.08)',
                   border: '2px solid var(--color-brand)',
                   borderRadius: 'var(--radius-md)',
                   padding: '16px 20px',
                   margin: '8px 0',
+                  fontSize: '1.05rem', 
+                  lineHeight: 1.7, 
+                  color: 'var(--color-text-primary)', 
+                  fontStyle: 'italic',
                 }}>
-                  {selectedCues.map(c => (
-                    <p key={c.id} style={{ margin: '0 0 4px', fontSize: '1rem', lineHeight: 1.7, color: 'var(--color-text-primary)', fontStyle: 'italic' }}>{c.text}</p>
-                  ))}
+                  {quoteText}
                 </div>
+
                 {allCues.slice(endIdx + 1, Math.min(allCues.length, endIdx + 3)).map(c => (
-                  <p key={c.id} style={{ margin: 0, fontSize: '0.875rem', color: 'var(--color-text-muted)', opacity: 0.4, lineHeight: 1.7 }}>{c.text}</p>
+                  <span key={c.id} style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', opacity: 0.4, lineHeight: 1.7, marginRight: 4 }}>{c.text}</span>
                 ))}
               </div>
 

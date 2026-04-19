@@ -210,7 +210,10 @@ export default function AudiobookPage() {
                 <button
                   className="btn btn-secondary"
                   style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem' }}
-                  onClick={() => setQuoteModalOpen(true)}
+                  onClick={() => {
+                    setQuoteModalOpen(true);
+                    if (isPlaying) setPlaying(false);
+                  }}
                 >
                   <Quote size={16} />
                   Share Quote
