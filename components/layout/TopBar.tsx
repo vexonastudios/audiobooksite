@@ -136,28 +136,50 @@ export function TopBar() {
       </div>
 
       {settingsOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)' }}>
-          <div className="card" style={{ width: 320, padding: 24, position: 'relative' }}>
-            <button className="btn btn-icon" style={{ position: 'absolute', top: 12, right: 12 }} onClick={() => setSettingsOpen(false)}>
-              <X size={18} />
-            </button>
-            <h3 style={{ marginBottom: 16 }}>Player Settings</h3>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+          <div className="card" style={{ width: '100%', maxWidth: 540, padding: 0, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-surface-2)' }}>
+              <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Preferences</h2>
+              <button className="btn btn-icon" onClick={() => setSettingsOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
             
-            <div style={{ marginBottom: 8, fontWeight: 500 }}>Skip Interval</div>
-            <p className="text-secondary text-sm" style={{ marginBottom: 16 }}>
-              Adjust how many seconds the forward/backward buttons skip.
-            </p>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {[5, 15, 30, 45].map(val => (
-                <button 
-                  key={val}
-                  className={`btn ${skipInterval === val ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ flex: 1, padding: '8px 0' }}
-                  onClick={() => setSkipInterval(val)}
-                >
-                  {val}s
-                </button>
-              ))}
+            <div style={{ padding: '24px', overflowY: 'auto' }}>
+              {/* Playback Settings Section */}
+              <div style={{ marginBottom: 32 }}>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: 16, color: 'var(--color-brand)' }}>Playback Settings</h3>
+                
+                <div style={{ background: 'var(--color-surface-2)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Skip Interval</div>
+                    <div className="text-secondary text-sm">Amount of time to jump when clicking forward/backward.</div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    {[5, 15, 30, 45].map(val => (
+                      <button 
+                        key={val}
+                        className={`btn ${skipInterval === val ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ flex: 1, padding: '10px 0', borderRadius: 'var(--radius-sm)' }}
+                        onClick={() => setSkipInterval(val)}
+                      >
+                        {val}s
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Future Settings Placeholder */}
+              <div>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: 16, color: 'var(--color-brand)' }}>Appearance & Display</h3>
+                
+                <div style={{ background: 'var(--color-surface-2)', padding: '16px', borderRadius: 'var(--radius-md)', opacity: 0.7 }}>
+                  <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: 4 }}>Theme Preference (Coming Soon)</div>
+                  <div className="text-secondary text-sm">Toggle between Light, Dark, or System themes.</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
