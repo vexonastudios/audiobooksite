@@ -105,13 +105,31 @@ export async function generateQuoteImage(opts: QuoteImageOptions): Promise<strin
   const ctx = canvas.getContext('2d')!;
 
   // ── 1. Load cover via proxy ────────────────────────────────────────────────
+  // Strip WordPress resize suffixes (like -1000x1000 or -150x150) to try grabbing the original tall book cover
+  const originalUrl = bookCoverUrl.replace(/-\d+x\d+(?=\.[a-zA-Z]+$)/, '');
+  
   const proxyUrl = bookCoverUrl
     ? `/api/image-proxy?url=${encodeURIComponent(bookCoverUrl)}`
     : null;
+    
+  const proxyOriginalUrl = originalUrl !== bookCoverUrl
+    ? `/api/image-proxy?url=${encodeURIComponent(originalUrl)}`
+    : null;
 
   let coverImg: HTMLImageElement | null = null;
-  if (proxyUrl) {
-    try { coverImg = await loadImage(proxyUrl); } catch { /* fallback to dark bg */ }
+  
+  if (proxyOriginalUrl) {
+    try { 
+      // Try to get original uncropped tall image first
+      coverImg = await loadImage(proxyOriginalUrl); 
+    } catch { /* fallback to standard url */ }
+  }
+  
+  if (!coverImg && proxyUrl) {
+    try { 
+      // Fallback to square or whatever was passed
+      coverImg = await loadImage(proxyUrl); 
+    } catch { /* fallback to dark bg */ }
   }
 
   // ── 2. Dark base fill ────────────────────────────────────────────────────
