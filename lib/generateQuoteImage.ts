@@ -59,26 +59,30 @@ function clipRoundedRect(
   ctx.closePath();
 }
 
-/** Draw image with object-fit: cover behaviour */
-function drawCoverFit(
+/** Draw image scaled to fit entirely within the box (object-fit: contain) — no cropping */
+function drawCoverContain(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
   x: number, y: number, w: number, h: number
 ) {
   const imgAspect = img.width / img.height;
   const boxAspect = w / h;
-  let sx = 0, sy = 0, sw = img.width, sh = img.height;
+  let drawW: number, drawH: number, drawX: number, drawY: number;
 
   if (imgAspect > boxAspect) {
-    // Image is wider than box — crop sides
-    sw = img.height * boxAspect;
-    sx = (img.width - sw) / 2;
+    // Image wider than box — fit width
+    drawW = w;
+    drawH = w / imgAspect;
+    drawX = x;
+    drawY = y + (h - drawH) / 2;
   } else {
-    // Image is taller than box — crop top/bottom
-    sh = img.width / boxAspect;
-    sy = (img.height - sh) / 2;
+    // Image taller than box — fit height
+    drawH = h;
+    drawW = h * imgAspect;
+    drawX = x + (w - drawW) / 2;
+    drawY = y;
   }
-  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+  ctx.drawImage(img, drawX, drawY, drawW, drawH);
 }
 
 /** Prefix chapterTitle with "Chapter N" if it starts with a bare number */
@@ -228,10 +232,10 @@ export async function generateQuoteImage(opts: QuoteImageOptions): Promise<strin
   }
 
   // ── 11. Book cover thumbnail (bottom-right) ────────────────────────────────
-  const COVER_W = 118;
-  const COVER_H = 178;   // 2:3 portrait — proper book ratio
+  const COVER_W = 126;
+  const COVER_H = 189;   // 2:3 portrait — proper book ratio
   const COVER_X = SIZE - PAD - COVER_W;
-  const COVER_Y = SIZE - 56 - COVER_H;
+  const COVER_Y = SIZE - 54 - COVER_H;
 
   if (coverImg) {
     // Drop shadow
@@ -239,22 +243,22 @@ export async function generateQuoteImage(opts: QuoteImageOptions): Promise<strin
     ctx.shadowColor = 'rgba(0,0,0,0.85)';
     ctx.shadowBlur = 32;
     ctx.shadowOffsetY = 12;
-    clipRoundedRect(ctx, COVER_X, COVER_Y, COVER_W, COVER_H, 7);
-    ctx.fillStyle = '#000';
+    clipRoundedRect(ctx, COVER_X, COVER_Y, COVER_W, COVER_H, 8);
+    ctx.fillStyle = '#111';
     ctx.fill();
     ctx.restore();
 
-    // Clipped cover with proper object-fit:cover
+    // Clip + draw full cover (no cropping — object-fit: contain)
     ctx.save();
-    clipRoundedRect(ctx, COVER_X, COVER_Y, COVER_W, COVER_H, 7);
+    clipRoundedRect(ctx, COVER_X, COVER_Y, COVER_W, COVER_H, 8);
     ctx.clip();
-    drawCoverFit(ctx, coverImg, COVER_X, COVER_Y, COVER_W, COVER_H);
+    drawCoverContain(ctx, coverImg, COVER_X, COVER_Y, COVER_W, COVER_H);
     ctx.restore();
 
     // Subtle border
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
     ctx.lineWidth = 1;
-    clipRoundedRect(ctx, COVER_X, COVER_Y, COVER_W, COVER_H, 7);
+    clipRoundedRect(ctx, COVER_X, COVER_Y, COVER_W, COVER_H, 8);
     ctx.stroke();
   }
 
