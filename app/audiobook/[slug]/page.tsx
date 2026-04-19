@@ -12,6 +12,7 @@ import { ReadAlongPanel } from '@/components/ui/ReadAlongPanel';
 import { QuoteModal } from '@/components/ui/QuoteModal';
 import { parseVTT, getContextText } from '@/lib/parseVTT';
 import type { TranscriptCue } from '@/lib/parseVTT';
+import authorsData from '@/public/data/authors.json';
 
 function formatTime(s: number) {
   if (isNaN(s) || !isFinite(s)) return '0:00';
@@ -57,6 +58,9 @@ export default function AudiobookPage() {
 
   const isCurrent = currentBook?.id === book?.id;
   const displayProgress = isCurrent && duration > 0 ? (currentTime / duration) * 100 : 0;
+  
+  // Find matching author mapped from authors.json
+  const authorRecord = book ? authorsData.find(a => a.name === book.authorName) : null;
   
   // Find active chapter index for display
   const activeChapterIndex = usePlayerStore(s => s.activeChapterIndex);
@@ -198,9 +202,19 @@ export default function AudiobookPage() {
             {/* Header info (Mobile mostly, but useful here too) */}
             <div>
               <h1 style={{ marginBottom: 4 }}>{book.title}</h1>
-              <p style={{ fontSize: '1.125rem', color: 'var(--color-brand)', marginBottom: 16 }}>
-                By <Link href={`/authors/${encodeURIComponent(book.authorName)}`} style={{ textDecoration: 'underline' }}>{book.authorName}</Link>
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, marginTop: 8 }}>
+                {authorRecord?.image && (
+                  <img src={authorRecord.image} alt={book.authorName} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                )}
+                <div>
+                  <p style={{ fontSize: '1.05rem', color: 'var(--color-brand)', fontWeight: 600, margin: 0 }}>
+                    By <Link href={`/authors/${encodeURIComponent(book.authorName)}`} style={{ textDecoration: 'underline' }}>{book.authorName}</Link>
+                  </p>
+                  {authorRecord?.dates && (
+                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: 0 }}>{authorRecord.dates}</p>
+                  )}
+                </div>
+              </div>
               {transcriptStatus !== 'unavailable' && (
                 <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
                   <button
