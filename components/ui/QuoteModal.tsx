@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { X, ChevronLeft, ChevronRight, Copy, Check, Bookmark, Share2 } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { X, ChevronLeft, ChevronRight, Copy, Check, Bookmark, Share2, Image as ImageIcon } from 'lucide-react';
+import { toPng } from 'html-to-image';
+import { QuoteImageRenderer } from './QuoteImageRenderer';
 import type { TranscriptCue } from '@/lib/parseVTT';
 import { useUserStore } from '@/lib/store/userStore';
 
@@ -37,6 +39,8 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
   const [endIdx, setEndIdx] = useState(0);
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [isRenderingImage, setIsRenderingImage] = useState(false);
+  const imageRef = useRef<HTMLDivElement>(null);
 
   // Replace getCuesInRange logic to snap to sentence boundaries enclosing currentTime
   useEffect(() => {
@@ -135,6 +139,24 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
+
+  const handleExportImage = async () => {
+    if (!imageRef.current) return;
+    try {
+      setIsRenderingImage(true);
+      // Wait for font/layout to settle
+      await new Promise(r => setTimeout(r, 50));
+      const dataUrl = await toPng(imageRef.current, { cacheBust: true, quality: 0.95 });
+      const link = document.createElement('a');
+      link.download = `quote-${bookSlug}-${Math.floor(currentTime)}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Failed to export image', err);
+    } finally {
+      setIsRenderingImage(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -251,6 +273,17 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
                 <Bookmark size={15} />
                 {saved ? 'Saved to Quotes!' : 'Save Quote'}
               </button>
+              
+              <button
+                onClick={handleExportImage}
+                className="btn btn-secondary"
+                style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.875rem' }}
+                disabled={!quoteText || isRenderingImage}
+              >
+                <ImageIcon size={15} />
+                {isRenderingImage ? 'Rendering...' : 'Export Image'}
+              </button>
+              
               <div style={{ flex: 1 }} />
               <button
                 onClick={handleCopy}
@@ -271,6 +304,16 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
                 Share
               </button>
             </div>
+            
+            {/* Hidden renderer for image exports */}
+            <QuoteImageRenderer
+              ref={imageRef}
+              quoteText={quoteText}
+              bookAuthor={bookAuthor}
+              bookTitle={bookTitle}
+              chapterTitle={chapterTitle}
+              bookCover={bookCover || ''}
+            />
           </>
         )}
         </div>

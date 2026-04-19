@@ -1,15 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useUserStore } from '@/lib/store/userStore';
-import { Quote, X, Search, Share2, Copy, Check, BookOpen, ExternalLink, Play, CheckSquare, Square, ChevronDown, ChevronRight, Settings } from 'lucide-react';
+import { Quote, X, Search, Share2, Copy, Check, BookOpen, ExternalLink, Play, CheckSquare, Square, ChevronDown, ChevronRight, Settings, Image as ImageIcon } from 'lucide-react';
+import { toPng } from 'html-to-image';
+import { QuoteImageRenderer } from '@/components/ui/QuoteImageRenderer';
 import type { SavedQuote } from '@/lib/types';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 
 function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
   const [copied, setCopied] = useState(false);
+  const [isRenderingImage, setIsRenderingImage] = useState(false);
+  const imageRef = useRef<HTMLDivElement>(null);
   const loadBook = usePlayerStore(s => s.loadBook);
   const { currentBook } = usePlayerStore();
   const getBook = () => useLibraryStore.getState().audiobooks.find(b => b.id === q.bookId);
@@ -50,6 +54,23 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
       loadBook(book, q.time);
     }
   }
+
+  const handleExportImage = async () => {
+    if (!imageRef.current) return;
+    try {
+      setIsRenderingImage(true);
+      await new Promise(r => setTimeout(r, 50));
+      const dataUrl = await toPng(imageRef.current, { cacheBust: true, quality: 0.95 });
+      const link = document.createElement('a');
+      link.download = `quote-${q.bookSlug}-${Math.floor(q.time)}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error('Failed to export image', err);
+    } finally {
+      setIsRenderingImage(false);
+    }
+  };
 
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -99,6 +120,9 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
           {copied ? <Check size={12} /> : <Copy size={12} />}
           {copied ? 'Copied!' : 'Copy'}
         </button>
+        <button onClick={handleExportImage} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: '0.8rem' }} disabled={isRenderingImage}>
+          <ImageIcon size={12} /> {isRenderingImage ? 'Rendering...' : 'Image'}
+        </button>
         <button onClick={handleShare} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: '0.8rem' }}>
           <Share2 size={12} /> Share
         </button>
@@ -106,6 +130,15 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
           <X size={14} />
         </button>
       </div>
+
+      <QuoteImageRenderer
+        ref={imageRef}
+        quoteText={q.text}
+        bookAuthor={q.bookAuthor}
+        bookTitle={q.bookTitle}
+        chapterTitle={q.chapterTitle}
+        bookCover={q.bookCover || ''}
+      />
     </div>
   );
 }
