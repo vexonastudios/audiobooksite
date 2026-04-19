@@ -7,22 +7,20 @@ interface Props {
   bookAuthor: string;
   bookTitle: string;
   chapterTitle?: string;
-  bookCover: string;
+  coverDataUrl: string; // pre-fetched base64 data URL — no async loading in renderer
 }
 
-export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText, bookAuthor, bookTitle, chapterTitle, bookCover }, ref) => {
-  const proxiedCoverUrl = `/api/image-proxy?url=${encodeURIComponent(bookCover)}`;
-
+export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText, bookAuthor, bookTitle, chapterTitle, coverDataUrl }, ref) => {
   return (
     <div 
       ref={ref}
       style={{
         position: 'fixed',
-        top: -9999, // Render off-screen
+        top: -9999,
         left: -9999,
         width: 1080,
         height: 1080,
-        backgroundColor: '#1a1a1a', // Fallback color
+        backgroundColor: '#1a1a1a',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
@@ -30,21 +28,26 @@ export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText
         padding: '100px 120px',
         boxSizing: 'border-box',
         color: 'white',
-        fontFamily: '"Georgia", "Times New Roman", serif', // Classic serif for mockup match
+        fontFamily: '"Georgia", "Times New Roman", serif',
       }}
     >
-      {/* Blurred Background Image */}
-      <div style={{
-        position: 'absolute',
-        inset: -100, // Extend past bounds to hide blur vignette
-        backgroundImage: `url(${proxiedCoverUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        filter: 'blur(30px) brightness(0.25)', // Blur and darken
-        zIndex: 0
-      }} />
+      {/* Blurred Background — using <img> instead of background-image so html-to-image can inline it */}
+      <img
+        src={coverDataUrl}
+        alt=""
+        style={{
+          position: 'absolute',
+          inset: '-100px',
+          width: 'calc(100% + 200px)',
+          height: 'calc(100% + 200px)',
+          objectFit: 'cover',
+          filter: 'blur(30px) brightness(0.25)',
+          zIndex: 0,
+          pointerEvents: 'none',
+        }}
+      />
 
-      {/* Textured Overlay (Optional but nice) */}
+      {/* Gradient overlay */}
       <div style={{
         position: 'absolute',
         inset: 0,
@@ -52,7 +55,7 @@ export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText
         zIndex: 1
       }} />
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingBottom: 60 }}>
         {/* Quote Text */}
         <div style={{
@@ -75,7 +78,7 @@ export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText
           {bookAuthor}
         </div>
 
-        {/* Book Title (and Chapter) */}
+        {/* Book Title */}
         <div style={{
           fontSize: '26px',
           fontStyle: 'italic',
@@ -86,7 +89,7 @@ export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText
         </div>
       </div>
 
-      {/* Footer Area: Branding & Cover */}
+      {/* Footer */}
       <div style={{
         position: 'absolute',
         bottom: 60,
@@ -97,8 +100,7 @@ export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText
         alignItems: 'flex-end',
         zIndex: 2,
       }}>
-        
-        {/* Left: Branding */}
+        {/* Branding */}
         <div style={{ paddingBottom: 10 }}>
           <div style={{ 
             fontSize: '18px', 
@@ -107,7 +109,7 @@ export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText
             opacity: 0.7, 
             marginBottom: '12px' 
           }}>
-            Audiobooks & Books
+            Audiobooks &amp; Books
           </div>
           <div style={{ 
             fontSize: '28px', 
@@ -121,22 +123,19 @@ export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText
           </div>
         </div>
 
-        {/* Right: Book Cover */}
-        <div>
-          <img 
-            src={proxiedCoverUrl} 
-            alt="Cover" 
-            crossOrigin="anonymous"
-            style={{ 
-              width: 220, 
-              height: 330, 
-              objectFit: 'cover', 
-              borderRadius: 8, 
-              boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
-              border: '1px solid rgba(255,255,255,0.1)'
-            }} 
-          />
-        </div>
+        {/* Book Cover thumbnail */}
+        <img 
+          src={coverDataUrl}
+          alt="Cover" 
+          style={{ 
+            width: 220, 
+            height: 330, 
+            objectFit: 'cover', 
+            borderRadius: 8, 
+            boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+            border: '1px solid rgba(255,255,255,0.1)'
+          }} 
+        />
       </div>
 
     </div>
