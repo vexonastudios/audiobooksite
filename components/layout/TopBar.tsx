@@ -118,7 +118,7 @@ export function TopBar() {
       {/* User */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 'auto' }}>
         {isSignedIn ? (
-          <UserButton afterSignOutUrl="/" />
+          <UserButton />
         ) : (
           <SignInButton mode="modal">
             <button className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.875rem' }}>

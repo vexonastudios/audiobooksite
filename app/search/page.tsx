@@ -1,10 +1,11 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   const isLoaded = useLibraryStore((s) => s.isLoaded);
@@ -43,5 +44,13 @@ export default function SearchPage() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="page"><div className="skeleton" style={{ height: 400 }} /></div>}>
+      <SearchContent />
+    </Suspense>
   );
 }
