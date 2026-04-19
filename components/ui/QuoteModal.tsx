@@ -138,23 +138,31 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
         style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
       />
 
-      {/* Modal */}
+      {/* Modal Wrapper for Centering & Safe Bounds */}
       <div style={{
         position: 'fixed',
-        top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
+        inset: 0,
         zIndex: 301,
-        width: '100%',
-        maxWidth: 580,
-        maxHeight: '90vh',
         display: 'flex',
-        flexDirection: 'column',
-        background: 'var(--color-surface)',
-        borderRadius: 'var(--radius-xl)',
-        boxShadow: 'var(--shadow-xl)',
-        overflow: 'hidden',
-        animation: 'fadeIn 200ms ease both',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        pointerEvents: 'none'
       }}>
+        {/* Modal */}
+        <div style={{
+          width: '100%',
+          maxWidth: 580,
+          maxHeight: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: 'var(--color-surface)',
+          borderRadius: 'var(--radius-xl)',
+          boxShadow: 'var(--shadow-xl)',
+          overflow: 'hidden',
+          pointerEvents: 'auto',
+          animation: 'fadeIn 200ms ease both',
+        }}>
         {/* Header */}
         <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, background: 'var(--color-surface-2)' }}>
           <div>
@@ -258,6 +266,7 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
             </div>
           </>
         )}
+        </div>
       </div>
     </>
   );
