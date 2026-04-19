@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+	<title>Authors - Scroll Reader</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js" async></script>
+    <meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' />
+
+	<!-- This site is optimized with the Yoast SEO plugin v27.4 - https://yoast.com/product/yoast-seo-wordpress/ -->
+	<link rel="canonical" href="https://scrollreader.com/authors/" />
+	<meta property="og:locale" content="en_US" />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content="Authors - Scroll Reader" />
+	<meta property="og:url" content="https://scrollreader.com/authors/" />
+	<meta property="og:site_name" content="Scroll Reader" />
+	<meta property="article:publisher" content="https://www.facebook.com/scrollreaderaudio" />
+	<meta property="og:image" content="https://scrollreader.com/wp-content/uploads/scroll-reader-banner.webp" />
+	<meta property="og:image:width" content="2048" />
+	<meta property="og:image:height" content="1152" />
+	<meta property="og:image:type" content="image/webp" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:site" content="@scroll_reader" />
+	<script type="application/ld+json" class="yoast-schema-graph">{"@context":"https:\/\/schema.org","@graph":[{"@type":"WebPage","@id":"https:\/\/scrollreader.com\/authors\/","url":"https:\/\/scrollreader.com\/authors\/","name":"Authors - Scroll Reader","isPartOf":{"@id":"https:\/\/scrollreader.com\/#website"},"datePublished":"2024-09-24T19:16:20+00:00","breadcrumb":{"@id":"https:\/\/scrollreader.com\/authors\/#breadcrumb"},"inLanguage":"en-US","potentialAction":[{"@type":"ReadAction","target":["https:\/\/scrollreader.com\/authors\/"]}]},{"@type":"BreadcrumbList","@id":"https:\/\/scrollreader.com\/authors\/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https:\/\/scrollreader.com\/"},{"@type":"ListItem","position":2,"name":"Authors"}]},{"@type":"WebSite","@id":"https:\/\/scrollreader.com\/#website","url":"https:\/\/scrollreader.com\/","name":"Scroll Reader - Free Christian Audiobooks","description":"Free Christian Audiobooks","publisher":{"@id":"https:\/\/scrollreader.com\/#organization"},"potentialAction":[{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https:\/\/scrollreader.com\/?s={search_term_string}"},"query-input":{"@type":"PropertyValueSpecification","valueRequired":true,"valueName":"search_term_string"}}],"inLanguage":"en-US"},{"@type":"Organization","@id":"https:\/\/scrollreader.com\/#organization","name":"Scroll Reader - Free Christian Audiobooks","url":"https:\/\/scrollreader.com\/","logo":{"@type":"ImageObject","inLanguage":"en-US","@id":"https:\/\/scrollreader.com\/#\/schema\/logo\/image\/","url":"https:\/\/scrollreader.com\/wp-content\/uploads\/cropped-cropped-cropped-1080x1080-logo-270x270-1.jpg","contentUrl":"https:\/\/scrollreader.com\/wp-content\/uploads\/cropped-cropped-cropped-1080x1080-logo-270x270-1.jpg","width":512,"height":512,"caption":"Scroll Reader - Free Christian Audiobooks"},"image":{"@id":"https:\/\/scrollreader.com\/#\/schema\/logo\/image\/"},"sameAs":["https:\/\/www.facebook.com\/scrollreaderaudio","https:\/\/x.com\/scroll_reader","https:\/\/www.youtube.com\/@scrollreaderaudio","https:\/\/www.instagram.com\/scrollreader\/","https:\/\/podcasters.spotify.com\/pod\/show\/scrollreader"]}]}</script>
+	<!-- / Yoast SEO plugin. -->
+
+
+<link rel='dns-prefetch' href='//www.googletagmanager.com' />
+<link rel='dns-prefetch' href='//cdnjs.cloudflare.com' />
+<link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href="https://scrollreader.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fscrollreader.com%2Fauthors%2F" />
+<link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href="https://scrollreader.com/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fscrollreader.com%2Fauthors%2F&#038;format=xml" />
+<style id='wp-img-auto-sizes-contain-inline-css' type='text/css'>
+img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
+/*# sourceURL=wp-img-auto-sizes-contain-inline-css */
+</style>
+<style id='classic-theme-styles-inline-css' type='text/css'>
+/*! This file is auto-generated */
+.wp-block-button__link{color:#fff;background-color:#32373c;border-radius:9999px;box-shadow:none;text-decoration:none;padding:calc(.667em + 2px) calc(1.333em + 2px);font-size:1.125em}.wp-block-file__button{background:#32373c;color:#fff;text-decoration:none}
+/*# sourceURL=/wp-includes/css/classic-themes.min.css */
+</style>
+<style id='global-styles-inline-css' type='text/css'>
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgb(6,147,227) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgb(252,185,0) 0%,rgb(255,105,0) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgb(255,105,0) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0);--wp--preset--shadow--crisp: 6px 6px 0px rgb(0, 0, 0);}:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+/*# sourceURL=global-styles-inline-css */
+</style>
+
+<link rel='stylesheet' id='video-theme-style-css' href='https://scrollreader.com/wp-content/themes/sr6-02/style.css?ver=6.9.4' type='text/css' media='all' />
+<link rel='stylesheet' id='font-awesome-css' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css?ver=6.9.4' type='text/css' media='all' />
+<script type="text/javascript" src="https://scrollreader.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1" id="jquery-core-js"></script>
+<script type="text/javascript" src="https://scrollreader.com/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1" id="jquery-migrate-js"></script>
+
+<!-- Google tag (gtag.js) snippet added by Site Kit -->
+<!-- Google Analytics snippet added by Site Kit -->
+<script type="text/javascript" src="https://www.googletagmanager.com/gtag/js?id=GT-PBGVHXZ" id="google_gtagjs-js" async></script>
+<script type="text/javascript" id="google_gtagjs-js-after">
+/* <![CDATA[ */
+window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}
+gtag("set","linker",{"domains":["scrollreader.com"]});
+gtag("js", new Date());
+gtag("set", "developer_id.dZTNiMT", true);
+gtag("config", "GT-PBGVHXZ");
+ window._googlesitekit = window._googlesitekit || {}; window._googlesitekit.throttledEvents = []; window._googlesitekit.gtagEvent = (name, data) => { var key = JSON.stringify( { name, data } ); if ( !! window._googlesitekit.throttledEvents[ key ] ) { return; } window._googlesitekit.throttledEvents[ key ] = true; setTimeout( () => { delete window._googlesitekit.throttledEvents[ key ]; }, 5 ); gtag( "event", name, { ...data, event_source: "site-kit" } ); }; 
+//# sourceURL=google_gtagjs-js-after
+/* ]]> */
+</script>
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://scrollreader.com/xmlrpc.php?rsd" />
+<link rel='shortlink' href='https://scrollreader.com/?p=8' />
+<meta name="generator" content="Site Kit by Google 1.176.0" /><link rel="icon" href="https://scrollreader.com/wp-content/uploads/cropped-cropped-cropped-1080x1080-logo-270x270-1-32x32.jpg" sizes="32x32" />
+<link rel="icon" href="https://scrollreader.com/wp-content/uploads/cropped-cropped-cropped-1080x1080-logo-270x270-1-192x192.jpg" sizes="192x192" />
+<link rel="apple-touch-icon" href="https://scrollreader.com/wp-content/uploads/cropped-cropped-cropped-1080x1080-logo-270x270-1-180x180.jpg" />
+<meta name="msapplication-TileImage" content="https://scrollreader.com/wp-content/uploads/cropped-cropped-cropped-1080x1080-logo-270x270-1-270x270.jpg" />
+
+</head>
+<body class="wp-singular page-template page-template-page-authors page-template-page-authors-php page page-id-8 wp-custom-logo wp-theme-sr6-02">
+<div id="global-loading-progress-bar"></div>
+    <header class="site-header">
+        <div class="header-container">
+			<div class="hamburger-menu" id="hamburgerMenu">
+				<i class="fas fa-bars"></i>
+			</div>
+					<a href="https://scrollreader.com" class="site-logo">
+						<img src="https://scrollreader.com/wp-content/uploads/scrollreader-audiobook-logo-sm-300x86-1.webp" class="custom-logo" alt="Scroll Reader" width="196" height="56">						<span class="site-title">Scroll Reader</span>
+					</a>
+
+
+					<span class="site-tagline">Free Christian Audiobooks</span>
+				<div class="header-center">
+					<div class="search-container">
+						<button type="button" class="search-icon" id="searchIcon" aria-label="Search"><i class="fas fa-search"></i></button>
+						<form class="search-form" action="https://scrollreader.com/" method="get" id="searchForm">
+							<input type="text" id="search-input" name="s" placeholder="Find your next listen—enter a title, author, or keyword" value="">
+							<button type="submit" aria-label="Submit search"><i class="fas fa-search"></i></button>
+						</form>
+						<div id="search-results" style="position: absolute; background: white; width: 100%; z-index: 1000;"></div>
+					</div>
+				</div>
+<div class="header-right">
+    <div class="language-selector">
+        <a href="https://shop.scrollreader.com/" class="language-btn" id="bookstoreLink">
+            <i class="fas fa-basket-shopping"></i>
+            <span class="language-text">Bookstore</span>
+        </a>
+    </div>
+</div>
+
+
+        </div>
+    </header>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9eef907729526e6c',t:'MTc3NjY0MDAzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
+
+<style>
+
+
+/* 2. Consistent typography */
+.content-area,
+.author-info h3,
+.author-info span,
+.author-posts a,
+h2 {
+  font-family: system-ui, sans-serif;
+}
+h2 {
+  font-size: 1.32rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 1rem;
+}
+
+/* grid */
+.author-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+/* featured contributors */
+.featured-contributors .author-box {
+  grid-column: span 2;
+  border: 1px solid #333;
+  border-radius: 25px;
+  background: #fafafa;
+}
+
+/* author box */
+.author-box {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 10px;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+.author-box:hover {
+  transform: translateY(-4px);
+}
+
+/* link reset */
+.author-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* images */
+.author-image,
+.small-author-image {
+  border-radius: 50%;
+  transition: opacity 0.3s ease, border-color 0.3s ease;
+  margin: 0 auto;
+  border: 3px solid transparent;
+  object-fit: cover;
+}
+.author-image {
+  width: 140px;
+  height: 140px;
+}
+.featured-author-box .author-image {
+  width: 160px;
+  height: 160px;
+}
+.small-author-image {
+  width: 140px;
+  height: 140px;
+}
+
+/* info panel */
+.author-info {
+  margin-top: -24px;
+  background: #fff;
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 15px;
+  white-space: nowrap;
+  transition: background 0.3s ease, transform 0.3s ease;
+  transform: scale(0.95);
+  border: 1px solid #ddd;
+}
+.author-info h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.author-info span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* hover effects */
+.author-link:hover .author-image {
+  border-color: #0073aa;
+  opacity: 0.9;
+}
+.author-link:hover .author-info {
+  background: #0a4771;
+  color: #fff;
+  transform: scale(1);
+}
+
+/* social icons */
+.author-social {
+  margin-top: 10px;
+}
+.author-social a {
+  margin-right: 8px;
+  color: #333;
+  font-size: 16px;
+  transition: color 0.3s ease;
+}
+.author-social a:hover {
+  color: #0073aa;
+}
+
+/* posts list */
+.author-posts {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  text-align: left;
+}
+.author-posts li {
+  margin-bottom: 8px;
+}
+.author-posts a {
+  text-decoration: none;
+  color: #0073aa;
+  transition: color 0.3s ease;
+}
+.author-posts a:hover {
+  color: #005680;
+  text-decoration: underline;
+}
+
+/* search bar next to heading */
+.explore-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.author-search {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 250px;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .author-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .featured-contributors .author-box,
+  .author-box {
+    grid-column: auto;
+  }
+  .page-template-page-authors #content {margin-left:15px !important;}
+}
+
+
+</style>
+
+<div id="main-container">
+  <div class="vtsidebar vtclosed" id="sidebar">
+    	<div class="hamburger-menu" id="sidebarHamburger">
+		<i class="fas fa-times"></i>
+	</div>
+	<div class="vtpin-unpin-container">
+        <div class="vtpin-unpin" id="pinUnpin" title="Pin/Unpin Menu">
+            <i class="fas fa-toggle-off"></i>
+        </div>
+    </div>
+
+    <!-- First menu section -->
+    <div class="vtmenu-section">
+        <ul class="vtmenu">
+<li><a href='https://scrollreader.com/'><i class="fas fa-home"></i><span class='menu-text'>Home</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/audiobooks/'><i class="fas fa-search"></i><span class='menu-text'>Browse All Audiobooks</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/categories/'><i class="fas fa-list"></i><span class='menu-text'>Categories</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/topics/'><i class="fas fa-tags"></i><span class='menu-text'>Topics</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/authors/'><i class="fas fa-users"></i><span class='menu-text'>Author or Subject</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/timeline/'><i class="fas fa-project-diagram"></i><span class='menu-text'>Timeline</span></a></li>
+</li>
+
+<li><a href='https://shop.scrollreader.com/'><i class="fas fa-basket-shopping"></i><span class='menu-text'>Shop</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/printed-books/'><i class="fas fa-box"></i><span class='menu-text'>Printed Books</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/podcast-links/'><i class="fas fa-podcast"></i><span class='menu-text'>Podcast Links</span></a></li>
+</li>
+</ul>    </div>
+
+    <!-- Second menu section -->
+    <div class="vtmenu-section">
+        <div class="vtmenu-title">You</div>
+        <ul class="vtmenu">
+<li><a href='https://scrollreader.com/favorites/'><i class="fas fa-heart"></i><span class='menu-text'>Favorites</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/downloads/'><i class="fas fa-download"></i><span class='menu-text'>Downloads</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/history/'><i class="fas fa-history"></i><span class='menu-text'>History</span></a></li>
+</li>
+</ul>    </div>
+
+    <!-- Third menu section with "More" toggle -->
+    <div class="vtmenu-section">
+        <div class="vtmenu-title" id="unique-more-toggle" style="cursor: pointer;">
+            More <i class="fas fa-chevron-down"></i>
+        </div>
+        <div id="unique-more-menu" class="unique-menu-hidden"> <!-- Hidden by default -->
+            <ul class="vtmenu">
+<li><a href='https://scrollreader.com/about-us/'><i class="fas fa-info-circle"></i><span class='menu-text'>About Us</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/subscribe/'><i class="fas fa-bell"></i><span class='menu-text'>Get Monthly Updates</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/contact-us/'><i class="fas fa-envelope"></i><span class='menu-text'>Contact Us</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/donate/'><i class="fas fa-gift"></i><span class='menu-text'>Donate</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/get-involved/'><i class="fas fa-hands-helping"></i><span class='menu-text'>Get Involved</span></a></li>
+</li>
+
+<li><a href='https://scrollreader.com/mobile-app/'><i class="fas fa-mobile-alt"></i><span class='menu-text'>Add to Home Screen</span></a></li>
+</li>
+</ul>        </div>
+    </div>
+</div>
+  <div id="content" class="content-area">
+
+    <h2>Featured Authors</h2>
+    <div class="featured-contributors author-grid">
+              <div class="author-box featured-author-box">
+          <a href="https://scrollreader.com/author/embounds/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/embounds-1.webp"
+                 width="160" height="160"
+                 class="author-image" />
+            <div class="author-info">
+              <h3>E.M. Bounds</h3>
+              <span>6 posts</span>
+            </div>
+          </a>
+          <ul class="author-posts">
+                          <li>
+                <a href="https://scrollreader.com/audiobook/the-weapon-of-prayer/">The Weapon of Prayer</a>
+                <span>March 20, 2026</span>
+              </li>
+                          <li>
+                <a href="https://scrollreader.com/audiobook/satan-his-personality-power-and-overthrow/">Satan: His Personality, Power and Overthrow</a>
+                <span>July 11, 2025</span>
+              </li>
+                          <li>
+                <a href="https://scrollreader.com/audiobook/prayer-and-praying-men/">Prayer and Praying Men</a>
+                <span>June 6, 2025</span>
+              </li>
+                          <li>
+                <a href="https://scrollreader.com/audiobook/the-reality-of-prayer/">The Reality of Prayer</a>
+                <span>April 8, 2025</span>
+              </li>
+                          <li>
+                <a href="https://scrollreader.com/audiobook/purpose-in-prayer/">Purpose In Prayer</a>
+                <span>January 31, 2025</span>
+              </li>
+                      </ul>
+        </div>
+              <div class="author-box featured-author-box">
+          <a href="https://scrollreader.com/author/gardinerspring/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/gardinerspring.jpg"
+                 width="160" height="160"
+                 class="author-image" />
+            <div class="author-info">
+              <h3>Gardiner Spring</h3>
+              <span>5 posts</span>
+            </div>
+          </a>
+          <ul class="author-posts">
+                          <li>
+                <a href="https://scrollreader.com/audiobook/mission-of-sorrow/">The Mission of Sorrow</a>
+                <span>July 18, 2025</span>
+              </li>
+                          <li>
+                <a href="https://scrollreader.com/audiobook/the-attraction-of-the-cross/">The Attraction of the Cross</a>
+                <span>July 8, 2025</span>
+              </li>
+                          <li>
+                <a href="https://scrollreader.com/i-dont-know-if-god-will-accept-me/">&#8220;I don’t know if God will accept me&#8221;?</a>
+                <span>June 29, 2025</span>
+              </li>
+                          <li>
+                <a href="https://scrollreader.com/audiobook/the-power-of-the-pulpit/">The Power of The Pulpit</a>
+                <span>February 7, 2025</span>
+              </li>
+                          <li>
+                <a href="https://scrollreader.com/audiobook/hints-to-parents-a-sermon-on-the-religious-education-of-children/">Hints to Parents: A Sermon on the Religious Education of Children</a>
+                <span>November 11, 2024</span>
+              </li>
+                      </ul>
+        </div>
+              <div class="author-box featured-author-box">
+          <a href="https://scrollreader.com/author/henryfrost/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/henyfrost.webp"
+                 width="160" height="160"
+                 class="author-image" />
+            <div class="author-info">
+              <h3>Henry Frost</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+          <ul class="author-posts">
+                          <li>
+                <a href="https://scrollreader.com/audiobook/effective-praying-meditations-prevailing-prayer/">Effective Praying: Meditations Upon The Subject of Prevailing Prayer</a>
+                <span>September 19, 2025</span>
+              </li>
+                          <li>
+                <a href="https://scrollreader.com/audiobook/miraculous-healing/">Miraculous Healing: A Personal Testimony &#038; Biblical Study</a>
+                <span>August 19, 2025</span>
+              </li>
+                      </ul>
+        </div>
+          </div>
+
+    <div class="explore-header">
+      <h2>Explore by Person or Author</h2>
+      <input
+        type="text"
+        id="author-search"
+        class="author-search"
+        placeholder="Search authors…"
+      />
+    </div>
+
+    <div class="all-authors author-grid">
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/aeglover/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/aeglover.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>A.E. Glover</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/ajgordon/" class="author-link">
+                        <img src="https://beta.scrollreader.com/wp-content/uploads/ajgordon.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>A.J. Gordon</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/atpierson/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/atpierson-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>A.T. Pierson</h3>
+              <span>4 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/awtozer/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/awtozer.jpg"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>A.W. Tozer</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/adalee/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/adalee.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Ada Lee</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/ameliaopie/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/amelia-opie.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Amelia Opie</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/amycarmichael/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/amycarmicahel.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Amy Carmichael</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/andrewbonar/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/andrewbonar-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Andrew Bonar</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/andrewfuller/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/andrew-fuller.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Andrew Fuller</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/andrewmurray/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/andrewmurray.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Andrew Murray</h3>
+              <span>5 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/arabellastuart/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/women.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Arabella W. Stuart</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/arthurhardy/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/ArthurJosephHardy.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Arthur Hardy</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/augustusbuckland/" class="author-link">
+                        <img src="https://ill-be-honest.local/wp-content/uploads/2024/07/noprofile.jpg"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Augustus Buckland</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/bobjennings/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/bobjennings-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Bob Jennings</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/chspurgeon/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/CharlesSpurgeonProfileAudiobook.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>C.H. Spurgeon</h3>
+              <span>3 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/ctstudd/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/ctstudd-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>C.T. Studd</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/charlesbridges/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/charlesbridges.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Charles Bridges</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/charlesray/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Charles Ray</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/conradmurrell/" class="author-link">
+                        <img src="https://beta.scrollreader.com/wp-content/uploads/Conrad-Murrell-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Conrad Murrell</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/dlmoody/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/dlmoody.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>D.L. Moody</h3>
+              <span>3 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/darylwingerd/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/Daryl_2020-300x300-1-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Daryl Wingerd</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/davidjdeane/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>David J. Deane</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/ehhamilton/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/ehhamilton.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>E.H. Hamilton</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/edwardbartlett/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Edward Bartlett</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/edwardjudson/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Edward Judson</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/edwardleighpell/" class="author-link">
+                        <img src="https://ill-be-honest.local/wp-content/uploads/2024/07/noprofile.jpg"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Edward Pell</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/edwinpaxtonhood/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Edwin Paxton Hood</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/eglantonthorne/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/women.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Eglanton Thorne</h3>
+              <span>3 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/eleanorastooke/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/women.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Eleanor H. Stooke</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/gcampbellmorgan/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/campbellmorgan.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>G. Campbell Morgan</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/gtbedell/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>G.T. Bedell</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/georgelasher/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>George Lasher</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/georgemuller/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/georgemuller-profile.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>George Müller</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/georgesmith/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>George Smith</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/haironside/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/ironside.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>H.A. Ironside</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/henryclaytrumbull/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/1024-trumbull.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Henry Clay Trumbull</h3>
+              <span>4 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/henryharrisjessup/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/jessup-profile.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Henry Jessup</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/hesbastretton/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/hesba.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Hesba Stretton</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/horatiusbonar/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/Horatius_Bonar-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Horatius Bonar</h3>
+              <span>4 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/hudsontaylor/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/hudsontaylor-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Hudson Taylor</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/ichabodspencer/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/ichabod-spencer.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Ichabod Spencer</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/isaacwatts/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/isaac-watts.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Isaac Watts</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/jcryle/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/jcryle.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>J.C. Ryle</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/jehutton/" class="author-link">
+                        <img src="https://beta.scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>J.E. Hutton</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/jamesdabneymccabe/" class="author-link">
+                        <img src="https://ill-be-honest.local/wp-content/uploads/2024/07/noprofile.jpg"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>James Dabney McCabe</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/jamesjellis/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>James Ellis</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/jamesgilmour/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/jamesgilmour.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>James Gilmour</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/jeanettegedalius/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/Jeanette-Gedalius.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Jeanette Gedalius</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/jerrymcauley/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/JerryMcAuley.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Jerry McAuley</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/jessepage/" class="author-link">
+                        <img src="https://beta.scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Jesse Page</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/jimelliff/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/jimeliff-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Jim Elliff</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/johnabbott/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/johnabbott.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>John Abbott</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/johnbell/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>John Bell</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/johnbunyan/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/John_Bunyan_by_Thomas_Sadler_1684-1-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>John Bunyan</h3>
+              <span>3 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/johnflavel/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/JohnFlavel-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>John Flavel</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/johngpaton/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/johngpaton-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>John G. Paton</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/johnharris/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/johnharris.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>John Harris</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/johnhawthorn/" class="author-link">
+                        <img src="https://ill-be-honest.local/wp-content/uploads/2024/07/noprofile.jpg"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>John Hawthorn</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/johnnevius/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/john-nevius.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>John Nevius</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/mabelwilliamson/" class="author-link">
+                        <img src="https://beta.scrollreader.com/wp-content/uploads/women.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Mabel Williamson</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/macktomlinson/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/pastor-mack-tomlinson-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Mack Tomlinson</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/marshallbroomhall/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/marshallbroomhall.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Marshall Broomhall</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/maryslessor/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/maryslessor.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Mary Slessor</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/matthewhenry/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/MatthewHenry-scaled.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Matthew Henry</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/mildredcable/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/women.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Mildred Cable</h3>
+              <span>4 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/mrshowardtaylor/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/mrshowardtaylor.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Mrs. Howard Taylor</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/mrsofwalton/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/mrsofwalton-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Mrs. O.F. Walton</h3>
+              <span>3 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/paulkanamori/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/paul-kanamori.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Paul Kanamori</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/petercartwright/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/peter-cartwright.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Peter Cartwright</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/philipdoddridge/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/philipdoddridge.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Philip Doddridge</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/richardbaxter/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/1024-richardbaxter.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Richard Baxter</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/richardnewton/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/newton.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Richard Newton</h3>
+              <span>2 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/robertchapman/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/400-robertchapman-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Robert Chapman</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/robertphilip/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Robert Philip</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/rolandallen/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/rolandallen.jpg"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Roland Allen</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/rosalindgoforth/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/400-rosalind-goforth-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Rosalind Goforth</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/ruthlamb/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/women.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Ruth Lamb</h3>
+              <span>3 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/ryandenton/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/ryandenton.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Ryan Denton</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/samuelchadwick/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/chadwick.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Samuel Chadwick</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/thomasboston/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/thomas-boston-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Thomas Boston</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/thomashooker/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/thomas-hooker-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Thomas Hooker</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/thomaswatson/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/thomaswatson.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>Thomas Watson</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/williamalcott/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/williamalcott.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>William Alcott</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/williamwallaceeverts/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>William Everts</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/williamhatcher/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>William Hatcher</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/williamhuntington/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/williamhuntingdon-1.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>William Huntington</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/williamparsons/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/male.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>William Parsons</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+              <div class="author-box">
+          <a href="https://scrollreader.com/author/williamtyndale/" class="author-link">
+                        <img src="https://scrollreader.com/wp-content/uploads/WilliamTyndale.webp"
+                 width="140" height="140"
+                 class="author-image small-author-image" />
+            <div class="author-info">
+              <h3>William Tyndale</h3>
+              <span>1 posts</span>
+            </div>
+          </a>
+        </div>
+          </div>
+
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var input = document.getElementById('author-search');
+  input.addEventListener('input', function() {
+    var term = this.value.toLowerCase();
+    document.querySelectorAll('.all-authors .author-box').forEach(function(box) {
+      var name = box.querySelector('.author-info h3').textContent.toLowerCase();
+      box.style.display = name.includes(term) ? '' : 'none';
+    });
+  });
+});
+</script>
+
+        </div> <!-- .content-area -->
+    </div> <!-- .main-container -->
+    <script type="speculationrules">
+{"prefetch":[{"source":"document","where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/wp-*.php","/wp-admin/*","/wp-content/uploads/*","/wp-content/*","/wp-content/plugins/*","/wp-content/themes/sr6-02/*","/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
+</script>
+<script type="text/javascript" id="general-controls-js-js-extra">
+/* <![CDATA[ */
+var tracking_ajax_object = {"ajax_url":"https://scrollreader.com/wp-admin/admin-ajax.php"};
+var themeSettings = {"autoRotate":"","tags":["home","Prayer","The Holy Spirit","Children and Youth","Women Evangelists","Counseling","Church History"]};
+//# sourceURL=general-controls-js-js-extra
+/* ]]> */
+</script>
+<script type="text/javascript" src="https://scrollreader.com/wp-content/themes/sr6-02/js/general-controls.js" id="general-controls-js-js"></script>
+<script type="text/javascript" defer="defer" src="https://scrollreader.com/wp-content/themes/sr6-02/template-parts/content-audiobook-post.js" id="audiobook-post-scripts-js"></script>
+<script type="text/javascript" id="related-audiobooks-js-extra">
+/* <![CDATA[ */
+var relatedAudiobooksData = {"ajax_url":"https://scrollreader.com/wp-admin/admin-ajax.php","nonce":"e4713b1dc0","post_id":"8"};
+//# sourceURL=related-audiobooks-js-extra
+/* ]]> */
+</script>
+<script type="text/javascript" src="https://scrollreader.com/wp-content/themes/sr6-02/js/related-audiobooks.js?ver=1.0" id="related-audiobooks-js"></script>
+
+<script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+            .then(function(registration) {
+                console.log('Service Worker registered with scope:', registration.scope);
+            })
+            .catch(function(error) {
+                console.log('Service Worker registration failed:', error);
+            });
+        }
+    </script>
+	
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  let targetNode = document.querySelector('#main-container');
+
+  const observer = new MutationObserver(function (mutationList, observer) {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const mainMenu = document.querySelector('.main-menu');
+    const contentArea = document.querySelector('.content-area');
+
+    if (menuToggle && mainMenu && contentArea) {
+      console.log("Elements found!"); 
+      menuToggle.addEventListener('click', function () {
+        mainMenu.classList.toggle('menu-closed');
+        contentArea.classList.toggle('menu-closed');
+
+        if (mainMenu.classList.contains('menu-closed')) {
+          menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+        } else {
+          menuToggle.innerHTML = '<i class="fas fa-arrow-left"></i>';
+        }
+      });
+      observer.disconnect(); 
+    } else {
+      targetNode = document.querySelector('#menu-container');
+      if (targetNode) {
+        observer.observe(targetNode, { childList: true, subtree: true });
+      }
+    }
+  });
+
+  if (targetNode) {
+    observer.observe(targetNode, { childList: true, subtree: true });
+  }
+});
+
+</script>
+
+</body>
+</html>
