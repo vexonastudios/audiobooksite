@@ -18,11 +18,8 @@ const TOPIC_GROUPS: Record<string, string[]> = {
 function TopicGroup({ title, topics, currentTopics }: { title: string, topics: string[], currentTopics: string[] }) {
   const [isOpen, setIsOpen] = useState(true);
   
-  // Only show topics that actually exist in the current database store, or just rely on the static list
-  // The screenshot shows 0-count or existing count topics. Let's merge them.
-  // Actually, we'll iterate through the static topics and look up their count.
   return (
-    <div style={{ breakInside: 'avoid', marginBottom: 24, backgroundColor: 'var(--color-surface)', borderRadius: 6, overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
+    <div style={{ breakInside: 'avoid', marginBottom: 24, backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
         style={{ 
@@ -30,21 +27,25 @@ function TopicGroup({ title, topics, currentTopics }: { title: string, topics: s
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center', 
-          padding: '12px 16px', 
-          backgroundColor: '#2e6aa7', // Deep blue brand
+          padding: '16px 20px', 
+          background: 'linear-gradient(135deg, var(--color-brand), var(--color-brand-dark))',
           color: '#ffffff',
           border: 'none',
           cursor: 'pointer',
           fontWeight: 600,
-          textAlign: 'left'
+          textAlign: 'left',
+          fontSize: '1.05rem',
+          letterSpacing: '0.01em'
         }}
       >
         <span>{title}</span>
-        <span style={{ fontSize: '1.2em', lineHeight: 1 }}>{isOpen ? '-' : '+'}</span>
+        <span style={{ fontSize: '1.25rem', lineHeight: 1, opacity: 0.8, transition: 'transform 0.2s ease', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </span>
       </button>
 
       {isOpen && (
-        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
           {topics.map(topic => {
             const books = useLibraryStore((s) => s.getByTopic(topic));
             return (
@@ -56,11 +57,23 @@ function TopicGroup({ title, topics, currentTopics }: { title: string, topics: s
                   color: 'var(--color-text-primary)',
                   display: 'flex',
                   alignItems: 'baseline',
-                  gap: 6
+                  justifyContent: 'space-between',
+                  padding: '4px 0',
+                  borderBottom: '1px solid var(--color-surface-2)'
                 }}
+                className="topic-link-row"
               >
-                <span className="hover-underline">{topic}</span>
-                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85em' }}>({books.length})</span>
+                <span className="hover-underline" style={{ fontWeight: 500 }}>{topic}</span>
+                <span style={{ 
+                  color: 'var(--color-text-muted)', 
+                  fontSize: '0.75rem', 
+                  fontWeight: 600, 
+                  backgroundColor: 'var(--color-surface-2)', 
+                  padding: '2px 8px', 
+                  borderRadius: 12 
+                }}>
+                  {books.length}
+                </span>
               </Link>
             )
           })}

@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote } from 'lucide-react';
+import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash } from 'lucide-react';
 
 const navItems = [
   { href: '/',            label: 'Home',       icon: Home       },
   { href: '/categories',  label: 'Browse',     icon: Headphones },
   { href: '/authors',     label: 'Authors',    icon: Users      },
   { href: '/categories',  label: 'Categories', icon: Tag        },
+  { href: '/topics',      label: 'Topics',     icon: Hash       },
   { href: '/bookmarks',   label: 'Bookmarks',  icon: Bookmark   },
   { href: '/quotes',      label: 'Quotes',     icon: Quote      },
   { href: '/history',     label: 'History',    icon: Clock      },

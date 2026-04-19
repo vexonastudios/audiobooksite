@@ -213,7 +213,7 @@ export default function AudiobookPage() {
              <img 
                src={book.coverImage || '/placeholder.png'} 
                alt={book.title} 
-               style={{ width: '100%', aspectRatio: 1, objectFit: 'cover', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-lg)' }}
+               style={{ width: '100%', aspectRatio: '2 / 3', objectFit: 'cover', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-lg)' }}
              />
              <div style={{ display: 'flex', justifyContent: 'center', gap: 24, padding: '8px 0' }}>
                <div style={{ textAlign: 'center' }}>
