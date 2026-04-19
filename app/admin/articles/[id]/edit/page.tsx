@@ -4,8 +4,9 @@ import ArticleForm from '../../ArticleForm';
 
 const sql = neon(process.env.DATABASE_URL!);
 
-export default async function EditArticlePage({ params }: { params: { id: string } }) {
-  const [row] = await sql`SELECT * FROM articles WHERE id = ${params.id}`;
+export default async function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  const [row] = await sql`SELECT * FROM articles WHERE id = ${resolvedParams.id}`;
   if (!row) notFound();
 
   const initialData = {
