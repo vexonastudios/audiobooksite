@@ -1,8 +1,6 @@
 /**
  * generateQuoteImage.ts
  * Renders a quote image directly onto an HTML5 Canvas and returns a PNG data URL.
- * This is far more reliable than html-to-image because the browser is fully in control
- * of the canvas paint cycle — no off-screen DOM tricks required.
  */
 
 interface QuoteImageOptions {
@@ -10,7 +8,7 @@ interface QuoteImageOptions {
   bookAuthor: string;
   bookTitle: string;
   chapterTitle?: string;
-  bookCoverUrl: string; // original URL; we'll fetch via our proxy
+  bookCoverUrl: string;
 }
 
 function wrapText(
@@ -44,7 +42,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-function drawRoundedRect(
+function clipRoundedRect(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
@@ -74,30 +72,25 @@ export async function generateQuoteImage(opts: QuoteImageOptions): Promise<strin
   canvas.height = SIZE;
   const ctx = canvas.getContext('2d')!;
 
-  // --- 1. Load cover via our Next.js proxy (avoids CORS taint) ---
+  // ── 1. Load cover image via proxy ──────────────────────────────────────────
   const proxyUrl = bookCoverUrl
     ? `/api/image-proxy?url=${encodeURIComponent(bookCoverUrl)}`
     : null;
 
   let coverImg: HTMLImageElement | null = null;
   if (proxyUrl) {
-    try {
-      coverImg = await loadImage(proxyUrl);
-    } catch {
-      coverImg = null;
-    }
+    try { coverImg = await loadImage(proxyUrl); } catch { /* fallback */ }
   }
 
-  // --- 2. Dark base background ---
-  ctx.fillStyle = '#1a1a1a';
+  // ── 2. Dark base fill ──────────────────────────────────────────────────────
+  ctx.fillStyle = '#18100c';
   ctx.fillRect(0, 0, SIZE, SIZE);
 
-  // --- 3. Blurred cover background ---
+  // ── 3. Blurred background image ────────────────────────────────────────────
   if (coverImg) {
     ctx.save();
-    ctx.filter = 'blur(40px) brightness(0.22)';
-    // Over-draw to avoid blur edge artifact
-    const overflow = 120;
+    ctx.filter = 'blur(50px) brightness(0.18) saturate(1.4)';
+    const overflow = 150;
     const scale = Math.max(
       (SIZE + overflow * 2) / coverImg.width,
       (SIZE + overflow * 2) / coverImg.height
@@ -108,115 +101,178 @@ export async function generateQuoteImage(opts: QuoteImageOptions): Promise<strin
     ctx.restore();
   }
 
-  // --- 4. Gradient overlay ---
-  const grad = ctx.createLinearGradient(0, 0, 0, SIZE);
-  grad.addColorStop(0, 'rgba(0,0,0,0.05)');
-  grad.addColorStop(1, 'rgba(0,0,0,0.45)');
-  ctx.fillStyle = grad;
+  // ── 4. Vignette overlay (edges dark, center lighter) ───────────────────────
+  const vigGrad = ctx.createRadialGradient(SIZE/2, SIZE/2, SIZE*0.2, SIZE/2, SIZE/2, SIZE*0.75);
+  vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
+  vigGrad.addColorStop(1, 'rgba(0,0,0,0.6)');
+  ctx.fillStyle = vigGrad;
   ctx.fillRect(0, 0, SIZE, SIZE);
 
-  // --- 5. Quote text ---
-  const PAD = 130;
+  // Also a subtle tonal gradient top→bottom
+  const toneGrad = ctx.createLinearGradient(0, 0, 0, SIZE);
+  toneGrad.addColorStop(0, 'rgba(0,0,0,0.15)');
+  toneGrad.addColorStop(0.5, 'rgba(0,0,0,0)');
+  toneGrad.addColorStop(1, 'rgba(0,0,0,0.35)');
+  ctx.fillStyle = toneGrad;
+  ctx.fillRect(0, 0, SIZE, SIZE);
+
+  // ── 5. Layout constants ────────────────────────────────────────────────────
+  const PAD = 110;           // horizontal padding
+  const FOOTER_H = 180;      // reserved footer zone height
+  const HEADER_H = 80;       // clear top margin
   const contentW = SIZE - PAD * 2;
   const centerX = SIZE / 2;
+  const availH = SIZE - FOOTER_H - HEADER_H;   // zone for quote block
 
-  const quoteFontSize = quoteText.length > 200 ? 40 : quoteText.length > 120 ? 46 : 52;
-  const quoteLineH = quoteFontSize * 1.45;
+  // ── 6. Font sizing ─────────────────────────────────────────────────────────
+  const len = quoteText.length;
+  const quoteFontSize = len > 280 ? 34 : len > 180 ? 40 : len > 100 ? 46 : 54;
+  const quoteLineH = quoteFontSize * 1.55;
+
   ctx.font = `${quoteFontSize}px Georgia, "Times New Roman", serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
 
-  const quoteLines = wrapText(ctx, quoteText, contentW);
+  const quoteLines = wrapText(ctx, quoteText, contentW - 20);
   const quoteTotalH = quoteLines.length * quoteLineH;
 
-  // Center block — quote + author + title
-  const authorFontSize = 28;
-  const titleFontSize = 22;
-  const gap1 = 52; // gap between quote and author
-  const gap2 = 18; // gap between author and title
-  const blockH = quoteTotalH + gap1 + authorFontSize + gap2 + titleFontSize;
-  let blockTop = (SIZE - blockH) / 2;
+  // Measure total block height:
+  //   openMark(80) + gap(16) + quoteText + gap(48) + divider(1) + gap(36) + author(34) + gap(14) + title(24)
+  const OPEN_MARK_H = 80;
+  const GAP_MARK_QUOTE = 16;
+  const GAP_QUOTE_DIV = 52;
+  const DIV_H = 1;
+  const GAP_DIV_AUTHOR = 40;
+  const AUTHOR_FONT = 30;
+  const GAP_AUTHOR_TITLE = 16;
+  const TITLE_FONT = 22;
 
-  // Quote
-  ctx.fillStyle = 'white';
-  ctx.shadowColor = 'rgba(0,0,0,0.55)';
-  ctx.shadowBlur = 14;
-  ctx.shadowOffsetY = 3;
+  const totalBlockH =
+    OPEN_MARK_H + GAP_MARK_QUOTE +
+    quoteTotalH +
+    GAP_QUOTE_DIV + DIV_H + GAP_DIV_AUTHOR +
+    AUTHOR_FONT + GAP_AUTHOR_TITLE + TITLE_FONT;
 
-  quoteLines.forEach((line, i) => {
-    ctx.fillText(line, centerX, blockTop + i * quoteLineH + quoteFontSize);
-  });
-  const quoteBottom = blockTop + quoteTotalH;
+  // Center the block within the available zone
+  const blockTop = HEADER_H + (availH - totalBlockH) / 2;
 
-  // Author
-  ctx.font = `bold ${authorFontSize}px Georgia, serif`;
-  ctx.shadowBlur = 8;
+  // ── 7. Decorative opening quote mark ──────────────────────────────────────
+  const markY = blockTop;
+  ctx.save();
+  ctx.font = `bold 110px Georgia, serif`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(255,255,255,0.13)';
+  ctx.shadowColor = 'transparent';
+  ctx.fillText('"', centerX, markY + OPEN_MARK_H);
+  ctx.restore();
+
+  // ── 8. Quote text ─────────────────────────────────────────────────────────
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = 'rgba(255,255,255,0.97)';
+  ctx.shadowColor = 'rgba(0,0,0,0.6)';
+  ctx.shadowBlur = 16;
   ctx.shadowOffsetY = 2;
-  const authorY = quoteBottom + gap1;
-  ctx.fillText(bookAuthor.toUpperCase(), centerX, authorY);
+  ctx.font = `${quoteFontSize}px Georgia, "Times New Roman", serif`;
 
-  // Book title / chapter
-  ctx.font = `italic ${titleFontSize}px Georgia, serif`;
-  ctx.shadowBlur = 6;
-  ctx.shadowOffsetY = 1;
-  ctx.globalAlpha = 0.88;
-  const titleText = chapterTitle ? `${bookTitle}: ${chapterTitle}` : bookTitle;
-  const titleY = authorY + gap2 + titleFontSize;
-  ctx.fillText(titleText, centerX, titleY);
-  ctx.globalAlpha = 1;
+  const quoteStartY = markY + OPEN_MARK_H + GAP_MARK_QUOTE;
+  quoteLines.forEach((line, i) => {
+    ctx.fillText(line, centerX, quoteStartY + i * quoteLineH + quoteFontSize * 0.85);
+  });
+  const quoteEndY = quoteStartY + quoteTotalH;
 
-  // --- 6. Branding (bottom-left) ---
+  // ── 9. Thin divider line ───────────────────────────────────────────────────
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
-  ctx.textAlign = 'left';
-  ctx.fillStyle = 'rgba(255,255,255,0.65)';
-  ctx.font = `14px Georgia, serif`;
-  ctx.fillText('AUDIOBOOKS & BOOKS', PAD, SIZE - 110);
-
-  const brand = 'SCROLLREADER.COM';
-  ctx.font = `bold 22px Georgia, serif`;
-  const brandW = ctx.measureText(brand).width;
-  const bx = PAD;
-  const by = SIZE - 96;
-  const bh2 = 44;
-  const bpad = 18;
-  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-  ctx.lineWidth = 1.5;
-  drawRoundedRect(ctx, bx, by, brandW + bpad * 2, bh2, 6);
+  const divY = quoteEndY + GAP_QUOTE_DIV;
+  const divW = 180;
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(centerX - divW / 2, divY);
+  ctx.lineTo(centerX + divW / 2, divY);
   ctx.stroke();
-  ctx.fillStyle = 'white';
-  ctx.fillText(brand, bx + bpad, by + bh2 - 12);
 
-  // --- 7. Book cover thumbnail (bottom-right) ---
+  // ── 10. Author name ────────────────────────────────────────────────────────
+  const authorY = divY + GAP_DIV_AUTHOR + AUTHOR_FONT;
+  ctx.font = `bold ${AUTHOR_FONT}px Georgia, serif`;
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 10;
+  ctx.fillText(bookAuthor.toUpperCase(), centerX, authorY);
+
+  // ── 11. Book title / chapter ───────────────────────────────────────────────
+  const titleY = authorY + GAP_AUTHOR_TITLE + TITLE_FONT;
+  ctx.font = `italic ${TITLE_FONT}px Georgia, serif`;
+  ctx.fillStyle = 'rgba(255,255,255,0.70)';
+  ctx.shadowBlur = 8;
+  const titleText = chapterTitle ? `${bookTitle}: ${chapterTitle}` : bookTitle;
+  // Wrap title if too long
+  const titleLines = wrapText(ctx, titleText, contentW - 40);
+  titleLines.forEach((line, i) => {
+    ctx.fillText(line, centerX, titleY + i * (TITLE_FONT * 1.5));
+  });
+
+  // ── 12. Footer area ────────────────────────────────────────────────────────
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+
+  // Book cover (bottom-right)
+  const COVER_W = 130;
+  const COVER_H = 195;
+  const COVER_X = SIZE - PAD - COVER_W;
+  const COVER_Y = SIZE - 60 - COVER_H;
+
   if (coverImg) {
-    const cw = 120;
-    const ch = 178;
-    const cx2 = SIZE - PAD - cw;
-    const cy2 = SIZE - 60 - ch;
-
-    // Shadow
+    // Drop shadow
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.7)';
-    ctx.shadowBlur = 24;
-    ctx.shadowOffsetY = 8;
-    drawRoundedRect(ctx, cx2, cy2, cw, ch, 6);
+    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+    ctx.shadowBlur = 28;
+    ctx.shadowOffsetY = 10;
+    clipRoundedRect(ctx, COVER_X, COVER_Y, COVER_W, COVER_H, 8);
     ctx.fillStyle = '#000';
     ctx.fill();
     ctx.restore();
 
-    // Clip + draw
+    // Clipped cover image
     ctx.save();
-    drawRoundedRect(ctx, cx2, cy2, cw, ch, 6);
+    clipRoundedRect(ctx, COVER_X, COVER_Y, COVER_W, COVER_H, 8);
     ctx.clip();
-    ctx.drawImage(coverImg, cx2, cy2, cw, ch);
+    ctx.drawImage(coverImg, COVER_X, COVER_Y, COVER_W, COVER_H);
     ctx.restore();
 
-    // Border
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    // Subtle border
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
     ctx.lineWidth = 1;
-    drawRoundedRect(ctx, cx2, cy2, cw, ch, 6);
+    clipRoundedRect(ctx, COVER_X, COVER_Y, COVER_W, COVER_H, 8);
     ctx.stroke();
   }
+
+  // Branding (bottom-left, vertically aligned with cover center)
+  const brandAreaCenterY = COVER_Y + COVER_H / 2;
+
+  ctx.textAlign = 'left';
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.font = `13px Georgia, serif`;
+  const subLabel = 'AUDIOBOOKS & BOOKS';
+  ctx.fillText(subLabel, PAD, brandAreaCenterY - 28);
+
+  // "SCROLLREADER.COM" box
+  const brand = 'SCROLLREADER.COM';
+  ctx.font = `bold 24px Georgia, serif`;
+  const brandMetrics = ctx.measureText(brand);
+  const brandW = brandMetrics.width;
+  const bpad = 20;
+  const boxH = 48;
+  const boxX = PAD;
+  const boxY = brandAreaCenterY - 14;
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 1.5;
+  clipRoundedRect(ctx, boxX, boxY, brandW + bpad * 2, boxH, 6);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+  ctx.fillText(brand, boxX + bpad, boxY + boxH - 13);
 
   return canvas.toDataURL('image/png', 1.0);
 }
