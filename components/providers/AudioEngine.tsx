@@ -47,12 +47,44 @@ export function AudioEngine() {
       navigator.mediaSession.setActionHandler('play', () => audio.play());
       navigator.mediaSession.setActionHandler('pause', () => audio.pause());
       navigator.mediaSession.setActionHandler('seekbackward', () => {
-        audio.currentTime = Math.max(audio.currentTime - 15, 0);
+        const interval = useUserStore.getState().skipInterval || 15;
+        audio.currentTime = Math.max(audio.currentTime - interval, 0);
       });
       navigator.mediaSession.setActionHandler('seekforward', () => {
-        audio.currentTime = Math.min(audio.currentTime + 15, audio.duration || 0);
+        const interval = useUserStore.getState().skipInterval || 15;
+        audio.currentTime = Math.min(audio.currentTime + interval, audio.duration || 0);
       });
     }
+
+    // Global Hotkeys (Desktop)
+    const onKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input, textarea, or editable element
+      const active = document.activeElement;
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || (active as HTMLElement).isContentEditable)) {
+        return;
+      }
+
+      // Only apply hotkeys if a book is actually loaded
+      if (!usePlayerStore.getState().currentBook) return;
+
+      switch (e.code) {
+        case 'Space':
+          e.preventDefault(); // Prevent scrolling page down
+          if (audio.paused) audio.play().catch(() => {});
+          else audio.pause();
+          break;
+        case 'ArrowLeft':
+          e.preventDefault();
+          usePlayerStore.getState().skipBackward();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          usePlayerStore.getState().skipForward();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
 
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
@@ -60,6 +92,7 @@ export function AudioEngine() {
       audio.removeEventListener('play', onPlay);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('ended', onEnded);
+      window.removeEventListener('keydown', onKeyDown);
     };
   }, [setCurrentTime, setDuration, setPlaying, addToHistory]);
 
