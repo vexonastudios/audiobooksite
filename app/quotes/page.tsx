@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useUserStore } from '@/lib/store/userStore';
-import { Quote, X, Search, Share2, Copy, Check, BookOpen, ExternalLink, Play } from 'lucide-react';
+import { Quote, X, Search, Share2, Copy, Check, BookOpen, ExternalLink, Play, CheckSquare, Square } from 'lucide-react';
 import type { SavedQuote } from '@/lib/types';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
@@ -157,18 +157,18 @@ export default function QuotesPage() {
       {quotes.length > 0 && (
         <div style={{ display: 'flex', gap: 16, marginBottom: 32, padding: '12px 16px', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)', flexWrap: 'wrap' }}>
           <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center' }}>Copy Format:</div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
-            <input type="checkbox" checked={quoteSettings.useQuotes} onChange={e => updateQuoteSettings({ useQuotes: e.target.checked })} style={{ accentColor: 'var(--color-brand)' }} />
+          <div onClick={() => updateQuoteSettings({ useQuotes: !quoteSettings.useQuotes })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
+            {quoteSettings.useQuotes ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
             Show "Quotes"
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
-            <input type="checkbox" checked={quoteSettings.includeBook} onChange={e => updateQuoteSettings({ includeBook: e.target.checked })} style={{ accentColor: 'var(--color-brand)' }} />
+          </div>
+          <div onClick={() => updateQuoteSettings({ includeBook: !quoteSettings.includeBook })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
+            {quoteSettings.includeBook ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
             Include Book Title
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
-            <input type="checkbox" checked={quoteSettings.includeLink} onChange={e => updateQuoteSettings({ includeLink: e.target.checked })} style={{ accentColor: 'var(--color-brand)' }} />
+          </div>
+          <div onClick={() => updateQuoteSettings({ includeLink: !quoteSettings.includeLink })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
+            {quoteSettings.includeLink ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
             Include Link
-          </label>
+          </div>
         </div>
       )}
 

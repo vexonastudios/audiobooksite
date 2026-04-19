@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { Search, Bell, Settings, X } from 'lucide-react';
+import { Search, Bell, Settings, X, CheckSquare, Square } from 'lucide-react';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { useUserStore } from '@/lib/store/userStore';
 import { UserButton, SignInButton, useUser } from '@clerk/nextjs';
@@ -22,6 +23,9 @@ export function TopBar() {
   const updateQuoteSettings = useUserStore((s) => s.updateQuoteSettings);
   const { isSignedIn } = useUser();
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const q = e.target.value;
@@ -137,9 +141,9 @@ export function TopBar() {
         )}
       </div>
 
-      {settingsOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
-          <div className="card" style={{ width: '100%', maxWidth: 540, padding: 0, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+      {settingsOpen && mounted && createPortal(
+        <div onClick={() => setSettingsOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+          <div className="card" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 540, padding: 0, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-surface-2)' }}>
               <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Preferences</h2>
               <button className="btn btn-icon" onClick={() => setSettingsOpen(false)}>
@@ -178,33 +182,28 @@ export function TopBar() {
                 <h3 style={{ fontSize: '1.1rem', marginBottom: 16, color: 'var(--color-brand)' }}>Quote Sharing Format</h3>
                 <div style={{ background: 'var(--color-surface-2)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={quoteSettings.useQuotes} 
-                        onChange={e => updateQuoteSettings({ useQuotes: e.target.checked })} 
-                        style={{ accentColor: 'var(--color-brand)', width: 18, height: 18 }} 
-                      />
+                    <div onClick={() => updateQuoteSettings({ useQuotes: !quoteSettings.useQuotes })} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
+                      {quoteSettings.useQuotes ? <CheckSquare size={20} color="var(--color-brand)" /> : <Square size={20} color="var(--color-border)" />}
                       Add quotation marks {"\" \""} around text
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={quoteSettings.includeBook} 
-                        onChange={e => updateQuoteSettings({ includeBook: e.target.checked })} 
-                        style={{ accentColor: 'var(--color-brand)', width: 18, height: 18 }} 
-                      />
+                    </div>
+                    <div onClick={() => updateQuoteSettings({ includeBook: !quoteSettings.includeBook })} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
+                      {quoteSettings.includeBook ? <CheckSquare size={20} color="var(--color-brand)" /> : <Square size={20} color="var(--color-border)" />}
                       Include Book Title and Chapter Note
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
-                      <input 
-                        type="checkbox" 
-                        checked={quoteSettings.includeLink} 
-                        onChange={e => updateQuoteSettings({ includeLink: e.target.checked })} 
-                        style={{ accentColor: 'var(--color-brand)', width: 18, height: 18 }} 
-                      />
+                    </div>
+                    <div onClick={() => updateQuoteSettings({ includeLink: !quoteSettings.includeLink })} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
+                      {quoteSettings.includeLink ? <CheckSquare size={20} color="var(--color-brand)" /> : <Square size={20} color="var(--color-border)" />}
                       Include scrollreader.com Link
-                    </label>
+                    </div>
+                  </div>
+                  
+                  {/* Real-time Preview */}
+                  <div style={{ marginTop: 24, padding: '14px 16px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Example output</div>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)', lineHeight: 1.6, fontFamily: 'monospace' }}>
+                      {quoteSettings.useQuotes ? '"For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life."' : 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.'}
+                      {quoteSettings.includeBook ? ' — Apostle John, The Bible (John Chapter 3)' : ' — Apostle John'}
+                      {quoteSettings.includeLink && ' Listen at: https://scrollreader.com/audiobook/the-bible'}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -221,7 +220,7 @@ export function TopBar() {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
     </header>
   );
 }
