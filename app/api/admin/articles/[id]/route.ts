@@ -5,18 +5,18 @@ import { requireAdmin } from '@/lib/admin-auth';
 const sql = neon(process.env.DATABASE_URL!);
 
 // GET /api/admin/articles/[id]
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try { await requireAdmin(); } catch { return NextResponse.json({ error: 'Forbidden' }, { status: 403 }); }
-
-  const [row] = await sql`SELECT * FROM articles WHERE id = ${params.id}`;
+  const { id } = await params;
+  const [row] = await sql`SELECT * FROM articles WHERE id = ${id}`;
   if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(row);
 }
 
 // PUT /api/admin/articles/[id]
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try { await requireAdmin(); } catch { return NextResponse.json({ error: 'Forbidden' }, { status: 403 }); }
-
+  const { id } = await params;
   const body = await req.json();
   const {
     slug, title, excerpt, content, pub_date,
@@ -36,7 +36,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       topics      = COALESCE(${topics ?? null}, topics),
       published   = COALESCE(${published ?? null}, published),
       updated_at  = now()
-    WHERE id = ${params.id}
+    WHERE id = ${id}
     RETURNING *
   `;
 
@@ -45,9 +45,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 }
 
 // DELETE /api/admin/articles/[id]
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   try { await requireAdmin(); } catch { return NextResponse.json({ error: 'Forbidden' }, { status: 403 }); }
-
-  await sql`DELETE FROM articles WHERE id = ${params.id}`;
+  const { id } = await params;
+  await sql`DELETE FROM articles WHERE id = ${id}`;
   return NextResponse.json({ success: true });
 }

@@ -575,3 +575,6 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
 .gap-4 { gap: 16px; }
 .w-full { width: 100%; }
 .min-w-0 { min-width: 0; }
+
+.author-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.author-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }

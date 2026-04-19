@@ -36,20 +36,12 @@ export default async function AuthorsIndexPage() {
           <Link
             key={author.id}
             href={`/author/${author.slug}`}
-            className="card"
+            className="card author-card"
             style={{
               padding: 20, textAlign: 'center',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
               textDecoration: 'none',
               transition: 'transform 0.18s, box-shadow 0.18s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'none';
-              e.currentTarget.style.boxShadow = '';
             }}
           >
             {/* Portrait or initial */}
