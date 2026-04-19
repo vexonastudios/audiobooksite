@@ -21,7 +21,7 @@ async function main() {
 
   let updatedCount = 0;
 
-  for (const record of records) {
+  for (const record of records as any[]) {
     const slug = record.user_login;
     let description = record.description.trim();
     
