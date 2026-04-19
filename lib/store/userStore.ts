@@ -14,7 +14,15 @@ interface UserState {
   clearHistory: () => void;
 
   // Bookmarks
-  addBookmark: (bookId: string, time: number, note: string) => void;
+  addBookmark: (bookId: string, time: number, meta: {
+    note?: string;
+    chapterTitle?: string;
+    transcriptContext?: string;
+    bookTitle?: string;
+    bookSlug?: string;
+    bookCover?: string;
+    bookAuthor?: string;
+  }) => void;
   removeBookmark: (id: string) => void;
   getBookmarksByBook: (bookId: string) => Bookmark[];
 
@@ -43,11 +51,11 @@ export const useUserStore = create<UserState>()(
 
       clearHistory: () => set({ history: [] }),
 
-      addBookmark: (bookId, time, note) => {
+      addBookmark: (bookId, time, meta) => {
         const id = `bm_${Date.now()}_${Math.random().toString(36).slice(2)}`;
         set((state) => ({
           bookmarks: [
-            { id, bookId, time, note, createdAt: Date.now() },
+            { id, bookId, time, note: meta.note || '', createdAt: Date.now(), ...meta },
             ...state.bookmarks,
           ],
         }));

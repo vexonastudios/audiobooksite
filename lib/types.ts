@@ -47,6 +47,13 @@ export interface Bookmark {
   time: number;
   note: string;
   createdAt: number;
+  // Auto-captured fields
+  chapterTitle?: string;
+  transcriptContext?: string;
+  bookTitle?: string;
+  bookSlug?: string;
+  bookCover?: string;
+  bookAuthor?: string;
 }
 
 export interface HistoryEntry {

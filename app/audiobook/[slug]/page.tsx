@@ -6,8 +6,11 @@ import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
-import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X } from 'lucide-react';
 import { BookCard } from '@/components/ui/BookCard';
+import { ReadAlongPanel } from '@/components/ui/ReadAlongPanel';
+import { parseVTT, getContextText } from '@/lib/parseVTT';
+import type { TranscriptCue } from '@/lib/parseVTT';
 
 function formatTime(s: number) {
   if (isNaN(s) || !isFinite(s)) return '0:00';
@@ -33,6 +36,17 @@ export default function AudiobookPage() {
   const [activeTab, setActiveTab] = useState<'chapters' | 'bookmarks' | 'share'>('chapters');
   const [bookmarkNote, setBookmarkNote] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
+  const [readAlongOpen, setReadAlongOpen] = useState(false);
+  const [loadedCues, setLoadedCues] = useState<TranscriptCue[]>([]);
+
+  // Load VTT cues for bookmark context (preloaded when panel first opens or book plays)
+  useEffect(() => {
+    if (!book) return;
+    fetch(`/transcripts/${book.slug}.vtt`)
+      .then(r => r.ok ? r.text() : Promise.reject())
+      .then(text => setLoadedCues(parseVTT(text)))
+      .catch(() => {}); // silently fail — transcript is optional
+  }, [book?.slug]);
 
   const isCurrent = currentBook?.id === book?.id;
   const displayProgress = isCurrent && duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -87,8 +101,20 @@ export default function AudiobookPage() {
 
   const handleAddBookmark = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isCurrent) return;
-    addBookmark(book.id, currentTime, bookmarkNote.trim() || 'Saved position');
+    if (!isCurrent || !book) return;
+    const chapterTitle = book.chapters[currentChapterIdx]?.title;
+    const transcriptContext = loadedCues.length > 0
+      ? getContextText(loadedCues, currentTime, 5, 20)
+      : undefined;
+    addBookmark(book.id, currentTime, {
+      note: bookmarkNote.trim(),
+      chapterTitle,
+      transcriptContext,
+      bookTitle: book.title,
+      bookSlug: book.slug,
+      bookCover: book.coverImage,
+      bookAuthor: book.authorName,
+    });
     setBookmarkNote('');
   };
 
@@ -164,9 +190,22 @@ export default function AudiobookPage() {
             {/* Header info (Mobile mostly, but useful here too) */}
             <div>
               <h1 style={{ marginBottom: 4 }}>{book.title}</h1>
-              <p style={{ fontSize: '1.125rem', color: 'var(--color-brand)' }}>
+              <p style={{ fontSize: '1.125rem', color: 'var(--color-brand)', marginBottom: 16 }}>
                 By <Link href={`/authors/${encodeURIComponent(book.authorName)}`} style={{ textDecoration: 'underline' }}>{book.authorName}</Link>
               </p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button
+                  className="btn btn-secondary"
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem' }}
+                  onClick={() => setReadAlongOpen(true)}
+                >
+                  <BookOpen size={16} />
+                  Read Along
+                  {loadedCues.length > 0 && (
+                    <span style={{ background: 'var(--color-brand)', color: 'white', borderRadius: 20, padding: '1px 8px', fontSize: '0.7rem', fontWeight: 700 }}>Live Sync</span>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* CARD 1: Player Controls */}
@@ -436,9 +475,24 @@ export default function AudiobookPage() {
         )}
 
       </div>
+
+      {/* Read Along Panel */}
+      <ReadAlongPanel
+        slug={book.slug}
+        currentTime={isCurrent ? currentTime : 0}
+        isOpen={readAlongOpen}
+        onClose={() => setReadAlongOpen(false)}
+        onSeek={(time) => {
+          const { getAudioElement } = require('@/lib/store/playerStore');
+          if (!isCurrent) {
+            loadBook(book, time);
+          } else {
+            getAudioElement().currentTime = time;
+          }
+        }}
+        bookTitle={book.title}
+        authorName={book.authorName}
+      />
     </div>
   );
 }
-
-// Need to import X icon since it was missed in the initial lucide-react import
-import { X } from 'lucide-react';
