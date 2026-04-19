@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface Chapter {
@@ -10,59 +10,36 @@ interface Chapter {
 }
 
 interface FormData {
-  // Identity
-  title: string;
-  slug: string;
-  authorName: string;
-  originalYear: string;
-  pubDate: string;
-  published: boolean;
-  // Content
-  excerpt: string;
-  description: string;
-  // Media
-  coverImage: string;
-  thumbnailUrl: string;
-  mp3Url: string;
-  mp3UrlLow: string;
-  totalDuration: string;
-  lengthStr: string;
-  durationSecs: number;
-  // Links
-  youtubeLink: string;
-  spotifyLink: string;
-  buyLink: string;
-  // Taxonomy
-  categories: string;
-  topics: string;
-  // Advanced
-  generatedColors: string;
-  plays: number;
-  // Chapters
+  title: string; slug: string; authorName: string; originalYear: string;
+  pubDate: string; published: boolean;
+  excerpt: string; description: string;
+  coverImage: string; thumbnailUrl: string;
+  mp3Url: string; mp3UrlLow: string;
+  totalDuration: string; lengthStr: string; durationSecs: number;
+  youtubeLink: string; spotifyLink: string; buyLink: string;
+  categories: string[]; topics: string[];
+  generatedColors: string; plays: number;
   chapters: Chapter[];
+}
+
+interface Metadata {
+  categories: string[];
+  topics: string[];
+  authors: string[];
 }
 
 const DEFAULT: FormData = {
   title: '', slug: '', authorName: '', originalYear: '',
-  pubDate: new Date().toISOString().split('T')[0],
-  published: true,
+  pubDate: new Date().toISOString().split('T')[0], published: true,
   excerpt: '', description: '',
   coverImage: '', thumbnailUrl: '',
   mp3Url: '', mp3UrlLow: '',
   totalDuration: '', lengthStr: '', durationSecs: 0,
   youtubeLink: '', spotifyLink: '', buyLink: '',
-  categories: '', topics: '',
-  generatedColors: '',
-  plays: 0,
-  chapters: [],
+  categories: [], topics: [],
+  generatedColors: '', plays: 0, chapters: [],
 };
 
-interface Props {
-  initialData?: Partial<FormData> & { id?: string };
-  mode: 'new' | 'edit';
-}
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
 function slugify(str: string) {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
@@ -80,63 +57,204 @@ function parseTimestampBlock(raw: string): Chapter[] {
   }).filter(Boolean) as Chapter[];
 }
 
-// ── Upload helpers (browser → R2 via presigned URL) ───────────────────────────
-async function uploadFileToR2(file: File, filename: string): Promise<{ uploadUrl: string; publicUrl: string }> {
-  const res = await fetch(`/api/admin/upload-url?filename=${encodeURIComponent(filename)}&type=${encodeURIComponent(file.type)}`);
-  if (!res.ok) throw new Error('Failed to get upload URL');
-  return res.json();
+async function getPresignedUrl(filename: string, type: string) {
+  const res = await fetch(`/api/admin/upload-url?filename=${encodeURIComponent(filename)}&type=${encodeURIComponent(type)}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json() as Promise<{ uploadUrl: string; publicUrl: string }>;
 }
 
-// ── Component ──────────────────────────────────────────────────────────────────
-export function AudiobookForm({ initialData, mode }: Props) {
+// ── Tag Input Component ────────────────────────────────────────────────────────
+function TagInput({
+  label, value, onChange, suggestions,
+}: {
+  label: string;
+  value: string[];
+  onChange: (v: string[]) => void;
+  suggestions: string[];
+}) {
+  const [input, setInput] = useState('');
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const filtered = suggestions.filter(
+    s => s.toLowerCase().includes(input.toLowerCase()) && !value.includes(s)
+  );
+
+  const add = (tag: string) => {
+    const trimmed = tag.trim();
+    if (trimmed && !value.includes(trimmed)) onChange([...value, trimmed]);
+    setInput('');
+    setOpen(false);
+  };
+
+  const remove = (tag: string) => onChange(value.filter(t => t !== tag));
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <label>{label}</label>
+      <div style={{
+        display: 'flex', flexWrap: 'wrap', gap: 6,
+        border: '1px solid #E2E8F0', borderRadius: 8,
+        padding: '8px 10px', background: '#fff', cursor: 'text',
+        minHeight: 42, alignItems: 'center',
+      }}
+        onClick={() => { setOpen(true); }}
+      >
+        {value.map(tag => (
+          <span key={tag} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            background: '#EFF6FF', color: '#1D4ED8',
+            borderRadius: 6, padding: '3px 8px', fontSize: 13, fontWeight: 500,
+          }}>
+            {tag}
+            <button
+              type="button"
+              onClick={e => { e.stopPropagation(); remove(tag); }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#93C5FD', padding: 0, lineHeight: 1, fontSize: 14 }}
+            >×</button>
+          </span>
+        ))}
+        <input
+          value={input}
+          onChange={e => { setInput(e.target.value); setOpen(true); }}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); if (input.trim()) add(input); }
+            if (e.key === 'Backspace' && !input && value.length) remove(value[value.length - 1]);
+          }}
+          onFocus={() => setOpen(true)}
+          placeholder={value.length === 0 ? `Add ${label.toLowerCase()}…` : ''}
+          style={{
+            border: 'none', outline: 'none', background: 'transparent',
+            fontSize: 14, padding: '2px 4px', minWidth: 120, flex: 1, width: 'auto',
+          }}
+        />
+      </div>
+      {open && filtered.length > 0 && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+          background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.1)', maxHeight: 200, overflowY: 'auto',
+          marginTop: 4,
+        }}>
+          {filtered.map(s => (
+            <div key={s}
+              onMouseDown={e => { e.preventDefault(); add(s); }}
+              style={{ padding: '9px 14px', cursor: 'pointer', fontSize: 14, color: '#1A202C' }}
+              className="tag-suggestion"
+            >
+              {s}
+            </div>
+          ))}
+        </div>
+      )}
+      <style>{`.tag-suggestion:hover { background: #F0F4F8; }`}</style>
+    </div>
+  );
+}
+
+// ── Author Combobox ────────────────────────────────────────────────────────────
+function AuthorInput({ value, onChange, suggestions }: { value: string; onChange: (v: string) => void; suggestions: string[] }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const filtered = suggestions.filter(s => s.toLowerCase().includes(value.toLowerCase()));
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <label>Author Name *</label>
+      <input
+        value={value}
+        onChange={e => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        placeholder="Author name…"
+        required
+      />
+      {open && filtered.length > 0 && value.length > 0 && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+          background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.1)', maxHeight: 200, overflowY: 'auto',
+          marginTop: 4,
+        }}>
+          {filtered.map(s => (
+            <div key={s}
+              onMouseDown={e => { e.preventDefault(); onChange(s); setOpen(false); }}
+              style={{ padding: '9px 14px', cursor: 'pointer', fontSize: 14, color: '#1A202C' }}
+              className="tag-suggestion"
+            >
+              {s}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main Form ──────────────────────────────────────────────────────────────────
+export interface AudiobookFormInitial extends Partial<FormData> { id?: string }
+
+export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFormInitial; mode: 'new' | 'edit' }) {
   const router = useRouter();
   const [form, setForm] = useState<FormData>({ ...DEFAULT, ...initialData });
+  const [meta, setMeta] = useState<Metadata>({ categories: [], topics: [], authors: [] });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
-
-  // Upload states
   const [audioUploading, setAudioUploading] = useState(false);
   const [audioProgress, setAudioProgress] = useState('');
   const [coverUploading, setCoverUploading] = useState(false);
   const [timestampPaste, setTimestampPaste] = useState('');
 
-  const set = (field: keyof FormData, val: unknown) =>
-    setForm(f => ({ ...f, [field]: val }));
+  // Load metadata (existing categories, topics, authors)
+  useEffect(() => {
+    fetch('/api/admin/metadata').then(r => r.json()).then(setMeta).catch(() => {});
+  }, []);
 
-  // Auto-slug from title (only in new mode)
+  const set = (field: keyof FormData, val: unknown) => setForm(f => ({ ...f, [field]: val }));
+
   const handleTitleChange = (v: string) => {
     set('title', v);
     if (mode === 'new') set('slug', slugify(v));
   };
 
-  // ── Audio upload ──────────────────────────────────────────────────────────
+  // ── Audio upload ──────────────────────────────────────────────────────────────
   const handleAudioUpload = async (file: File) => {
     try {
       setAudioUploading(true);
       setAudioProgress('Uploading to R2…');
 
-      // 1. Get presigned URL
-      const filename = `${form.slug || slugify(form.title) || 'audiobook'}-original.mp3`;
-      const { uploadUrl, publicUrl: _ } = await uploadFileToR2(file, filename);
+      const slug = form.slug || slugify(form.title) || 'audiobook';
+      const filename = `${slug}-original.mp3`;
+      const { uploadUrl } = await getPresignedUrl(filename, 'audio/mpeg');
 
-      // 2. Upload directly to R2
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', uploadUrl);
       xhr.setRequestHeader('Content-Type', 'audio/mpeg');
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          setAudioProgress(`Uploading… ${Math.round((e.loaded / e.total) * 100)}%`);
-        }
+      xhr.upload.onprogress = e => {
+        if (e.lengthComputable) setAudioProgress(`Uploading… ${Math.round((e.loaded / e.total) * 100)}%`);
       };
       await new Promise<void>((resolve, reject) => {
         xhr.onload = () => xhr.status < 400 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`));
-        xhr.onerror = () => reject(new Error('Upload error'));
+        xhr.onerror = () => reject(new Error('Network error'));
         xhr.send(file);
       });
 
-      setAudioProgress('Processing (transcoding to 128k + 64k)…');
-
-      // 3. Trigger server-side transcoding
+      setAudioProgress('Processing (transcoding 128k stereo + 64k mono)…');
       const res = await fetch('/api/admin/process-audio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -144,7 +262,6 @@ export function AudiobookForm({ initialData, mode }: Props) {
       });
       if (!res.ok) throw new Error(await res.text());
       const { mp3Url, mp3UrlLow, totalDuration, lengthStr, durationSecs } = await res.json();
-
       setForm(f => ({ ...f, mp3Url, mp3UrlLow, totalDuration, lengthStr, durationSecs }));
       setAudioProgress('✅ Done!');
     } catch (e) {
@@ -154,26 +271,21 @@ export function AudiobookForm({ initialData, mode }: Props) {
     }
   };
 
-  // ── Cover upload (browser → R2 directly → server-side resize) ────────────
+  // ── Cover upload ──────────────────────────────────────────────────────────────
   const handleCoverUpload = async (file: File) => {
     try {
       setCoverUploading(true);
       const slug = form.slug || slugify(form.title) || `cover-${Date.now()}`;
-
-      // 1. Get presigned upload URL for the original
       const ext = file.name.split('.').pop() || 'jpg';
       const tempKey = `covers/temp-${slug}-${Date.now()}.${ext}`;
-      const { uploadUrl } = await uploadFileToR2(file, tempKey);
+      const { uploadUrl } = await getPresignedUrl(tempKey, file.type);
 
-      // 2. Upload original directly to R2 from browser
       const uploadRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: file,
+        method: 'PUT', body: file,
         headers: { 'Content-Type': file.type },
       });
       if (!uploadRes.ok) throw new Error(`R2 upload failed: ${uploadRes.status}`);
 
-      // 3. Call server to resize + produce portrait + thumbnail
       const res = await fetch('/api/admin/upload-cover', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -189,17 +301,16 @@ export function AudiobookForm({ initialData, mode }: Props) {
     }
   };
 
-  // ── Parse timestamps ──────────────────────────────────────────────────────
+  // ── Chapters ──────────────────────────────────────────────────────────────────
   const handleParseTimestamps = () => {
     const parsed = parseTimestampBlock(timestampPaste);
-    if (parsed.length === 0) { alert('No timestamps found. Check the format.'); return; }
+    if (!parsed.length) { alert('No timestamps found. Check the format.'); return; }
     set('chapters', parsed);
     setTimestampPaste('');
   };
 
-  const addChapter = () =>
-    set('chapters', [...form.chapters, { title: '', startTime: 0, duration: null }]);
-
+  const addChapter = () => set('chapters', [...form.chapters, { title: '', startTime: 0, duration: null }]);
+  const removeChapter = (i: number) => set('chapters', form.chapters.filter((_, idx) => idx !== i));
   const updateChapter = useCallback((i: number, field: keyof Chapter, val: unknown) => {
     setForm(f => {
       const ch = [...f.chapters];
@@ -208,38 +319,23 @@ export function AudiobookForm({ initialData, mode }: Props) {
     });
   }, []);
 
-  const removeChapter = (i: number) =>
-    set('chapters', form.chapters.filter((_, idx) => idx !== i));
-
-  // ── Save ──────────────────────────────────────────────────────────────────
+  // ── Save ──────────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
-    setMsg(null);
+    setSaving(true); setMsg(null);
     try {
       const payload = {
         ...form,
-        categories: typeof form.categories === 'string'
-          ? form.categories.split(',').map(s => s.trim()).filter(Boolean)
-          : form.categories,
-        topics: typeof form.topics === 'string'
-          ? form.topics.split(',').map(s => s.trim()).filter(Boolean)
-          : form.topics,
         originalYear: form.originalYear ? Number(form.originalYear) : null,
         plays: Number(form.plays),
       };
-
       const url = mode === 'edit' && initialData?.id
-        ? `/api/admin/audiobooks/${initialData.id}`
-        : '/api/admin/audiobooks';
-      const method = mode === 'edit' ? 'PUT' : 'POST';
-
+        ? `/api/admin/audiobooks/${initialData.id}` : '/api/admin/audiobooks';
       const res = await fetch(url, {
-        method,
+        method: mode === 'edit' ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-
       if (!res.ok) throw new Error(await res.text());
       setMsg({ type: 'ok', text: mode === 'edit' ? 'Saved!' : 'Audiobook created!' });
       if (mode === 'new') {
@@ -253,34 +349,34 @@ export function AudiobookForm({ initialData, mode }: Props) {
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-  const SectionHeader = ({ title }: { title: string }) => (
-    <div style={{ borderBottom: '1px solid #2a2a2a', paddingBottom: 8, marginBottom: 20, marginTop: 32 }}>
-      <h2 style={{ margin: 0, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#555' }}>{title}</h2>
-    </div>
-  );
-
   const Row2 = ({ children }: { children: React.ReactNode }) => (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 18 }}>
       {children}
     </div>
   );
 
+  const SectionTitle = ({ title }: { title: string }) => (
+    <>
+      <hr className="section-divider" />
+      <p className="section-title">{title}</p>
+    </>
+  );
+
   return (
     <form onSubmit={handleSubmit}>
       {msg && (
         <div style={{
-          padding: '12px 16px', borderRadius: 8, marginBottom: 20,
-          background: msg.type === 'ok' ? '#052e16' : '#3b0a0a',
-          color: msg.type === 'ok' ? '#4ade80' : '#f87171',
-          fontSize: 14,
+          padding: '12px 16px', borderRadius: 8, marginBottom: 20, fontSize: 14,
+          background: msg.type === 'ok' ? '#D1FAE5' : '#FEE2E2',
+          color: msg.type === 'ok' ? '#065F46' : '#991B1B',
+          border: `1px solid ${msg.type === 'ok' ? '#A7F3D0' : '#FECACA'}`,
         }}>
           {msg.text}
         </div>
       )}
 
       {/* ── Basic Info ─────────────────────────────────────────────── */}
-      <SectionHeader title="Basic Info" />
+      <p className="section-title" style={{ marginTop: 0 }}>Basic Info</p>
       <div className="form-group">
         <label>Title *</label>
         <input value={form.title} onChange={e => handleTitleChange(e.target.value)} required />
@@ -291,14 +387,13 @@ export function AudiobookForm({ initialData, mode }: Props) {
           <input value={form.slug} onChange={e => set('slug', slugify(e.target.value))} required />
         </div>
         <div className="form-group">
-          <label>Author Name *</label>
-          <input value={form.authorName} onChange={e => set('authorName', e.target.value)} required />
+          <AuthorInput value={form.authorName} onChange={v => set('authorName', v)} suggestions={meta.authors} />
         </div>
       </Row2>
       <Row2>
         <div className="form-group">
           <label>Original Publication Year</label>
-          <input type="number" value={form.originalYear} onChange={e => set('originalYear', e.target.value)} placeholder="e.g. 1914" />
+          <input type="number" value={form.originalYear} onChange={e => set('originalYear', e.target.value)} placeholder="e.g. 1887" />
         </div>
         <div className="form-group">
           <label>Publish Date</label>
@@ -306,18 +401,15 @@ export function AudiobookForm({ initialData, mode }: Props) {
         </div>
       </Row2>
       <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <input
-          type="checkbox"
-          id="published"
-          checked={form.published}
-          onChange={e => set('published', e.target.checked)}
-          style={{ width: 'auto' }}
-        />
-        <label htmlFor="published" style={{ margin: 0, cursor: 'pointer' }}>Published (live on site)</label>
+        <input type="checkbox" id="published" checked={form.published}
+          onChange={e => set('published', e.target.checked)} style={{ width: 'auto', accentColor: '#2e6aa7' }} />
+        <label htmlFor="published" style={{ margin: 0, cursor: 'pointer', textTransform: 'none', letterSpacing: 0, fontSize: 14, fontWeight: 500, color: '#1A202C' }}>
+          Published (live on site)
+        </label>
       </div>
 
       {/* ── Content ─────────────────────────────────────────────────── */}
-      <SectionHeader title="Content" />
+      <SectionTitle title="Content" />
       <div className="form-group">
         <label>Excerpt (short teaser)</label>
         <textarea value={form.excerpt} onChange={e => set('excerpt', e.target.value)} rows={3} />
@@ -328,85 +420,90 @@ export function AudiobookForm({ initialData, mode }: Props) {
       </div>
 
       {/* ── Cover Image ──────────────────────────────────────────────── */}
-      <SectionHeader title="Cover Image" />
+      <SectionTitle title="Cover Image" />
       <Row2>
         <div>
           <div className="form-group">
-            <label>Upload new cover</label>
-            <input
-              type="file"
-              accept="image/*"
+            <label>Upload Cover (auto-creates tall + square)</label>
+            <input type="file" accept="image/*"
               onChange={e => e.target.files?.[0] && handleCoverUpload(e.target.files[0])}
-              disabled={coverUploading}
-            />
-            {coverUploading && <div style={{ marginTop: 6, color: '#888', fontSize: 13 }}>Uploading…</div>}
+              disabled={coverUploading} />
+            {coverUploading && (
+              <div style={{ marginTop: 6, color: '#2e6aa7', fontSize: 13 }}>
+                Uploading and processing…
+              </div>
+            )}
           </div>
-          <div className="form-group">
-            <label>Cover Image URL (auto-filled after upload)</label>
-            <input value={form.coverImage} onChange={e => set('coverImage', e.target.value)} placeholder="https://…" />
-          </div>
-          <div className="form-group">
-            <label>Thumbnail URL (auto-filled after upload)</label>
-            <input value={form.thumbnailUrl} onChange={e => set('thumbnailUrl', e.target.value)} placeholder="https://…" />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="form-group">
+              <label>Tall Cover (t-{'{slug}'}.webp)</label>
+              <input value={form.coverImage} onChange={e => set('coverImage', e.target.value)} placeholder="Auto-filled after upload" />
+            </div>
+            <div className="form-group">
+              <label>Square (1024-{'{slug}'}.webp)</label>
+              <input value={form.thumbnailUrl} onChange={e => set('thumbnailUrl', e.target.value)} placeholder="Auto-filled after upload" />
+            </div>
           </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', paddingTop: 24 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', paddingTop: 24 }}>
           {form.coverImage ? (
-            <img src={form.coverImage} alt="Cover preview" style={{ maxHeight: 200, borderRadius: 8, objectFit: 'cover', border: '1px solid #333' }} />
+            <img src={form.coverImage} alt="Tall cover"
+              style={{ maxHeight: 180, borderRadius: 8, objectFit: 'cover', border: '1px solid #E2E8F0', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }} />
           ) : (
-            <div style={{ width: 130, height: 195, background: '#1e1e1e', border: '2px dashed #333', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555', fontSize: 13 }}>
-              No cover
+            <div style={{ width: 110, height: 160, background: '#F0F4F8', border: '2px dashed #CBD5E0', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#A0AEB0', fontSize: 12 }}>
+              Tall cover
             </div>
+          )}
+          {form.thumbnailUrl && (
+            <img src={form.thumbnailUrl} alt="Square thumbnail"
+              style={{ width: 64, height: 64, borderRadius: 8, objectFit: 'cover', border: '1px solid #E2E8F0' }} />
           )}
         </div>
       </Row2>
 
       {/* ── Audio ────────────────────────────────────────────────────── */}
-      <SectionHeader title="Audio" />
+      <SectionTitle title="Audio" />
       <div className="form-group">
-        <label>Upload MP3 (auto-transcodes to 128k stereo + 64k mono)</label>
-        <input
-          type="file"
-          accept="audio/mpeg,audio/*"
+        <label>Upload MP3 → auto-transcodes to 128k stereo + 64k mono</label>
+        <input type="file" accept="audio/mpeg,audio/*"
           onChange={e => e.target.files?.[0] && handleAudioUpload(e.target.files[0])}
-          disabled={audioUploading}
-        />
+          disabled={audioUploading} />
         {audioProgress && (
-          <div style={{ marginTop: 6, color: audioProgress.startsWith('✅') ? '#4ade80' : audioProgress.startsWith('❌') ? '#f87171' : '#888', fontSize: 13 }}>
+          <div style={{ marginTop: 6, fontSize: 13, color: audioProgress.startsWith('✅') ? '#059669' : audioProgress.startsWith('❌') ? '#DC2626' : '#2e6aa7' }}>
             {audioProgress}
           </div>
         )}
       </div>
       <Row2>
         <div className="form-group">
-          <label>Standard MP3 URL (128kbps stereo — auto-filled)</label>
+          <label>Standard MP3 (128kbps stereo)</label>
           <input value={form.mp3Url} onChange={e => set('mp3Url', e.target.value)} placeholder="https://audio.scrollreader.com/…-128.mp3" />
         </div>
         <div className="form-group">
-          <label>Low Quality MP3 URL (64kbps mono — auto-filled)</label>
-          <input value={form.mp3UrlLow} onChange={e => set('mp3UrlLow', e.target.value)} placeholder="https://audio.scrollreader.com/…-64.mp3" />
+          <label>Low Quality MP3 (64kbps mono)</label>
+          <input value={form.mp3UrlLow} onChange={e => set('mp3UrlLow', e.target.value)} placeholder="Auto-filled after upload" />
         </div>
       </Row2>
       <Row2>
         <div className="form-group">
-          <label>Total Duration (auto-filled, e.g. "5:47:04")</label>
+          <label>Total Duration (auto-filled)</label>
           <input value={form.totalDuration} onChange={e => set('totalDuration', e.target.value)} placeholder="H:MM:SS" />
         </div>
         <div className="form-group">
-          <label>Length (auto-filled, e.g. "5h 47m")</label>
-          <input value={form.lengthStr} onChange={e => set('lengthStr', e.target.value)} placeholder="Xh Ym" />
+          <label>Length (auto-filled)</label>
+          <input value={form.lengthStr} onChange={e => set('lengthStr', e.target.value)} placeholder="5h 47m" />
         </div>
       </Row2>
 
       {/* ── External Links ───────────────────────────────────────────── */}
-      <SectionHeader title="External Links" />
+      <SectionTitle title="External Links" />
       <Row2>
         <div className="form-group">
-          <label>YouTube Link</label>
+          <label>YouTube</label>
           <input value={form.youtubeLink} onChange={e => set('youtubeLink', e.target.value)} placeholder="https://youtu.be/…" />
         </div>
         <div className="form-group">
-          <label>Spotify Link</label>
+          <label>Spotify</label>
           <input value={form.spotifyLink} onChange={e => set('spotifyLink', e.target.value)} placeholder="https://podcasters.spotify.com/…" />
         </div>
       </Row2>
@@ -416,20 +513,21 @@ export function AudiobookForm({ initialData, mode }: Props) {
       </div>
 
       {/* ── Taxonomy ─────────────────────────────────────────────────── */}
-      <SectionHeader title="Taxonomy" />
-      <Row2>
-        <div className="form-group">
-          <label>Categories (comma-separated)</label>
-          <input value={typeof form.categories === 'string' ? form.categories : (form.categories as string[]).join(', ')} onChange={e => set('categories', e.target.value)} placeholder="Church History, Biographies" />
+      <SectionTitle title="Taxonomy" />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 18 }}>
+        <div className="form-group" style={{ marginBottom: 0 }}>
+          <TagInput label="Categories" value={form.categories} onChange={v => set('categories', v)} suggestions={meta.categories} />
         </div>
-        <div className="form-group">
-          <label>Topics (comma-separated)</label>
-          <input value={typeof form.topics === 'string' ? form.topics : (form.topics as string[]).join(', ')} onChange={e => set('topics', e.target.value)} placeholder="Faith, Prayer, Revival" />
+        <div className="form-group" style={{ marginBottom: 0 }}>
+          <TagInput label="Topics" value={form.topics} onChange={v => set('topics', v)} suggestions={meta.topics} />
         </div>
-      </Row2>
+      </div>
+      <p style={{ fontSize: 12, color: '#718096', margin: '4px 0 0' }}>
+        Type to filter existing entries, or type a new one and press Enter to add it.
+      </p>
 
       {/* ── Advanced ─────────────────────────────────────────────────── */}
-      <SectionHeader title="Advanced" />
+      <SectionTitle title="Advanced" />
       <Row2>
         <div className="form-group">
           <label>Play Count</label>
@@ -442,54 +540,37 @@ export function AudiobookForm({ initialData, mode }: Props) {
       </Row2>
 
       {/* ── Chapters ─────────────────────────────────────────────────── */}
-      <SectionHeader title="Chapters" />
-
+      <SectionTitle title="Chapters" />
       <div style={{ marginBottom: 16 }}>
-        <label style={{ marginBottom: 6, display: 'block' }}>Paste Timestamp Block (format: <code style={{ color: '#888' }}>(0:00) Chapter 1 - Title - Duration: 12:34</code>)</label>
-        <textarea
-          value={timestampPaste}
-          onChange={e => setTimestampPaste(e.target.value)}
-          rows={5}
-          placeholder={'(0:00) Chapter 1 - Introduction - Duration: 12:34\n(12:34) Chapter 2 - The Call - Duration: 8:22\n…'}
-        />
+        <label style={{ marginBottom: 6, display: 'block' }}>
+          Paste Timestamp Block <span style={{ color: '#718096', fontWeight: 400 }}>(format: (0:00) Chapter Title - Duration: 12:34)</span>
+        </label>
+        <textarea value={timestampPaste} onChange={e => setTimestampPaste(e.target.value)} rows={5}
+          placeholder={'(0:00) Chapter 1 - Introduction - Duration: 12:34\n(12:34) Chapter 2 - The Call - Duration: 8:22\n…'} />
         <button type="button" onClick={handleParseTimestamps} className="btn-secondary" style={{ marginTop: 8 }}>
           Parse Timestamps
         </button>
       </div>
 
-      <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ color: '#888', fontSize: 13 }}>{form.chapters.length} chapter{form.chapters.length !== 1 ? 's' : ''}</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span style={{ fontSize: 13, color: '#718096' }}>{form.chapters.length} chapter{form.chapters.length !== 1 ? 's' : ''}</span>
         <button type="button" onClick={addChapter} className="btn-secondary">+ Add Chapter</button>
       </div>
 
       {form.chapters.length > 0 && (
-        <div style={{ border: '1px solid #2a2a2a', borderRadius: 8, overflow: 'hidden', marginBottom: 24 }}>
+        <div style={{ border: '1px solid #E2E8F0', borderRadius: 8, overflow: 'hidden', marginBottom: 24 }}>
           <table>
             <thead>
-              <tr>
-                <th>#</th>
-                <th>Title</th>
-                <th>Start (secs)</th>
-                <th>Duration (secs)</th>
-                <th></th>
-              </tr>
+              <tr><th>#</th><th>Title</th><th>Start (s)</th><th>Duration (s)</th><th></th></tr>
             </thead>
             <tbody>
               {form.chapters.map((ch, i) => (
                 <tr key={i}>
-                  <td style={{ color: '#666', width: 32 }}>{i + 1}</td>
-                  <td>
-                    <input value={ch.title} onChange={e => updateChapter(i, 'title', e.target.value)} style={{ padding: '6px 8px' }} />
-                  </td>
-                  <td>
-                    <input type="number" value={ch.startTime} onChange={e => updateChapter(i, 'startTime', Number(e.target.value))} style={{ width: 90, padding: '6px 8px' }} />
-                  </td>
-                  <td>
-                    <input type="number" value={ch.duration ?? ''} onChange={e => updateChapter(i, 'duration', e.target.value ? Number(e.target.value) : null)} style={{ width: 90, padding: '6px 8px' }} placeholder="—" />
-                  </td>
-                  <td>
-                    <button type="button" onClick={() => removeChapter(i)} style={{ color: '#f87171', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px' }}>×</button>
-                  </td>
+                  <td style={{ color: '#A0AEB0', width: 32 }}>{i + 1}</td>
+                  <td><input value={ch.title} onChange={e => updateChapter(i, 'title', e.target.value)} style={{ padding: '6px 8px' }} /></td>
+                  <td><input type="number" value={ch.startTime} onChange={e => updateChapter(i, 'startTime', Number(e.target.value))} style={{ width: 90, padding: '6px 8px' }} /></td>
+                  <td><input type="number" value={ch.duration ?? ''} onChange={e => updateChapter(i, 'duration', e.target.value ? Number(e.target.value) : null)} style={{ width: 90, padding: '6px 8px' }} placeholder="—" /></td>
+                  <td><button type="button" onClick={() => removeChapter(i)} style={{ color: '#DC2626', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, padding: '2px 8px' }}>×</button></td>
                 </tr>
               ))}
             </tbody>
@@ -498,7 +579,7 @@ export function AudiobookForm({ initialData, mode }: Props) {
       )}
 
       {/* ── Submit ─────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: 12, paddingTop: 8, borderTop: '1px solid #2a2a2a', marginTop: 8 }}>
+      <div style={{ display: 'flex', gap: 12, paddingTop: 16, borderTop: '1px solid #E2E8F0', marginTop: 8 }}>
         <button type="submit" disabled={saving} className="btn-primary">
           {saving ? 'Saving…' : mode === 'edit' ? 'Save Changes' : 'Create Audiobook'}
         </button>

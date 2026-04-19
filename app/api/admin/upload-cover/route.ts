@@ -69,8 +69,8 @@ export async function POST(req: NextRequest) {
       .toBuffer();
 
     const cleanSlug = slug.replace(/[^a-z0-9-]/g, '-').toLowerCase();
-    const coverKey = `covers/${cleanSlug}-cover.webp`;
-    const thumbKey = `covers/${cleanSlug}-thumb.webp`;
+    const coverKey = `covers/t-${cleanSlug}.webp`;    // tall portrait — t- prefix
+    const thumbKey = `covers/1024-${cleanSlug}.webp`; // square 1024 format
 
     // 4. Upload both to R2
     await r2.send(new PutObjectCommand({

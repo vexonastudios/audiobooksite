@@ -7,85 +7,169 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!userId) redirect('/sign-in');
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0f0f0f', color: '#e8e8e8', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{
+      display: 'flex', minHeight: '100vh',
+      background: '#F8F9FA', color: '#1A202C',
+      fontFamily: "'Inter', system-ui, sans-serif",
+    }}>
       {/* Sidebar */}
       <aside style={{
-        width: 220, flexShrink: 0, background: '#161616',
-        borderRight: '1px solid #2a2a2a', padding: '28px 0',
-        display: 'flex', flexDirection: 'column', gap: 4,
+        width: 224, flexShrink: 0,
+        background: '#FFFFFF',
+        borderRight: '1px solid #E2E8F0',
+        padding: '24px 0',
+        display: 'flex', flexDirection: 'column',
+        boxShadow: '2px 0 8px rgba(46,106,167,0.06)',
       }}>
-        <div style={{ padding: '0 20px 24px', borderBottom: '1px solid #2a2a2a', marginBottom: 8 }}>
-          <div style={{ fontSize: 11, letterSpacing: '0.1em', color: '#888', textTransform: 'uppercase', marginBottom: 4 }}>ScrollReader</div>
-          <div style={{ fontWeight: 700, fontSize: 16, color: '#fff' }}>Admin CMS</div>
+        {/* Brand */}
+        <div style={{ padding: '0 20px 20px', borderBottom: '1px solid #E2E8F0', marginBottom: 8 }}>
+          <div style={{ fontSize: 10, letterSpacing: '0.12em', color: '#718096', textTransform: 'uppercase', marginBottom: 4, fontWeight: 600 }}>ScrollReader</div>
+          <div style={{ fontWeight: 700, fontSize: 17, color: '#2e6aa7', letterSpacing: '-0.02em' }}>Admin CMS</div>
         </div>
 
         {[
-          { href: '/admin', label: '📊 Dashboard' },
-          { href: '/admin/audiobooks', label: '📚 Audiobooks' },
-          { href: '/admin/audiobooks/new', label: '➕ New Audiobook' },
-        ].map(({ href, label }) => (
+          { href: '/admin', label: 'Dashboard', icon: '◈' },
+          { href: '/admin/audiobooks', label: 'Audiobooks', icon: '◎' },
+          { href: '/admin/audiobooks/new', label: 'New Audiobook', icon: '+' },
+        ].map(({ href, label, icon }) => (
           <Link key={href} href={href} style={{
-            display: 'block', padding: '10px 20px',
-            color: '#c8c8c8', textDecoration: 'none', fontSize: 14,
-            borderRadius: 0, transition: 'background 0.15s',
-          }}
-          className="admin-nav-link"
-          >
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '10px 20px', color: '#4A5568',
+            textDecoration: 'none', fontSize: 14, fontWeight: 500,
+          }} className="admin-nav-link">
+            <span style={{ color: '#2e6aa7', fontSize: 16, width: 18, textAlign: 'center' }}>{icon}</span>
             {label}
           </Link>
         ))}
 
         <div style={{ flex: 1 }} />
-        <div style={{ padding: '16px 20px', borderTop: '1px solid #2a2a2a' }}>
-          <Link href="/" style={{ color: '#666', fontSize: 13, textDecoration: 'none' }}>← View Site</Link>
+        <div style={{ padding: '16px 20px', borderTop: '1px solid #E2E8F0' }}>
+          <Link href="/" style={{ color: '#718096', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+            ← View Site
+          </Link>
         </div>
       </aside>
 
-      {/* Main content */}
-      <main style={{ flex: 1, overflow: 'auto', padding: 32 }}>
+      {/* Main */}
+      <main style={{ flex: 1, overflow: 'auto', padding: '32px 36px' }}>
         {children}
       </main>
 
       <style>{`
-        .admin-nav-link:hover { background: #222 !important; color: #fff !important; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .admin-nav-link:hover { background: #F0F4F8 !important; color: #2e6aa7 !important; }
         * { box-sizing: border-box; }
+
         input, textarea, select {
-          background: #1e1e1e; border: 1px solid #333; color: #e8e8e8;
-          padding: 8px 12px; border-radius: 6px; font-size: 14px; width: 100%;
-          outline: none; transition: border-color 0.15s;
+          background: #fff;
+          border: 1px solid #E2E8F0;
+          color: #1A202C;
+          padding: 9px 12px;
+          border-radius: 8px;
+          font-size: 14px;
+          width: 100%;
+          outline: none;
+          transition: border-color 0.15s, box-shadow 0.15s;
+          font-family: inherit;
         }
-        input:focus, textarea:focus, select:focus { border-color: #555; }
-        label { font-size: 13px; color: #888; display: block; margin-bottom: 4px; }
+        input:focus, textarea:focus, select:focus {
+          border-color: #2e6aa7;
+          box-shadow: 0 0 0 3px rgba(46,106,167,0.12);
+        }
+        label {
+          font-size: 12px;
+          color: #718096;
+          display: block;
+          margin-bottom: 5px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
         .form-group { margin-bottom: 18px; }
+
         .btn-primary {
-          background: #3b82f6; color: #fff; border: none; padding: 10px 20px;
-          border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;
+          background: #2e6aa7;
+          color: #fff;
+          border: none;
+          padding: 10px 22px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
           transition: background 0.15s;
+          font-family: inherit;
         }
-        .btn-primary:hover { background: #2563eb; }
+        .btn-primary:hover { background: #23507e; }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
         .btn-secondary {
-          background: #252525; color: #c8c8c8; border: 1px solid #333; padding: 8px 16px;
-          border-radius: 6px; font-size: 13px; cursor: pointer; text-decoration: none;
+          background: #fff;
+          color: #4A5568;
+          border: 1px solid #E2E8F0;
+          padding: 8px 16px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 500;
+          cursor: pointer;
+          text-decoration: none;
           display: inline-block;
+          font-family: inherit;
+          transition: border-color 0.15s, background 0.15s;
         }
-        .btn-secondary:hover { background: #2e2e2e; }
+        .btn-secondary:hover { background: #F8F9FA; border-color: #CBD5E0; }
+
         .btn-danger {
-          background: #ef4444; color: #fff; border: none; padding: 7px 14px;
-          border-radius: 6px; font-size: 13px; cursor: pointer;
+          background: #FEE2E2;
+          color: #DC2626;
+          border: none;
+          padding: 7px 14px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 500;
+          cursor: pointer;
+          font-family: inherit;
         }
-        .btn-danger:hover { background: #dc2626; }
+        .btn-danger:hover { background: #FECACA; }
+
         .card {
-          background: #161616; border: 1px solid #2a2a2a; border-radius: 10px; padding: 24px;
+          background: #fff;
+          border: 1px solid #E2E8F0;
+          border-radius: 12px;
+          padding: 24px;
+          box-shadow: 0 1px 3px rgba(46,106,167,0.06);
         }
-        h1 { font-size: 22px; font-weight: 700; margin: 0 0 24px; color: #fff; }
-        h2 { font-size: 16px; font-weight: 600; margin: 0 0 16px; color: #e0e0e0; }
+
+        h1 { font-size: 22px; font-weight: 700; margin: 0 0 24px; color: #1A202C; }
+        h2 { font-size: 14px; font-weight: 600; margin: 0 0 16px; color: #2e6aa7; text-transform: uppercase; letter-spacing: 0.06em; }
+
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th { text-align: left; padding: 10px 12px; border-bottom: 1px solid #2a2a2a; color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
-        td { padding: 12px 12px; border-bottom: 1px solid #1e1e1e; vertical-align: middle; }
-        tr:hover td { background: #1a1a1a; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
-        .badge-green { background: #052e16; color: #4ade80; }
-        .badge-gray  { background: #1c1c1c; color: #666; }
+        th {
+          text-align: left; padding: 10px 14px;
+          border-bottom: 2px solid #E2E8F0;
+          color: #718096; font-size: 11px;
+          text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600;
+          background: #F8F9FA;
+        }
+        td { padding: 12px 14px; border-bottom: 1px solid #F0F4F8; vertical-align: middle; color: #1A202C; }
+        tr:hover td { background: #F8F9FA; }
+
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+        .badge-green { background: #D1FAE5; color: #065F46; }
+        .badge-gray  { background: #F3F4F6; color: #6B7280; }
+
+        .section-divider {
+          border: none;
+          border-top: 1px solid #E2E8F0;
+          margin: 28px 0 20px;
+        }
+        .section-title {
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: #2e6aa7;
+          margin: 0 0 16px;
+        }
       `}</style>
     </div>
   );
