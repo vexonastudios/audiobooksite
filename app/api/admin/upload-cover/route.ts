@@ -10,7 +10,7 @@ import * as path from 'path';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const r2 = new S3Client({
+const r2 = () => new S3Client({
   region: 'auto',
   endpoint: process.env.R2_ENDPOINT!,
   credentials: {
@@ -20,30 +20,26 @@ const r2 = new S3Client({
 });
 
 /**
- * POST /api/admin/process-cover
- * Body: { key: "covers/temp-filename.jpg", slug: "book-slug" }
+ * POST /api/admin/upload-cover
+ * Body: { key: "covers/temp-…", slug: "book-slug", variant: "portrait" | "square" }
  *
- * The browser first uploads the original image directly to R2 via presigned URL.
- * Then calls this endpoint which:
- *  1. Downloads the original from R2
- *  2. Resizes to portrait 800×1200 WebP → covers/{slug}-cover.webp
- *  3. Resizes to square 400×400 WebP   → covers/{slug}-thumb.webp
- *  4. Deletes the temp original
- *  5. Returns { coverImage, thumbnailUrl }
+ * variant "portrait" → 800×1200 → covers/t-{slug}.webp  → returns { coverImage }
+ * variant "square"   → 400×400  → covers/1024-{slug}.webp → returns { thumbnailUrl }
  */
 export async function POST(req: NextRequest) {
   let tmpDir: string | null = null;
 
   try {
     await requireAdmin();
-    const { key, slug } = await req.json();
+    const { key, slug, variant } = await req.json() as { key: string; slug: string; variant: 'portrait' | 'square' };
     if (!key || !slug) return NextResponse.json({ error: 'key and slug required' }, { status: 400 });
 
+    const client = r2();
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scrollreader-cover-'));
     const inputPath = path.join(tmpDir, 'input');
 
     // 1. Download original from R2
-    const { Body } = await r2.send(new GetObjectCommand({
+    const { Body } = await client.send(new GetObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME!,
       Key: key,
     }));
@@ -55,43 +51,34 @@ export async function POST(req: NextRequest) {
     });
 
     const inputBuf = fs.readFileSync(inputPath);
-
-    // 2. Portrait cover 800×1200
-    const portraitBuf = await sharp(inputBuf)
-      .resize(800, 1200, { fit: 'cover', position: 'top' })
-      .webp({ quality: 88 })
-      .toBuffer();
-
-    // 3. Square thumbnail 400×400
-    const thumbBuf = await sharp(inputBuf)
-      .resize(400, 400, { fit: 'cover' })
-      .webp({ quality: 85 })
-      .toBuffer();
-
     const cleanSlug = slug.replace(/[^a-z0-9-]/g, '-').toLowerCase();
-    const coverKey = `covers/t-${cleanSlug}.webp`;    // tall portrait — t- prefix
-    const thumbKey = `covers/1024-${cleanSlug}.webp`; // square 1024 format
-
-    // 4. Upload both to R2
-    await r2.send(new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME!,
-      Key: coverKey,
-      Body: portraitBuf,
-      ContentType: 'image/webp',
-    }));
-
-    await r2.send(new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME!,
-      Key: thumbKey,
-      Body: thumbBuf,
-      ContentType: 'image/webp',
-    }));
-
     const base = process.env.R2_PUBLIC_URL!;
-    return NextResponse.json({
-      coverImage: `${base}/${coverKey}`,
-      thumbnailUrl: `${base}/${thumbKey}`,
-    });
+
+    if (variant === 'square') {
+      // Square thumbnail: 400×400
+      const buf = await sharp(inputBuf)
+        .resize(400, 400, { fit: 'cover', position: 'centre' })
+        .webp({ quality: 85 })
+        .toBuffer();
+      const thumbKey = `covers/1024-${cleanSlug}.webp`;
+      await client.send(new PutObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME!,
+        Key: thumbKey, Body: buf, ContentType: 'image/webp',
+      }));
+      return NextResponse.json({ thumbnailUrl: `${base}/${thumbKey}` });
+    } else {
+      // Portrait tall cover: 800×1200
+      const buf = await sharp(inputBuf)
+        .resize(800, 1200, { fit: 'cover', position: 'top' })
+        .webp({ quality: 88 })
+        .toBuffer();
+      const coverKey = `covers/t-${cleanSlug}.webp`;
+      await client.send(new PutObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME!,
+        Key: coverKey, Body: buf, ContentType: 'image/webp',
+      }));
+      return NextResponse.json({ coverImage: `${base}/${coverKey}` });
+    }
   } catch (err: unknown) {
     if (err instanceof Error && err.message === 'Forbidden') return adminForbidden();
     console.error('process-cover error:', err);

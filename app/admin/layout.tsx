@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import Link from 'next/link';
+import { LayoutDashboard, BookOpen, PlusCircle, ArrowLeftToLine } from 'lucide-react';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
@@ -28,16 +29,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
 
         {[
-          { href: '/admin', label: 'Dashboard', icon: '◈' },
-          { href: '/admin/audiobooks', label: 'Audiobooks', icon: '◎' },
-          { href: '/admin/audiobooks/new', label: 'New Audiobook', icon: '+' },
+          { href: '/admin', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
+          { href: '/admin/audiobooks', label: 'Audiobooks', icon: <BookOpen size={16} /> },
+          { href: '/admin/audiobooks/new', label: 'New Audiobook', icon: <PlusCircle size={16} /> },
         ].map(({ href, label, icon }) => (
           <Link key={href} href={href} style={{
             display: 'flex', alignItems: 'center', gap: 10,
             padding: '10px 20px', color: '#4A5568',
             textDecoration: 'none', fontSize: 14, fontWeight: 500,
           }} className="admin-nav-link">
-            <span style={{ color: '#2e6aa7', fontSize: 16, width: 18, textAlign: 'center' }}>{icon}</span>
+            <span style={{ color: '#2e6aa7', display: 'flex', alignItems: 'center' }}>{icon}</span>
             {label}
           </Link>
         ))}
@@ -45,7 +46,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div style={{ flex: 1 }} />
         <div style={{ padding: '16px 20px', borderTop: '1px solid #E2E8F0' }}>
           <Link href="/" style={{ color: '#718096', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-            ← View Site
+            <ArrowLeftToLine size={14} /> View Site
           </Link>
         </div>
       </aside>
