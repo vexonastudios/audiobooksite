@@ -415,7 +415,7 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
       <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <input type="checkbox" id="published" checked={form.published}
           onChange={e => set('published', e.target.checked)}
-          style={{ width: 'auto', accentColor: '#2e6aa7', width: 16, height: 16 }} />
+          style={{ accentColor: '#2e6aa7', width: 16, height: 16 }} />
         <label htmlFor="published" style={{ margin: 0, cursor: 'pointer', textTransform: 'none', letterSpacing: 0, fontSize: 14, fontWeight: 500, color: '#1A202C' }}>
           Published (live on site)
         </label>
