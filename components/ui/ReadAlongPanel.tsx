@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { parseVTT, getActiveCues } from '@/lib/parseVTT';
 import type { TranscriptCue } from '@/lib/parseVTT';
 import { X, Quote, Copy, Check, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useUserStore } from '@/lib/store/userStore';
 
 interface Props {
   slug: string;
@@ -76,20 +77,32 @@ export function ReadAlongPanel({ slug, currentTime, isOpen, onClose, onSeek, boo
     .filter(c => selectedIds.has(c.id))
     .sort((a, b) => a.start - b.start)
     .map(c => c.text)
-    .join(' ');
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const quoteSettings = useUserStore(s => s.quoteSettings);
+  
+  let formattedText = quoteSettings.useQuotes ? `"${selectedText}"` : selectedText;
+  if (quoteSettings.includeBook) {
+    formattedText += ` — ${authorName}, ${bookTitle}`;
+  } else {
+    formattedText += ` — ${authorName}`;
+  }
+  if (quoteSettings.includeLink) {
+    formattedText += ` Listen at: https://scrollreader.com/audiobook/${slug}`;
+  }
 
   function copyQuote() {
-    const text = `"${selectedText}"\n\n— ${bookTitle} by ${authorName}\nhttps://scrollreader.com/audiobook/${slug}`;
-    navigator.clipboard.writeText(text).then(() => {
+    navigator.clipboard.writeText(formattedText).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
   }
 
   async function shareQuote() {
-    const text = `"${selectedText}"\n\n— ${bookTitle} by ${authorName}\nhttps://scrollreader.com/audiobook/${slug}`;
     if (navigator.share) {
-      await navigator.share({ title: bookTitle, text });
+      await navigator.share({ title: bookTitle, text: formattedText }).catch(() => {});
     } else {
       copyQuote();
     }

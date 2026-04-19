@@ -401,7 +401,7 @@ export default function AudiobookPage() {
                           className="search-input"
                           style={{ flex: 1, paddingLeft: 16 }}
                         />
-                        <button type="submit" className="btn btn-primary" disabled={!bookmarkNote.trim()}>Save</button>
+                        <button type="submit" className="btn btn-primary">Save</button>
                       </form>
                     ) : (
                       <div className="text-muted text-sm" style={{ marginBottom: 20, fontStyle: 'italic' }}>
@@ -420,7 +420,7 @@ export default function AudiobookPage() {
                                     onClick={() => { if(!isCurrent) loadBook(book, bm.time); else { const {getAudioElement} = require('@/lib/store/playerStore'); getAudioElement().currentTime = bm.time; } }}>
                                  {formatTime(bm.time)}
                                </div>
-                               <div className="text-secondary">{bm.note}</div>
+                               <div className="text-secondary">{bm.note || bm.chapterTitle || 'Saved Bookmark'}</div>
                                <div className="text-xs text-muted" style={{ marginTop: 8 }}>Added {new Date(bm.createdAt).toLocaleDateString()}</div>
                             </div>
                             <button className="btn btn-icon text-error" onClick={() => removeBookmark(bm.id)}>

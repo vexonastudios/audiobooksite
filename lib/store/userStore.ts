@@ -4,6 +4,12 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { HistoryEntry, Bookmark, SavedQuote } from '@/lib/types';
 
+export interface QuoteSettings {
+  includeLink: boolean;
+  includeBook: boolean;
+  useQuotes: boolean;
+}
+
 interface UserState {
   history: HistoryEntry[];
   bookmarks: Bookmark[];
@@ -32,7 +38,10 @@ interface UserState {
   removeQuote: (id: string) => void;
 
   // Settings
+
+  quoteSettings: QuoteSettings;
   setSkipInterval: (val: number) => void;
+  updateQuoteSettings: (settings: Partial<QuoteSettings>) => void;
 }
 
 export const useUserStore = create<UserState>()(
@@ -42,6 +51,7 @@ export const useUserStore = create<UserState>()(
       bookmarks: [],
       quotes: [],
       skipInterval: 15,
+      quoteSettings: { includeLink: true, includeBook: true, useQuotes: true },
 
       addToHistory: (bookId, position) => {
         set((state) => {
@@ -78,6 +88,9 @@ export const useUserStore = create<UserState>()(
       },
 
       setSkipInterval: (val) => set({ skipInterval: val }),
+      updateQuoteSettings: (updates) => set((state) => ({
+        quoteSettings: { ...state.quoteSettings, ...updates }
+      })),
 
       saveQuote: (quote) => {
         const id = `q_${Date.now()}_${Math.random().toString(36).slice(2)}`;

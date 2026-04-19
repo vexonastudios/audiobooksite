@@ -18,6 +18,8 @@ export function TopBar() {
   const search = useLibraryStore((s) => s.search);
   const skipInterval = useUserStore((s) => s.skipInterval);
   const setSkipInterval = useUserStore((s) => s.setSkipInterval);
+  const quoteSettings = useUserStore((s) => s.quoteSettings);
+  const updateQuoteSettings = useUserStore((s) => s.updateQuoteSettings);
   const { isSignedIn } = useUser();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -167,6 +169,42 @@ export function TopBar() {
                         {val}s
                       </button>
                     ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Quote Sharing Settings */}
+              <div style={{ marginBottom: 32 }}>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: 16, color: 'var(--color-brand)' }}>Quote Sharing Format</h3>
+                <div style={{ background: 'var(--color-surface-2)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={quoteSettings.useQuotes} 
+                        onChange={e => updateQuoteSettings({ useQuotes: e.target.checked })} 
+                        style={{ accentColor: 'var(--color-brand)', width: 18, height: 18 }} 
+                      />
+                      Add quotation marks {"\" \""} around text
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={quoteSettings.includeBook} 
+                        onChange={e => updateQuoteSettings({ includeBook: e.target.checked })} 
+                        style={{ accentColor: 'var(--color-brand)', width: 18, height: 18 }} 
+                      />
+                      Include Book Title and Chapter Note
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={quoteSettings.includeLink} 
+                        onChange={e => updateQuoteSettings({ includeLink: e.target.checked })} 
+                        style={{ accentColor: 'var(--color-brand)', width: 18, height: 18 }} 
+                      />
+                      Include scrollreader.com Link
+                    </label>
                   </div>
                 </div>
               </div>

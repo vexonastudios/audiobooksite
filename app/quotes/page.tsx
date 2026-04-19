@@ -14,8 +14,17 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
   const { currentBook } = usePlayerStore();
   const getBook = () => useLibraryStore.getState().audiobooks.find(b => b.id === q.bookId);
 
-  const formattedText = `"${q.text}"\n\n— ${q.bookAuthor}, ${q.bookTitle}${q.chapterTitle ? ` (${q.chapterTitle})` : ''}\n\nhttps://scrollreader.com/audiobook/${q.bookSlug}?t=${Math.floor(q.time)}`;
+  const quoteSettings = useUserStore(s => s.quoteSettings);
 
+  let formattedText = quoteSettings.useQuotes ? `"${q.text}"` : q.text;
+  if (quoteSettings.includeBook) {
+    formattedText += ` — ${q.bookAuthor}, ${q.bookTitle}${q.chapterTitle ? ` (${q.chapterTitle})` : ''}`;
+  } else {
+    formattedText += ` — ${q.bookAuthor}`;
+  }
+  if (quoteSettings.includeLink) {
+    formattedText += ` Listen at: https://scrollreader.com/audiobook/${q.bookSlug}?t=${Math.floor(q.time)}`;
+  }
   function handleCopy() {
     navigator.clipboard.writeText(formattedText).then(() => {
       setCopied(true);
@@ -104,6 +113,8 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
 export default function QuotesPage() {
   const quotes = useUserStore(s => s.quotes);
   const removeQuote = useUserStore(s => s.removeQuote);
+  const quoteSettings = useUserStore(s => s.quoteSettings);
+  const updateQuoteSettings = useUserStore(s => s.updateQuoteSettings);
   const [searchQuery, setSearchQuery] = useState('');
 
   const filtered = quotes.filter(q => {
@@ -141,6 +152,25 @@ export default function QuotesPage() {
           </div>
         )}
       </div>
+
+      {/* Settings Row */}
+      {quotes.length > 0 && (
+        <div style={{ display: 'flex', gap: 16, marginBottom: 32, padding: '12px 16px', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center' }}>Copy Format:</div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
+            <input type="checkbox" checked={quoteSettings.useQuotes} onChange={e => updateQuoteSettings({ useQuotes: e.target.checked })} style={{ accentColor: 'var(--color-brand)' }} />
+            Show "Quotes"
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
+            <input type="checkbox" checked={quoteSettings.includeBook} onChange={e => updateQuoteSettings({ includeBook: e.target.checked })} style={{ accentColor: 'var(--color-brand)' }} />
+            Include Book Title
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
+            <input type="checkbox" checked={quoteSettings.includeLink} onChange={e => updateQuoteSettings({ includeLink: e.target.checked })} style={{ accentColor: 'var(--color-brand)' }} />
+            Include Link
+          </label>
+        </div>
+      )}
 
       {quotes.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--color-text-muted)' }}>

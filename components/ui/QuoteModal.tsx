@@ -69,7 +69,17 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
   const selectedCues = allCues.slice(startIdx, endIdx + 1);
   const quoteText = selectedCues.map(c => c.text).join(' ').replace(/\s+/g, ' ').trim();
 
-  const formattedQuote = `"${quoteText}"\n\n— ${bookAuthor}, ${bookTitle}${chapterTitle ? ` (${chapterTitle})` : ''}\n\nListen at scrollreader.com/audiobook/${bookSlug}?t=${Math.floor(currentTime)}`;
+  const quoteSettings = useUserStore(s => s.quoteSettings);
+  
+  let formattedQuote = quoteSettings.useQuotes ? `"${quoteText}"` : quoteText;
+  if (quoteSettings.includeBook) {
+    formattedQuote += ` — ${bookAuthor}, ${bookTitle}${chapterTitle ? ` (${chapterTitle})` : ''}`;
+  } else {
+    formattedQuote += ` — ${bookAuthor}`;
+  }
+  if (quoteSettings.includeLink) {
+    formattedQuote += ` Listen at: https://scrollreader.com/audiobook/${bookSlug}?t=${Math.floor(currentTime)}`;
+  }
 
   function expandBefore() {
     setStartIdx(i => {
@@ -226,10 +236,7 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
 
               {/* Formatted attribution preview */}
               <div style={{ background: 'var(--color-surface-2)', borderRadius: 'var(--radius-md)', padding: '14px 18px', fontSize: '0.8rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, fontFamily: 'monospace' }}>
-                <div style={{ fontStyle: 'italic', marginBottom: 6 }}>"{quoteText}"</div>
-                <div style={{ color: 'var(--color-brand)', fontWeight: 600 }}>
-                  — {bookAuthor}, {bookTitle}{chapterTitle ? ` (${chapterTitle})` : ''}
-                </div>
+                {formattedQuote}
               </div>
             </div>
 
