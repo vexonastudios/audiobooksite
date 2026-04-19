@@ -11,6 +11,8 @@ interface Props {
 }
 
 export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText, bookAuthor, bookTitle, chapterTitle, bookCover }, ref) => {
+  const proxiedCoverUrl = `/api/image-proxy?url=${encodeURIComponent(bookCover)}`;
+
   return (
     <div 
       ref={ref}
@@ -35,7 +37,7 @@ export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText
       <div style={{
         position: 'absolute',
         inset: -100, // Extend past bounds to hide blur vignette
-        backgroundImage: `url(${bookCover})`,
+        backgroundImage: `url(${proxiedCoverUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         filter: 'blur(30px) brightness(0.25)', // Blur and darken
@@ -122,8 +124,9 @@ export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText
         {/* Right: Book Cover */}
         <div>
           <img 
-            src={bookCover} 
+            src={proxiedCoverUrl} 
             alt="Cover" 
+            crossOrigin="anonymous"
             style={{ 
               width: 220, 
               height: 330, 
