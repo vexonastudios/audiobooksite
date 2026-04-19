@@ -1,31 +1,44 @@
 import { NextResponse } from 'next/server';
 import { getAllAudiobooks } from '@/lib/db/audiobooks';
+import { neon } from '@neondatabase/serverless';
 import audiobooksJson from '@/public/data/audiobooks.json';
 import articlesJson from '@/public/data/articles.json';
 
 export const revalidate = 60; // ISR — refresh every 60 seconds
 
+async function getAllArticles() {
+  const sql = neon(process.env.DATABASE_URL!);
+  const rows = await sql`
+    SELECT id, slug, title, excerpt, content AS description, pub_date AS "pubDate",
+           author_name AS "authorName", cover_image AS "coverImage",
+           categories, topics, published
+    FROM articles
+    WHERE published = true
+    ORDER BY pub_date DESC
+  `;
+  return rows;
+}
+
 export async function GET() {
   try {
-    // Try the database first
-    const audiobooks = await getAllAudiobooks();
-    
-    // If DB has data, return it
+    const [audiobooks, articles] = await Promise.all([
+      getAllAudiobooks(),
+      getAllArticles(),
+    ]);
+
     if (audiobooks.length > 0) {
       return NextResponse.json({
         audiobooks,
-        articles: articlesJson, // articles still from JSON for now
+        articles: articles.length > 0 ? articles : articlesJson,
       });
     }
 
-    // Fallback to static JSON while migration is pending
     return NextResponse.json({
       audiobooks: audiobooksJson,
       articles: articlesJson,
     });
   } catch (err) {
     console.error('Library API error, falling back to JSON:', err);
-    // Always fall back to static JSON if DB fails
     return NextResponse.json({
       audiobooks: audiobooksJson,
       articles: articlesJson,

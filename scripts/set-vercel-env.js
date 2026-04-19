@@ -4,13 +4,15 @@
  */
 const { execSync } = require('child_process');
 
+require('dotenv').config({ path: '.env.local' });
+
 const vars = [
-  ['R2_ACCOUNT_ID',        '7f888ea20d137eb5eba42db45b492cba'],
-  ['R2_ENDPOINT',          'https://7f888ea20d137eb5eba42db45b492cba.r2.cloudflarestorage.com'],
-  ['R2_BUCKET_NAME',       'scrollreader'],
-  ['R2_ACCESS_KEY_ID',     'be51efbe36931572c0ef702cd1ec057a'],
-  ['R2_SECRET_ACCESS_KEY', '1a50708e657b06ad3b2ae807fa4680c35627f9199d225c8b9f1aa0e53aca4752'],
-  ['R2_PUBLIC_URL',        'https://audio.scrollreader.com'],
+  ['R2_ACCOUNT_ID',        process.env.R2_ACCOUNT_ID],
+  ['R2_ENDPOINT',          process.env.R2_ENDPOINT],
+  ['R2_BUCKET_NAME',       process.env.R2_BUCKET_NAME],
+  ['R2_ACCESS_KEY_ID',     process.env.R2_ACCESS_KEY_ID],
+  ['R2_SECRET_ACCESS_KEY', process.env.R2_SECRET_ACCESS_KEY],
+  ['R2_PUBLIC_URL',        process.env.R2_PUBLIC_URL],
 ];
 
 for (const [key, value] of vars) {

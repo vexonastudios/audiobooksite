@@ -8,12 +8,12 @@ import * as path from 'path';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
-// Use the raw values — no env var corruption locally
-const ACCOUNT_ID    = '7f888ea20d137eb5eba42db45b492cba';
-const ACCESS_KEY    = 'be51efbe36931572c0ef702cd1ec057a';
-const SECRET_KEY    = '1a50708e657b06ad3b2ae807fa4680c35627f9199d225c8b9f1aa0e53aca4752';
-const BUCKET        = 'scrollreader';
-const ENDPOINT      = `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`;
+// Use env vars instead of hardcoded raw values to prevent security leaks
+const ACCOUNT_ID    = process.env.R2_ACCOUNT_ID;
+const ACCESS_KEY    = process.env.R2_ACCESS_KEY_ID!;
+const SECRET_KEY    = process.env.R2_SECRET_ACCESS_KEY!;
+const BUCKET        = process.env.R2_BUCKET_NAME;
+const ENDPOINT      = process.env.R2_ENDPOINT;
 
 async function setCors() {
   const r2 = new S3Client({
