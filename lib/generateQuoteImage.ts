@@ -258,31 +258,49 @@ export async function generateQuoteImage(opts: QuoteImageOptions): Promise<strin
     ctx.stroke();
   }
 
-  // ── 12. Branding (bottom-left corner) ─────────────────────────────────────
+  // ── 12. Branding (bottom-left corner) — matches reference design ──────────
   const brand = 'SCROLLREADER.COM';
-  ctx.font = `bold 22px Georgia, serif`;
-  const brandMetrics = ctx.measureText(brand);
-  const brandW = brandMetrics.width;
-  const bpad = 18;
-  const boxH = 44;
-  const boxX = PAD;
-  // Pin to bottom: same baseline as cover bottom
-  const boxY = SIZE - 56 - boxH;
+  const BRAND_FONT_SIZE = 26;
+  ctx.font = `bold ${BRAND_FONT_SIZE}px Georgia, serif`;
 
-  // "AUDIOBOOKS & BOOKS" label above box
+  // Measure brand text width
+  const brandW2 = ctx.measureText(brand).width;
+  const bpad2   = 22;   // horizontal padding inside box
+  const boxH2   = 50;   // box height
+  const boxX2   = PAD;
+  // Bottom-align: 52px from bottom edge
+  const boxY2   = SIZE - 52 - boxH2;
+
+  // "AUDIOBOOKS & BOOKS" — spaced uppercase label above box
   ctx.textAlign = 'left';
-  ctx.fillStyle = 'rgba(255,255,255,0.38)';
-  ctx.font = `12px Georgia, serif`;
-  ctx.fillText('AUDIOBOOKS & BOOKS', boxX, boxY - 12);
+  ctx.textBaseline = 'alphabetic';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
 
-  // Brand box
-  ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+  // Draw letter-spaced label manually by adding spacing between characters
+  const labelText = 'AUDIOBOOKS & BOOKS';
+  const labelFontSize = 13;
+  ctx.font = `${labelFontSize}px Georgia, serif`;
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  const letterSpacing = 2.5;
+  let lx = boxX2;
+  for (const ch of labelText) {
+    ctx.fillText(ch, lx, boxY2 - 14);
+    lx += ctx.measureText(ch).width + letterSpacing;
+  }
+
+  // Brand box — sharp rectangular border (no radius)
+  const boxW2 = brandW2 + bpad2 * 2;
+  ctx.strokeStyle = 'rgba(255,255,255,0.50)';
   ctx.lineWidth = 1.5;
-  clipRoundedRect(ctx, boxX, boxY, brandW + bpad * 2, boxH, 6);
-  ctx.stroke();
-  ctx.font = `bold 22px Georgia, serif`;
-  ctx.fillStyle = 'rgba(255,255,255,0.90)';
-  ctx.fillText(brand, boxX + bpad, boxY + boxH - 13);
+  ctx.strokeRect(boxX2, boxY2, boxW2, boxH2);
+
+  // Brand text inside box
+  ctx.font = `bold ${BRAND_FONT_SIZE}px Georgia, serif`;
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  // Vertically center the text in the box
+  ctx.textBaseline = 'middle';
+  ctx.fillText(brand, boxX2 + bpad2, boxY2 + boxH2 / 2);
 
   return canvas.toDataURL('image/png', 1.0);
 }
