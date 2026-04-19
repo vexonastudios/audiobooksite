@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useUserStore } from '@/lib/store/userStore';
-import { Quote, X, Search, Share2, Copy, Check, BookOpen, ExternalLink, Play, CheckSquare, Square } from 'lucide-react';
+import { Quote, X, Search, Share2, Copy, Check, BookOpen, ExternalLink, Play, CheckSquare, Square, ChevronDown, ChevronRight, Settings } from 'lucide-react';
 import type { SavedQuote } from '@/lib/types';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
@@ -116,6 +116,7 @@ export default function QuotesPage() {
   const quoteSettings = useUserStore(s => s.quoteSettings);
   const updateQuoteSettings = useUserStore(s => s.updateQuoteSettings);
   const [searchQuery, setSearchQuery] = useState('');
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
 
   const filtered = quotes.filter(q => {
     if (!searchQuery.trim()) return true;
@@ -155,20 +156,47 @@ export default function QuotesPage() {
 
       {/* Settings Row */}
       {quotes.length > 0 && (
-        <div style={{ display: 'flex', gap: 16, marginBottom: 32, padding: '12px 16px', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)', flexWrap: 'wrap' }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center' }}>Copy Format:</div>
-          <div onClick={() => updateQuoteSettings({ useQuotes: !quoteSettings.useQuotes })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
-            {quoteSettings.useQuotes ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
-            Show "Quotes"
+        <div style={{ marginBottom: 32, background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
+          {/* Header Toggle */}
+          <div 
+            onClick={() => setSettingsExpanded(!settingsExpanded)}
+            style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', background: settingsExpanded ? 'var(--color-surface-2)' : 'transparent' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
+              <Settings size={16} /> Copy Format Settings
+            </div>
+            {settingsExpanded ? <ChevronDown size={16} color="var(--color-text-muted)" /> : <ChevronRight size={16} color="var(--color-text-muted)" />}
           </div>
-          <div onClick={() => updateQuoteSettings({ includeBook: !quoteSettings.includeBook })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
-            {quoteSettings.includeBook ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
-            Include Book Title
-          </div>
-          <div onClick={() => updateQuoteSettings({ includeLink: !quoteSettings.includeLink })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
-            {quoteSettings.includeLink ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
-            Include Link
-          </div>
+
+          {/* Expanded Content */}
+          {settingsExpanded && (
+            <div style={{ padding: '16px', borderTop: '1px solid var(--color-border)' }}>
+              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
+                <div onClick={() => updateQuoteSettings({ useQuotes: !quoteSettings.useQuotes })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
+                  {quoteSettings.useQuotes ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
+                  Show "Quotes"
+                </div>
+                <div onClick={() => updateQuoteSettings({ includeBook: !quoteSettings.includeBook })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
+                  {quoteSettings.includeBook ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
+                  Include Book Title
+                </div>
+                <div onClick={() => updateQuoteSettings({ includeLink: !quoteSettings.includeLink })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
+                  {quoteSettings.includeLink ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
+                  Include Link
+                </div>
+              </div>
+
+              {/* Real-time Preview */}
+              <div style={{ padding: '14px 16px', background: 'var(--color-background)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Example output</div>
+                <div style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)', lineHeight: 1.6, fontFamily: 'monospace' }}>
+                  {quoteSettings.useQuotes ? '"For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life."' : 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.'}
+                  {quoteSettings.includeBook ? ' — Apostle John, The Bible (John Chapter 3)' : ' — Apostle John'}
+                  {quoteSettings.includeLink && ' Listen at: https://scrollreader.com/audiobook/the-bible'}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
