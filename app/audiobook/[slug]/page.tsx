@@ -40,14 +40,19 @@ export default function AudiobookPage() {
   const [readAlongOpen, setReadAlongOpen] = useState(false);
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
   const [loadedCues, setLoadedCues] = useState<TranscriptCue[]>([]);
+  const [transcriptStatus, setTranscriptStatus] = useState<'loading' | 'available' | 'unavailable'>('loading');
 
   // Load VTT cues for bookmark context (preloaded when panel first opens or book plays)
   useEffect(() => {
     if (!book) return;
+    setTranscriptStatus('loading');
     fetch(`/transcripts/${book.slug}.vtt`)
       .then(r => r.ok ? r.text() : Promise.reject())
-      .then(text => setLoadedCues(parseVTT(text)))
-      .catch(() => {}); // silently fail — transcript is optional
+      .then(text => {
+        setLoadedCues(parseVTT(text));
+        setTranscriptStatus('available');
+      })
+      .catch(() => setTranscriptStatus('unavailable'));
   }, [book?.slug]);
 
   const isCurrent = currentBook?.id === book?.id;
@@ -196,31 +201,34 @@ export default function AudiobookPage() {
               <p style={{ fontSize: '1.125rem', color: 'var(--color-brand)', marginBottom: 16 }}>
                 By <Link href={`/authors/${encodeURIComponent(book.authorName)}`} style={{ textDecoration: 'underline' }}>{book.authorName}</Link>
               </p>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <button
-                  className="btn btn-secondary"
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem' }}
-                  onClick={() => setReadAlongOpen(true)}
-                >
-                  <BookOpen size={16} />
-                  Read Along
-                  {loadedCues.length > 0 && (
-                    <span style={{ background: 'var(--color-brand)', color: 'white', borderRadius: 20, padding: '1px 8px', fontSize: '0.7rem', fontWeight: 700 }}>Live Sync</span>
-                  )}
-                </button>
-                <button
-                  className="btn btn-secondary"
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem' }}
-                  onClick={() => {
-                    setQuoteModalOpen(true);
-                    if (isPlaying) setPlaying(false);
-                  }}
-                >
-                  <Quote size={16} />
-                  Share Quote
-                  {!loadedCues.length && <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>No transcript</span>}
-                </button>
-              </div>
+              {transcriptStatus !== 'unavailable' && (
+                <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
+                  <button
+                    className="btn btn-secondary"
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', opacity: transcriptStatus === 'loading' ? 0.5 : 1 }}
+                    onClick={() => setReadAlongOpen(true)}
+                    disabled={transcriptStatus === 'loading'}
+                  >
+                    <BookOpen size={16} />
+                    Read Along
+                    {loadedCues.length > 0 && (
+                      <span style={{ background: 'var(--color-brand)', color: 'white', borderRadius: 20, padding: '1px 8px', fontSize: '0.7rem', fontWeight: 700 }}>Live Sync</span>
+                    )}
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', opacity: transcriptStatus === 'loading' ? 0.5 : 1 }}
+                    onClick={() => {
+                      setQuoteModalOpen(true);
+                      if (isPlaying) setPlaying(false);
+                    }}
+                    disabled={transcriptStatus === 'loading'}
+                  >
+                    <Quote size={16} />
+                    Share Quote
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* CARD 1: Player Controls */}
