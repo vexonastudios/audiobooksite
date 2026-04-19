@@ -7,6 +7,7 @@ import type { HistoryEntry, Bookmark } from '@/lib/types';
 interface UserState {
   history: HistoryEntry[];
   bookmarks: Bookmark[];
+  skipInterval: number;
 
   // History
   addToHistory: (bookId: string, position: number) => void;
@@ -16,6 +17,9 @@ interface UserState {
   addBookmark: (bookId: string, time: number, note: string) => void;
   removeBookmark: (id: string) => void;
   getBookmarksByBook: (bookId: string) => Bookmark[];
+
+  // Settings
+  setSkipInterval: (val: number) => void;
 }
 
 export const useUserStore = create<UserState>()(
@@ -23,6 +27,7 @@ export const useUserStore = create<UserState>()(
     (set, get) => ({
       history: [],
       bookmarks: [],
+      skipInterval: 15,
 
       addToHistory: (bookId, position) => {
         set((state) => {
@@ -57,6 +62,8 @@ export const useUserStore = create<UserState>()(
       getBookmarksByBook: (bookId) => {
         return get().bookmarks.filter((b) => b.bookId === bookId);
       },
+
+      setSkipInterval: (val) => set({ skipInterval: val }),
     }),
     {
       name: 'scrollreader-user', // localStorage key

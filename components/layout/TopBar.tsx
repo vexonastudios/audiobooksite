@@ -2,8 +2,9 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Bell } from 'lucide-react';
+import { Search, Bell, Settings, X } from 'lucide-react';
 import { useLibraryStore } from '@/lib/store/libraryStore';
+import { useUserStore } from '@/lib/store/userStore';
 import { UserButton, SignInButton, useUser } from '@clerk/nextjs';
 import type { Audiobook } from '@/lib/types';
 import Link from 'next/link';
@@ -13,7 +14,10 @@ export function TopBar() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Audiobook[]>([]);
   const [open, setOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const search = useLibraryStore((s) => s.search);
+  const skipInterval = useUserStore((s) => s.skipInterval);
+  const setSkipInterval = useUserStore((s) => s.setSkipInterval);
   const { isSignedIn } = useUser();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -117,6 +121,9 @@ export function TopBar() {
 
       {/* User */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 'auto' }}>
+        <button className="btn btn-icon" onClick={() => setSettingsOpen(true)}>
+          <Settings size={20} />
+        </button>
         {isSignedIn ? (
           <UserButton />
         ) : (
@@ -127,6 +134,34 @@ export function TopBar() {
           </SignInButton>
         )}
       </div>
+
+      {settingsOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)' }}>
+          <div className="card" style={{ width: 320, padding: 24, position: 'relative' }}>
+            <button className="btn btn-icon" style={{ position: 'absolute', top: 12, right: 12 }} onClick={() => setSettingsOpen(false)}>
+              <X size={18} />
+            </button>
+            <h3 style={{ marginBottom: 16 }}>Player Settings</h3>
+            
+            <div style={{ marginBottom: 8, fontWeight: 500 }}>Skip Interval</div>
+            <p className="text-secondary text-sm" style={{ marginBottom: 16 }}>
+              Adjust how many seconds the forward/backward buttons skip.
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {[5, 15, 30, 45].map(val => (
+                <button 
+                  key={val}
+                  className={`btn ${skipInterval === val ? 'btn-primary' : 'btn-secondary'}`}
+                  style={{ flex: 1, padding: '8px 0' }}
+                  onClick={() => setSkipInterval(val)}
+                >
+                  {val}s
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

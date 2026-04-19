@@ -1,6 +1,7 @@
 'use client';
 
 import { usePlayerStore } from '@/lib/store/playerStore';
+import { useUserStore } from '@/lib/store/userStore';
 import { Play, Pause, SkipBack, SkipForward, X } from 'lucide-react';
 import Link from 'next/link';
 
@@ -17,6 +18,7 @@ function formatTime(s: number) {
 export function GlobalAudioPlayer() {
   const { currentBook, isPlaying, currentTime, duration, activeChapterIndex,
     setPlaying, skipForward, skipBackward, close } = usePlayerStore();
+  const skipInterval = useUserStore(s => s.skipInterval);
 
   if (!currentBook) return null;
 
@@ -59,11 +61,11 @@ export function GlobalAudioPlayer() {
           <button
             className="btn btn-icon"
             onClick={skipBackward}
-            title="Back 15s"
+            title={`Back ${skipInterval}s`}
             style={{ width: 36, height: 36, fontSize: '0.75rem', position: 'relative' }}
           >
             <SkipBack size={18} />
-            <span style={{ position: 'absolute', fontSize: '0.5rem', fontWeight: 700, bottom: 4 }}>15</span>
+            <span style={{ position: 'absolute', fontSize: '0.5rem', fontWeight: 700, bottom: 4 }}>{skipInterval}</span>
           </button>
 
           <button
@@ -77,11 +79,11 @@ export function GlobalAudioPlayer() {
           <button
             className="btn btn-icon"
             onClick={skipForward}
-            title="Forward 15s"
+            title={`Forward ${skipInterval}s`}
             style={{ width: 36, height: 36, fontSize: '0.75rem', position: 'relative' }}
           >
             <SkipForward size={18} />
-            <span style={{ position: 'absolute', fontSize: '0.5rem', fontWeight: 700, bottom: 4 }}>15</span>
+            <span style={{ position: 'absolute', fontSize: '0.5rem', fontWeight: 700, bottom: 4 }}>{skipInterval}</span>
           </button>
         </div>
 

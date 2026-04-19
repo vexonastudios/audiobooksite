@@ -27,7 +27,7 @@ export default function AudiobookPage() {
   // Stores
   const { currentBook, isPlaying, currentTime, duration, playbackSpeed, 
           loadBook, setPlaying, setPlaybackSpeed, skipForward, skipBackward, jumpToChapter } = usePlayerStore();
-  const { addBookmark, getBookmarksByBook, removeBookmark } = useUserStore();
+  const { addBookmark, getBookmarksByBook, removeBookmark, skipInterval } = useUserStore();
 
   // Local state
   const [activeTab, setActiveTab] = useState<'chapters' | 'bookmarks' | 'share'>('chapters');
@@ -159,58 +159,95 @@ export default function AudiobookPage() {
             </div>
 
             {/* CARD 1: Player Controls */}
-            <div className="card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <button className="btn-play-large" onClick={handlePlayPause} style={{ width: 64, height: 64 }}>
-                    {isCurrent && isPlaying ? <Pause size={28} /> : <Play size={28} style={{ marginLeft: 3 }} />}
-                  </button>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '1.125rem' }}>
-                      {isCurrent ? (isPlaying ? 'Playing Audio' : 'Paused') : 'Ready to Play'}
-                    </div>
-                    {isCurrent && book.chapters[currentChapterIdx] && (
-                       <div className="text-muted text-sm">{book.chapters[currentChapterIdx].title}</div>
-                    )}
-                  </div>
+            <div className="card" style={{ padding: '24px' }}>
+              {isCurrent && book.chapters[currentChapterIdx] ? (
+                <div style={{ textAlign: 'center', marginBottom: 12, fontWeight: 600, fontSize: '1.25rem' }}>
+                  {book.chapters[currentChapterIdx].title}
                 </div>
+              ) : (
+                <div style={{ textAlign: 'center', marginBottom: 12, fontWeight: 600, fontSize: '1.25rem', opacity: 0.5 }}>
+                  Not Playing
+                </div>
+              )}
 
-                {/* Playback Settings */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <select 
-                    value={playbackSpeed}
-                    onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
-                    className="btn btn-secondary" 
-                    style={{ padding: '8px 12px', fontSize: '0.875rem' }}
-                  >
-                    <option value="0.75">0.75x</option>
-                    <option value="1">1.0x</option>
-                    <option value="1.25">1.25x</option>
-                    <option value="1.5">1.5x</option>
-                    <option value="2">2.0x</option>
-                  </select>
+              {/* Scrubber Area */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <input
+                  type="range"
+                  min={0}
+                  max={isCurrent && book.chapters[currentChapterIdx+1] ? book.chapters[currentChapterIdx+1].startTime - book.chapters[currentChapterIdx].startTime : isCurrent ? duration - book.chapters[currentChapterIdx].startTime : 100}
+                  step={0.1}
+                  value={isCurrent ? currentTime - book.chapters[currentChapterIdx].startTime : 0}
+                  onChange={(e) => {
+                    if (!isCurrent) return;
+                    const { getAudioElement } = require('@/lib/store/playerStore');
+                    getAudioElement().currentTime = book.chapters[currentChapterIdx].startTime + parseFloat(e.target.value);
+                  }}
+                  disabled={!isCurrent || duration === 0}
+                  className="scrubber"
+                  style={{ flex: 1 }}
+                />
+                
+                <select 
+                  value={playbackSpeed}
+                  onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
+                  className="btn btn-secondary" 
+                  style={{ padding: '4px 10px', fontSize: '0.875rem', borderRadius: 16, backgroundColor: 'var(--color-brand)', color: 'white', border: 'none', appearance: 'none', MozAppearance: 'none', WebkitAppearance: 'none', cursor: 'pointer' }}
+                >
+                  <option value="0.75">0.75x</option>
+                  <option value="1">1x</option>
+                  <option value="1.25">1.25x</option>
+                  <option value="1.5">1.5x</option>
+                  <option value="2">2x</option>
+                </select>
+              </div>
+
+              {/* Time displays */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, marginBottom: 24, fontSize: '0.875rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
+                <div style={{ width: 80, textAlign: 'left' }}>
+                  {isCurrent ? formatTime(currentTime - book.chapters[currentChapterIdx].startTime) : '0:00'}
+                </div>
+                <div style={{ flex: 1, textAlign: 'center', color: 'var(--color-text-primary)' }}>
+                  {isCurrent && duration > 0 ? formatTime(duration - currentTime) + ' left in book' : ''}
+                </div>
+                <div style={{ width: 80, textAlign: 'right' }}>
+                  {isCurrent && book.chapters[currentChapterIdx+1] ? 
+                    `- ${formatTime(book.chapters[currentChapterIdx+1].startTime - currentTime)}` : 
+                    isCurrent && duration > 0 ? `- ${formatTime(duration - currentTime)}` : '0:00'}
                 </div>
               </div>
 
-              {/* Scrubber Area */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-                <button className="btn btn-icon" onClick={skipBackward} disabled={!isCurrent}><SkipBack size={18} /></button>
-                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
-                   <span className="text-secondary text-sm" style={{ width: 45, textAlign: 'right' }}>
-                     {isCurrent ? formatTime(currentTime) : '0:00'}
-                   </span>
-                   <input
-                     type="range" min={0} max={100} step={0.1}
-                     value={displayProgress}
-                     onChange={handleScrub}
-                     disabled={!isCurrent || duration === 0}
-                     className="scrubber"
-                   />
-                   <span className="text-secondary text-sm" style={{ width: 45 }}>
-                     {isCurrent ? formatTime(duration) : book.length.replace(/[a-zA-Z]+/g, '').trim() + ':00' /* fallback */}
-                   </span>
-                </div>
-                <button className="btn btn-icon" onClick={skipForward} disabled={!isCurrent}><SkipForward size={18} /></button>
+              {/* Playback Buttons */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24 }}>
+                <button 
+                  className="btn btn-icon" 
+                  style={{ opacity: !isCurrent || currentChapterIdx === 0 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === 0 ? 'none' : 'auto' }}
+                  onClick={() => jumpToChapter(currentChapterIdx - 1)}
+                >
+                  <SkipBack size={24} />
+                </button>
+                <button className="btn btn-icon" onClick={skipBackward} disabled={!isCurrent}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: 'var(--color-surface-2)', width: 44, height: 44 }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                    <span style={{ position: 'absolute', fontSize: '0.65rem', fontWeight: 700, marginTop: 2 }}>{skipInterval}</span>
+                  </div>
+                </button>
+                <button className="btn-play-large" onClick={handlePlayPause} style={{ width: 72, height: 72 }}>
+                  {isCurrent && isPlaying ? <Pause size={32} /> : <Play size={32} style={{ marginLeft: 4 }} />}
+                </button>
+                <button className="btn btn-icon" onClick={skipForward} disabled={!isCurrent}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: 'var(--color-surface-2)', width: 44, height: 44 }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'scaleX(-1)' }}><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+                    <span style={{ position: 'absolute', fontSize: '0.65rem', fontWeight: 700, marginTop: 2 }}>{skipInterval}</span>
+                  </div>
+                </button>
+                <button 
+                  className="btn btn-icon" 
+                  style={{ opacity: !isCurrent || currentChapterIdx === book.chapters.length - 1 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === book.chapters.length - 1 ? 'none' : 'auto' }}
+                  onClick={() => jumpToChapter(currentChapterIdx + 1)}
+                >
+                  <SkipForward size={24} />
+                </button>
               </div>
             </div>
 

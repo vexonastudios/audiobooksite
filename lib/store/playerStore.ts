@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Audiobook, Chapter } from '@/lib/types';
+import { useUserStore } from './userStore';
 
 interface PlayerState {
   // Current track
@@ -117,12 +118,14 @@ export const usePlayerStore = create<PlayerState>()((set, get) => ({
 
   skipForward: () => {
     const audio = getAudioElement();
-    audio.currentTime = Math.min(audio.currentTime + 15, audio.duration || 0);
+    const interval = useUserStore.getState().skipInterval || 15;
+    audio.currentTime = Math.min(audio.currentTime + interval, audio.duration || 0);
   },
 
   skipBackward: () => {
     const audio = getAudioElement();
-    audio.currentTime = Math.max(audio.currentTime - 15, 0);
+    const interval = useUserStore.getState().skipInterval || 15;
+    audio.currentTime = Math.max(audio.currentTime - interval, 0);
   },
 
   jumpToChapter: (index) => {
