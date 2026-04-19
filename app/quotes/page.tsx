@@ -57,17 +57,20 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
   const handleExportImage = async () => {
     try {
       setIsRenderingImage(true);
-      const dataUrl = await generateQuoteImage({
+      const dataUrls = await generateQuoteImage({
         quoteText: q.text,
         bookAuthor: q.bookAuthor,
         bookTitle: q.bookTitle,
         chapterTitle: q.chapterTitle,
         bookCoverUrl: q.bookCover || '',
       });
-      const link = document.createElement('a');
-      link.download = `quote-${q.bookSlug}-${Math.floor(q.time)}.png`;
-      link.href = dataUrl;
-      link.click();
+      dataUrls.forEach((dataUrl, i) => {
+        const link = document.createElement('a');
+        const suffix = dataUrls.length > 1 ? `-part${i + 1}` : '';
+        link.download = `quote-${q.bookSlug}-${Math.floor(q.time)}${suffix}.png`;
+        link.href = dataUrl;
+        link.click();
+      });
     } catch (err) {
       console.error('Failed to export image', err);
     } finally {

@@ -142,17 +142,20 @@ export function QuoteModal({ isOpen, onClose, allCues, currentTime, bookId, book
   const handleExportImage = async () => {
     try {
       setIsRenderingImage(true);
-      const dataUrl = await generateQuoteImage({
+      const dataUrls = await generateQuoteImage({
         quoteText,
         bookAuthor,
         bookTitle,
         chapterTitle,
         bookCoverUrl: bookCover || '',
       });
-      const link = document.createElement('a');
-      link.download = `quote-${bookSlug}-${Math.floor(currentTime)}.png`;
-      link.href = dataUrl;
-      link.click();
+      dataUrls.forEach((dataUrl, i) => {
+        const link = document.createElement('a');
+        const suffix = dataUrls.length > 1 ? `-part${i + 1}` : '';
+        link.download = `quote-${bookSlug}-${Math.floor(currentTime)}${suffix}.png`;
+        link.href = dataUrl;
+        link.click();
+      });
     } catch (err) {
       console.error('Failed to export image', err);
     } finally {
