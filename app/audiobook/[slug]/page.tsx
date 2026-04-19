@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
@@ -35,6 +35,8 @@ export default function AudiobookPage() {
           loadBook, setPlaying, setPlaybackSpeed, skipForward, skipBackward, jumpToChapter } = usePlayerStore();
   const { history, addBookmark, getBookmarksByBook, removeBookmark, skipInterval } = useUserStore();
 
+  const searchParams = useSearchParams();
+
   // Local state
   const [activeTab, setActiveTab] = useState<'chapters' | 'bookmarks' | 'share' | 'timer'>('chapters');
   const [bookmarkNote, setBookmarkNote] = useState('');
@@ -44,6 +46,17 @@ export default function AudiobookPage() {
   const [loadedCues, setLoadedCues] = useState<TranscriptCue[]>([]);
   const [transcriptStatus, setTranscriptStatus] = useState<'loading' | 'available' | 'unavailable'>('loading');
   const [timerTick, setTimerTick] = useState(0);
+  // Timestamp from shared link (?t=)
+  const [timedStart, setTimedStart] = useState<number | null>(null);
+
+  // Parse ?t= param from URL on load
+  useEffect(() => {
+    const t = searchParams?.get('t');
+    if (t) {
+      const secs = parseInt(t, 10);
+      if (!isNaN(secs) && secs > 0) setTimedStart(secs);
+    }
+  }, [searchParams]);
 
   // Tick for Sleep Timer Countdown UI
   useEffect(() => {
@@ -124,6 +137,9 @@ export default function AudiobookPage() {
   const handlePlayPause = () => {
     if (isCurrent) {
       setPlaying(!isPlaying);
+    } else if (timedStart !== null) {
+      loadBook(book, timedStart);
+      setTimedStart(null);
     } else {
       const hist = history.find(h => h.bookId === book.id);
       loadBook(book, hist?.position || 0);
@@ -274,6 +290,29 @@ export default function AudiobookPage() {
 
             {/* CARD 1: Player Controls */}
             <div className="card" style={{ padding: '24px' }}>
+
+              {/* Timestamped-link banner */}
+              {!isCurrent && timedStart !== null && (
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  background: 'var(--color-brand)', color: 'white',
+                  borderRadius: 'var(--radius-md)', padding: '10px 16px',
+                  marginBottom: 16, gap: 12,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Clock size={16} />
+                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Shared link starts at {formatTime(timedStart)}</span>
+                  </div>
+                  <button
+                    onClick={() => setTimedStart(null)}
+                    style={{ background: 'none', border: 'none', color: 'white', opacity: 0.7, cursor: 'pointer', padding: 0, lineHeight: 1 }}
+                    aria-label="Dismiss"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+
               {book.chapters[currentChapterIdx] ? (
                 <div style={{ textAlign: 'center', marginBottom: 12, fontWeight: 600, fontSize: '1.25rem' }}>
                   {book.chapters[currentChapterIdx].title}
@@ -535,6 +574,12 @@ export default function AudiobookPage() {
                       href: `mailto:?subject=${encodeURIComponent('Check out this audiobook')}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}`,
                       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>,
                     },
+                    ...(book.spotifyLink ? [{
+                      label: 'Listen on Spotify',
+                      color: '#1DB954',
+                      href: book.spotifyLink,
+                      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>,
+                    }] : []),
                   ];
 
                   return (
