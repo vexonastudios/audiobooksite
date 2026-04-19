@@ -104,7 +104,18 @@ export default function AudiobookPage() {
 
   // Set background color globally based on book
   const bgStyle = book.generatedColors 
-    ? { background: `linear-gradient(to bottom, ${book.generatedColors}40 0%, var(--color-bg) 600px)`, position: 'absolute' as const, inset: 0, zIndex: -1 } 
+    ? { 
+        background: book.generatedColors, 
+        opacity: 0.25, 
+        position: 'absolute' as const, 
+        left: 0,
+        right: 0,
+        top: 0,
+        height: '600px',
+        zIndex: -1,
+        maskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)'
+      } 
     : {};
 
   return (
