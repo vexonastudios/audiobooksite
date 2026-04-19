@@ -37,7 +37,8 @@ export default function AudiobookPage() {
   const displayProgress = isCurrent && duration > 0 ? (currentTime / duration) * 100 : 0;
   
   // Find active chapter index for display
-  const currentChapterIdx = isCurrent ? usePlayerStore(s => s.activeChapterIndex) : 0;
+  const activeChapterIndex = usePlayerStore(s => s.activeChapterIndex);
+  const currentChapterIdx = isCurrent ? activeChapterIndex : 0;
   const bookmarks = book ? getBookmarksByBook(book.id) : [];
 
   if (!isLoaded) {
