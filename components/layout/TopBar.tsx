@@ -18,7 +18,6 @@ export function TopBar() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Audiobook[]>([]);
   const [open, setOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const search = useLibraryStore((s) => s.search);
   const skipInterval = useUserStore((s) => s.skipInterval);
@@ -178,9 +177,9 @@ export function TopBar() {
             <Search size={20} />
           </button>
 
-          <button className="btn btn-icon" onClick={() => setSettingsOpen(true)} aria-label="Preferences">
+          <Link href="/settings" className="btn btn-icon" aria-label="Preferences">
             <Settings size={20} />
-          </button>
+          </Link>
 
           {isSignedIn ? (
             <UserButton />
@@ -242,110 +241,7 @@ export function TopBar() {
         document.body
       )}
 
-      {/* ─── Settings modal ─── */}
-      {settingsOpen && mounted && createPortal(
-        <div onClick={() => setSettingsOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
-          <div className="card" onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 540, padding: 0, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--color-surface-2)' }}>
-              <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Preferences</h2>
-              <button className="btn btn-icon" onClick={() => setSettingsOpen(false)}>
-                <X size={20} />
-              </button>
-            </div>
 
-            <div style={{ padding: '24px', overflowY: 'auto' }}>
-              <div style={{ marginBottom: 32 }}>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: 16, color: 'var(--color-brand)' }}>Playback Settings</h3>
-                <div style={{ background: 'var(--color-surface-2)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>Skip Interval</div>
-                    <div className="text-secondary text-sm">Amount of time to jump when clicking forward/backward.</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    {[5, 15, 30, 45].map(val => (
-                      <button
-                        key={val}
-                        className={`btn ${skipInterval === val ? 'btn-primary' : 'btn-secondary'}`}
-                        style={{ flex: 1, padding: '10px 0', borderRadius: 'var(--radius-sm)' }}
-                        onClick={() => setSkipInterval(val)}
-                      >
-                        {val}s
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: 32 }}>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: 16, color: 'var(--color-brand)' }}>Quote Sharing Format</h3>
-                <div style={{ background: 'var(--color-surface-2)', padding: '16px', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                    <div onClick={() => updateQuoteSettings({ useQuotes: !quoteSettings.useQuotes })} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
-                      {quoteSettings.useQuotes ? <CheckSquare size={20} color="var(--color-brand)" /> : <Square size={20} color="var(--color-border)" />}
-                      Add quotation marks {`" "`} around text
-                    </div>
-                    <div onClick={() => updateQuoteSettings({ includeBook: !quoteSettings.includeBook })} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
-                      {quoteSettings.includeBook ? <CheckSquare size={20} color="var(--color-brand)" /> : <Square size={20} color="var(--color-border)" />}
-                      Include Book Title and Chapter Note
-                    </div>
-                    <div onClick={() => updateQuoteSettings({ includeLink: !quoteSettings.includeLink })} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
-                      {quoteSettings.includeLink ? <CheckSquare size={20} color="var(--color-brand)" /> : <Square size={20} color="var(--color-border)" />}
-                      Include scrollreader.com Link
-                    </div>
-                  </div>
-                  <div style={{ marginTop: 24, padding: '14px 16px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Example output</div>
-                    <div style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)', lineHeight: 1.6, fontFamily: 'monospace' }}>
-                      {quoteSettings.useQuotes ? '"For God so loved the world..."' : 'For God so loved the world...'}
-                      {quoteSettings.includeBook ? ' — Apostle John, The Bible' : ' — Apostle John'}
-                      {quoteSettings.includeLink && ' Listen at: https://scrollreader.com'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: 32 }}>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: 8, color: 'var(--color-brand)' }}>Read Along Text Size</h3>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 12 }}>Font size used in the Read Along panel on mobile.</div>
-                <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-                  {([
-                    { label: 'S',   value: 0.9  },
-                    { label: 'M',   value: 1.05 },
-                    { label: 'L',   value: 1.2  },
-                    { label: 'XL',  value: 1.4  },
-                    { label: 'XXL', value: 1.65 },
-                  ] as { label: string; value: number }[]).map(opt => {
-                    const isActive = Math.abs(readAlongFontSize - opt.value) < 0.01;
-                    return (
-                      <button
-                        key={opt.label}
-                        onClick={() => setReadAlongFontSize(opt.value)}
-                        className={`btn ${isActive ? 'btn-primary' : 'btn-secondary'}`}
-                        style={{ flex: 1, padding: '10px 4px', fontSize: `${opt.value * 0.72}rem`, fontWeight: 700 }}
-                      >
-                        {opt.label}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '12px 14px' }}>
-                  <p style={{ margin: 0, fontSize: `${readAlongFontSize}rem`, lineHeight: 1.8, color: 'var(--color-text-primary)' }}>
-                    "The soul must become quiet and wait before the Lord."
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: 16, color: 'var(--color-brand)' }}>Appearance & Display</h3>
-                <div style={{ background: 'var(--color-surface-2)', padding: '16px', borderRadius: 'var(--radius-md)', opacity: 0.7 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: 4 }}>Theme Preference (Coming Soon)</div>
-                  <div className="text-secondary text-sm">Toggle between Light, Dark, or System themes.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      , document.body)}
     </>
   );
 }

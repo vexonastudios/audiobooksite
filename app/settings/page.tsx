@@ -394,6 +394,16 @@ export default function SettingsPage() {
               </div>
             </label>
           ))}
+          
+          <div style={{ padding: '14px 16px', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Example output</div>
+            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)', lineHeight: 1.6, fontFamily: 'monospace' }}>
+              {quoteSettings.useQuotes ? '"For God so loved the world..."' : 'For God so loved the world...'}
+              {quoteSettings.includeBook ? ' — Apostle John, The Bible' : ' — Apostle John'}
+              {quoteSettings.includeLink && ' Listen at: https://scrollreader.com'}
+            </div>
+          </div>
+
           <label
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
