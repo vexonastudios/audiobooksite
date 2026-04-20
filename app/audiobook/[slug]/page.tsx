@@ -39,6 +39,7 @@ export default function AudiobookPage() {
 
   // Local state
   const [activeTab, setActiveTab] = useState<'chapters' | 'bookmarks' | 'share' | 'timer'>('chapters');
+  const [mobileTabOpen, setMobileTabOpen] = useState(false);
   const [bookmarkNote, setBookmarkNote] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
   const [readAlongOpen, setReadAlongOpen] = useState(false);
@@ -447,19 +448,30 @@ export default function AudiobookPage() {
                   <span style={{ fontSize: '1.2rem', fontWeight: 800 }}>{playbackSpeed}x</span>
                   <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Speed</span>
                 </button>
-                <button onClick={() => setActiveTab('chapters')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}>
+                <button onClick={() => { setActiveTab('chapters'); setMobileTabOpen(true); }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}>
                   <List size={22} color="currentColor" />
                   <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Chapters</span>
                 </button>
-                <button onClick={(e) => { e.preventDefault(); /* Mobile bookmark handler */ }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}>
+                <button onClick={(e) => { e.preventDefault(); setActiveTab('bookmarks'); setMobileTabOpen(true); }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}>
                   <BookmarkPlus size={22} color="currentColor" />
                   <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Bookmark</span>
                 </button>
               </div>
             </div>
 
-            {/* CARD 2: Interactive Tabs (Chapters / Bookmarks / Share) */}
-            <div className="card tabs-card-desktop" style={{ padding: '16px 24px 24px', flex: 1 }}>
+            {/* CARD 2: Tabs (Chapters, Bookmarks, etc) */}
+            <div className={`card tabs-card-desktop ${mobileTabOpen ? 'mobile-modal-active' : ''}`} style={{ padding: '16px 24px 24px', flex: 1 }}>
+              
+              {/* Mobile-Only Modal Header */}
+              {mobileTabOpen && (
+                <div className="mobile-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, paddingTop: 8 }}>
+                  <h2 style={{ fontSize: '1.25rem', margin: 0, textTransform: 'capitalize' }}>{activeTab}</h2>
+                  <button className="btn btn-icon" onClick={() => setMobileTabOpen(false)} style={{ background: 'var(--color-surface-2)', borderRadius: '50%', width: 36, height: 36 }}>
+                    <X size={20} />
+                  </button>
+                </div>
+              )}
+
               <div className="tabs">
                 <button className={`tab ${activeTab === 'chapters' ? 'active' : ''}`} onClick={() => setActiveTab('chapters')}>
                   <List size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: '-3px' }}/> Chapters
@@ -487,6 +499,7 @@ export default function AudiobookPage() {
                           onClick={() => {
                             if (!isCurrent) loadBook(book, ch.startTime);
                             else jumpToChapter(idx);
+                            setMobileTabOpen(false);
                           }}
                           style={{
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -537,7 +550,11 @@ export default function AudiobookPage() {
                           <div key={bm.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '16px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
                             <div>
                                <div style={{ fontWeight: 600, color: 'var(--color-brand)', marginBottom: 4, cursor: 'pointer' }}
-                                    onClick={() => { if(!isCurrent) loadBook(book, bm.time); else { const {getAudioElement} = require('@/lib/store/playerStore'); getAudioElement().currentTime = bm.time; } }}>
+                                    onClick={() => { 
+                                      if(!isCurrent) loadBook(book, bm.time); 
+                                      else { const {getAudioElement} = require('@/lib/store/playerStore'); getAudioElement().currentTime = bm.time; } 
+                                      setMobileTabOpen(false);
+                                    }}>
                                  {formatTime(bm.time)}
                                </div>
                                <div className="text-secondary">{bm.note || bm.chapterTitle || 'Saved Bookmark'}</div>

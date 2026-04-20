@@ -339,6 +339,23 @@ button {
   .tabs-card-desktop {
     display: none !important; /* Uses mobile bottom icon row instead */
   }
+  .tabs-card-desktop.mobile-modal-active {
+    display: flex !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 100 !important;
+    flex-direction: column !important;
+    padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom) !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    max-height: none !important;
+    background: var(--color-bg) !important;
+    overflow-y: hidden !important; /* Scrolling handled internally */
+  }
   .mobile-player-options {
     display: flex !important;
   }
