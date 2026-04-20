@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, Suspense } from 'react';
 import { useLibraryStore, slugify } from '@/lib/store/libraryStore';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -31,7 +31,7 @@ function parseDurationSecs(book: Audiobook): number {
   return book.chapters.reduce((sum, ch) => sum + (ch.duration || 0), 0);
 }
 
-export default function AudiobooksPage() {
+function AudiobooksPageContent() {
   const { audiobooks, isLoaded, getAllCategories, getAllTopics, getAllAuthors } = useLibraryStore();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -514,5 +514,26 @@ export default function AudiobooksPage() {
         ))}
       </div>
     </div>
+    </div>
+  );
+}
+
+export default function AudiobooksPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="page">
+          <div className="skeleton" style={{ height: 48, width: 300, marginBottom: 16 }} />
+          <div className="skeleton" style={{ height: 48, marginBottom: 24 }} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 20 }}>
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className="skeleton" style={{ height: 260, borderRadius: 'var(--radius-lg)' }} />
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <AudiobooksPageContent />
+    </Suspense>
   );
 }
