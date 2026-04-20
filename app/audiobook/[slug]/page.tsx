@@ -403,28 +403,28 @@ export default function AudiobookPage() {
               </div>
 
               {/* Playback Buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
                 <button 
-                  className="btn btn-icon" 
+                  className="btn-icon" 
                   style={{ opacity: !isCurrent || currentChapterIdx === 0 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === 0 ? 'none' : 'auto' }}
                   onClick={() => jumpToChapter(currentChapterIdx - 1)}
+                  title="Previous chapter"
                 >
-                  <SkipBack size={24} />
+                  <SkipBack size={20} />
                 </button>
-                <button className="btn btn-icon" onClick={skipBackward} disabled={!isCurrent}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: 'var(--color-surface-2)', width: 44, height: 44 }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
-                    <span style={{ position: 'absolute', fontSize: '0.65rem', fontWeight: 700, marginTop: 2 }}>{skipInterval}</span>
-                  </div>
+                <button className="btn-skip" onClick={skipBackward} disabled={!isCurrent} title={`Back ${skipInterval}s`}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                  <span className="skip-label">{skipInterval}</span>
                 </button>
                 <button className="btn-play-large" onClick={handlePlayPause} style={{ width: 72, height: 72 }}>
-                  {isCurrent && isPlaying ? <Pause size={32} /> : <Play size={32} style={{ marginLeft: 4 }} />}
+                  {isCurrent && isPlaying
+                    ? <Pause size={30} strokeWidth={2.5} />
+                    : <Play size={30} strokeWidth={2.5} style={{ marginLeft: 4 }} />
+                  }
                 </button>
-                <button className="btn btn-icon" onClick={skipForward} disabled={!isCurrent}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', background: 'var(--color-surface-2)', width: 44, height: 44 }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'scaleX(-1)' }}><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
-                    <span style={{ position: 'absolute', fontSize: '0.65rem', fontWeight: 700, marginTop: 2 }}>{skipInterval}</span>
-                  </div>
+                <button className="btn-skip" onClick={skipForward} disabled={!isCurrent} title={`Forward ${skipInterval}s`}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'scaleX(-1)' }}><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                  <span className="skip-label">{skipInterval}</span>
                 </button>
                 <button 
                   className="btn btn-icon" 

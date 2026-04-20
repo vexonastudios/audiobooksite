@@ -422,17 +422,53 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
 }
 
 .btn-icon {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border-radius: 50%;
   color: var(--color-text-secondary);
   background: var(--color-surface-2);
+  border: 1.5px solid var(--color-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
 }
 .btn-icon:hover {
   color: var(--color-brand);
-  background: var(--color-surface-2);
+  background: rgba(46,106,167,0.08);
+  border-color: var(--color-brand);
   transform: scale(1.08);
+}
+
+/* Skip button with label badge */
+.btn-skip {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-2);
+  border: 1.5px solid var(--color-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+.btn-skip:hover {
+  color: var(--color-brand);
+  background: rgba(46,106,167,0.08);
+  border-color: var(--color-brand);
+  transform: scale(1.08);
+}
+.btn-skip .skip-label {
+  position: absolute;
+  bottom: 5px;
+  font-size: 0.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.01em;
 }
 
 .btn-play-large {
@@ -440,14 +476,19 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
   height: 56px;
   padding: 0;
   border-radius: 50%;
-  background: var(--color-brand);
+  background: linear-gradient(135deg, var(--color-brand-light), var(--color-brand-dark));
   color: white;
-  box-shadow: 0 4px 16px rgba(46,106,167,0.4);
+  box-shadow: 0 4px 20px rgba(46,106,167,0.45);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  border: none;
 }
 .btn-play-large:hover {
-  background: var(--color-brand-dark);
-  transform: scale(1.06);
-  box-shadow: 0 6px 24px rgba(46,106,167,0.5);
+  transform: scale(1.08);
+  box-shadow: 0 6px 28px rgba(46,106,167,0.55);
+}
 }
 
 /* Progress / Scrubber */
