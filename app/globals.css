@@ -28,9 +28,8 @@
   --player-height-dynamic: 0px;
   --sidebar-width:        248px;
   --tab-bar-height:       60px;
-}
 
-/* Elevation */
+  /* Elevation */
   --shadow-sm:  0 1px 3px rgba(46,106,167,0.08);
   --shadow-md:  0 4px 16px rgba(46,106,167,0.12);
   --shadow-lg:  0 8px 32px rgba(46,106,167,0.18);
