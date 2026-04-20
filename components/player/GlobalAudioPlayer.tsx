@@ -33,8 +33,14 @@ export function GlobalAudioPlayer() {
   }
 
   return (
-    <div className="player-bar animate-fade-in">
-      {/* Cover + Info */}
+    <>
+      <style>{`
+        :root {
+          --player-height-dynamic: var(--player-height);
+        }
+      `}</style>
+      <div className="player-bar animate-fade-in">
+        {/* Cover + Info */}
       <Link href={`/audiobook/${currentBook.slug}`} style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: '0 0 auto', maxWidth: 260 }}>
         {currentBook.coverImage ? (
           <img
@@ -115,6 +121,7 @@ export function GlobalAudioPlayer() {
       <button className="btn btn-icon" onClick={close} title="Close player" style={{ flexShrink: 0 }}>
         <X size={18} />
       </button>
-    </div>
+      </div>
+    </>
   );
 }

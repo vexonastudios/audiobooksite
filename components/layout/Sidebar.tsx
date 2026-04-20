@@ -73,7 +73,7 @@ export function Sidebar() {
 
       {/* Footer */}
       <div style={{ padding: '16px 20px', borderTop: '1px solid var(--color-border)', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-        © 2024 ScrollReader
+        © {new Date().getFullYear()} ScrollReader
       </div>
     </aside>
   );

@@ -25,10 +25,12 @@
 
   /* Player bar */
   --player-height:        80px;
+  --player-height-dynamic: 0px;
   --sidebar-width:        248px;
   --tab-bar-height:       60px;
+}
 
-  /* Elevation */
+/* Elevation */
   --shadow-sm:  0 1px 3px rgba(46,106,167,0.08);
   --shadow-md:  0 4px 16px rgba(46,106,167,0.12);
   --shadow-lg:  0 8px 32px rgba(46,106,167,0.18);
@@ -119,7 +121,7 @@ button {
   position: fixed;
   top: 0;
   left: 0;
-  bottom: var(--player-height);
+  bottom: var(--player-height-dynamic);
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
   overflow-y: auto;
@@ -132,8 +134,8 @@ button {
 .main-content {
   margin-left: var(--sidebar-width);
   flex: 1;
-  min-height: calc(100dvh - var(--player-height));
-  padding-bottom: var(--player-height);
+  min-height: calc(100dvh - var(--player-height-dynamic));
+  padding-bottom: var(--player-height-dynamic);
 }
 
 /* Global player bar */
