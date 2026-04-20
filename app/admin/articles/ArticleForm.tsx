@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 
 // Dynamically import React Quill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), {
+const ReactQuill = dynamic(() => import('react-quill-new'), {
   ssr: false,
   loading: () => (
     <div style={{ height: 400, background: '#F8F9FA', border: '1px solid #E2E8F0', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#718096' }}>
