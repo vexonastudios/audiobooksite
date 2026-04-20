@@ -17,8 +17,10 @@ const isPublicRoute = createRouteMatcher([
   '/api/library(.*)',
   '/api/notifications(.*)',
   '/api/image-proxy(.*)',
+  '/api/analytics(.*)',  // analytics: anonymous events allowed
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/stats(.*)',          // user stats page: handled by auth() inside
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

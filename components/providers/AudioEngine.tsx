@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { usePlayerStore, getAudioElement } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
+import { usePlayAnalytics } from '@/lib/hooks/usePlayAnalytics';
 
 /**
  * Attaches event listeners to the global <audio> element.
@@ -10,9 +11,12 @@ import { useUserStore } from '@/lib/store/userStore';
  * that keeps the Zustand player store in sync with the audio element.
  */
 export function AudioEngine() {
-  const { setCurrentTime, setDuration, setPlaying, currentBook } = usePlayerStore();
+  const { setCurrentTime, setDuration, setPlaying, currentBook, isPlaying, currentTime } = usePlayerStore();
   const addToHistory = useUserStore((s) => s.addToHistory);
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // ── Analytics tracking ────────────────────────────────────────────────────
+  usePlayAnalytics({ audiobookId: currentBook?.id, isPlaying, currentTime });
 
   useEffect(() => {
     const audio = getAudioElement();
