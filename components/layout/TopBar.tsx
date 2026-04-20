@@ -39,8 +39,12 @@ export function TopBar() {
   }, [currentPath]);
 
   // Close on any click outside the form OR the portal dropdown
+  // IMPORTANT: only call setOpen when open is true — calling setState on every
+  // mousedown causes a React re-render between mousedown and click, which
+  // replaces Link anchor elements in the DOM and swallows the click event.
   useEffect(() => {
     function handleOutsideClick(e: MouseEvent) {
+      if (!open) return;
       const target = e.target as Node;
       const inForm = formRef.current?.contains(target);
       const inDropdown = dropdownRef.current?.contains(target);
@@ -50,7 +54,7 @@ export function TopBar() {
     }
     document.addEventListener('mousedown', handleOutsideClick);
     return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, []);
+  }, [open]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const q = e.target.value;
