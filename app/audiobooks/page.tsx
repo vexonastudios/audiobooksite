@@ -514,7 +514,6 @@ function AudiobooksPageContent() {
         ))}
       </div>
     </div>
-    </div>
   );
 }
 
