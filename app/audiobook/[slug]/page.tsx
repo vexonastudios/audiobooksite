@@ -572,12 +572,12 @@ export default function AudiobookPage() {
                       <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Favorite</span>
                     </button>
                   ),
-                  quote: transcriptStatus !== 'unavailable' ? (
-                    <button key="quote" onClick={() => { setQuoteModalOpen(true); if (isPlaying) setPlaying(false); }} style={{ ...btnStyle, opacity: transcriptStatus === 'loading' ? 0.5 : 1 }} disabled={transcriptStatus === 'loading'}>
+                  quote: (
+                    <button key="quote" onClick={() => { setQuoteModalOpen(true); if (isPlaying) setPlaying(false); }} style={{ ...btnStyle, opacity: transcriptStatus === 'unavailable' ? 0.3 : transcriptStatus === 'loading' ? 0.5 : 1 }} disabled={transcriptStatus !== 'available'}>
                       <Quote size={22} />
                       <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Quote</span>
                     </button>
-                  ) : null,
+                  ),
                   share: (
                     <button key="share" onClick={() => { setActiveTab('share'); setMobileTabOpen(true); }} style={btnStyle}>
                       <Share2 size={22} />
@@ -590,12 +590,12 @@ export default function AudiobookPage() {
                       <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Timer</span>
                     </button>
                   ),
-                  readalong: transcriptStatus !== 'unavailable' ? (
-                    <button key="readalong" onClick={() => setReadAlongOpen(true)} style={{ ...btnStyle, opacity: transcriptStatus === 'loading' ? 0.5 : 1 }} disabled={transcriptStatus === 'loading'}>
+                  readalong: (
+                    <button key="readalong" onClick={() => setReadAlongOpen(true)} style={{ ...btnStyle, opacity: transcriptStatus === 'unavailable' ? 0.3 : transcriptStatus === 'loading' ? 0.5 : 1 }} disabled={transcriptStatus !== 'available'}>
                       <BookOpen size={22} />
                       <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Read Along</span>
                     </button>
-                  ) : null,
+                  ),
                 };
                 return (
                   <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginTop: 32, paddingBottom: 16 }}>
