@@ -676,16 +676,18 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
 /* Skip button with label badge */
 .btn-skip {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 44px;
   height: 44px;
   padding: 0;
   border-radius: 50%;
   color: var(--color-text-secondary);
-  background: var(--color-surface-2);
-  border: 1.5px solid var(--color-border);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  background: var(--color-surface-hover);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  outline: none;
   transition: all var(--transition-fast);
 }
 .btn-skip:hover {
@@ -696,11 +698,13 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
 }
 .btn-skip .skip-label {
   position: absolute;
-  bottom: 5px;
-  font-size: 0.5rem;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.55rem;
   font-weight: 800;
   line-height: 1;
-  letter-spacing: 0.01em;
+  pointer-events: none;
 }
 
 .btn-play-large {

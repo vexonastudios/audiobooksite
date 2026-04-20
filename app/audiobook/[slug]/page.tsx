@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
-import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon, Heart, ExternalLink } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon, Heart, ExternalLink, RotateCcw, RotateCw } from 'lucide-react';
 import { BookCard } from '@/components/ui/BookCard';
 import { ReadAlongPanel } from '@/components/ui/ReadAlongPanel';
 import { QuoteModal } from '@/components/ui/QuoteModal';
@@ -457,8 +457,8 @@ export default function AudiobookPage() {
                   <SkipBack size={24} fill="currentColor" />
                 </button>
                 <button className="btn-skip" style={{ width: 48, height: 48, background: 'transparent', border: 'none' }} onClick={skipBackward} disabled={!isCurrent} title={`Back ${skipInterval}s`}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                  <span className="skip-label" style={{ bottom: 10, fontSize: '0.6rem' }}>{skipInterval}</span>
+                  <RotateCcw size={32} strokeWidth={2} />
+                  <span className="skip-label">{skipInterval}</span>
                 </button>
                 <button className="btn-play-large" onClick={handlePlayPause} style={{ width: 72, height: 72, background: 'var(--color-brand)', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(var(--color-brand-rgb, 0,0,0), 0.3)' }}>
                   {isCurrent && isPlaying
@@ -467,8 +467,8 @@ export default function AudiobookPage() {
                   }
                 </button>
                 <button className="btn-skip" style={{ width: 48, height: 48, background: 'transparent', border: 'none' }} onClick={skipForward} disabled={!isCurrent} title={`Forward ${skipInterval}s`}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'scaleX(-1)' }}><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                  <span className="skip-label" style={{ bottom: 10, fontSize: '0.6rem' }}>{skipInterval}</span>
+                  <RotateCw size={32} strokeWidth={2} />
+                  <span className="skip-label">{skipInterval}</span>
                 </button>
                 <button 
                   className="btn btn-icon" 

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
-import { Play, Pause, SkipBack, SkipForward, X } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, X, RotateCcw, RotateCw } from 'lucide-react';
 import Link from 'next/link';
 
 function formatTime(s: number) {
@@ -20,7 +20,7 @@ const SPEEDS = [0.75, 1, 1.25, 1.5, 1.75, 2];
 
 export function GlobalAudioPlayer() {
   const { currentBook, isPlaying, currentTime, duration, activeChapterIndex,
-    playbackSpeed, setPlaying, skipForward, skipBackward, setPlaybackSpeed, close } = usePlayerStore();
+    playbackSpeed, setPlaying, skipForward, skipBackward, setPlaybackSpeed, jumpToChapter, close } = usePlayerStore();
   const skipInterval = useUserStore(s => s.skipInterval);
 
   if (!currentBook) return null;
@@ -72,13 +72,24 @@ export function GlobalAudioPlayer() {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '0 16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
 
-            {/* Rewind */}
+            {/* Prev Track */}
+            <button 
+              className="btn-icon" 
+              onClick={() => jumpToChapter(activeChapterIndex - 1)} 
+              disabled={activeChapterIndex === 0} 
+              style={{ opacity: activeChapterIndex === 0 ? 0.3 : 1 }}
+              title="Previous Chapter"
+            >
+              <SkipBack size={18} fill="currentColor" />
+            </button>
+
+            {/* Rewind 15s */}
             <button
               className="btn-skip"
               onClick={skipBackward}
               title={`Back ${skipInterval}s`}
             >
-              <SkipBack size={17} />
+              <RotateCcw size={22} strokeWidth={2.5} />
               <span className="skip-label">{skipInterval}</span>
             </button>
 
@@ -90,19 +101,30 @@ export function GlobalAudioPlayer() {
               style={{ width: 48, height: 48 }}
             >
               {isPlaying
-                ? <Pause size={20} strokeWidth={2.5} />
-                : <Play size={20} strokeWidth={2.5} style={{ marginLeft: 2 }} />
+                ? <Pause size={20} strokeWidth={2.5} fill="currentColor" color="currentColor" />
+                : <Play size={20} strokeWidth={2.5} style={{ marginLeft: 2 }} fill="currentColor" color="currentColor" />
               }
             </button>
 
-            {/* Fast-forward */}
+            {/* Fast-forward 15s */}
             <button
               className="btn-skip"
               onClick={skipForward}
               title={`Forward ${skipInterval}s`}
             >
-              <SkipForward size={17} />
+              <RotateCw size={22} strokeWidth={2.5} />
               <span className="skip-label">{skipInterval}</span>
+            </button>
+
+            {/* Next Track */}
+            <button 
+              className="btn-icon" 
+              onClick={() => jumpToChapter(activeChapterIndex + 1)} 
+              disabled={activeChapterIndex >= (currentBook.chapters?.length || 1) - 1} 
+              style={{ opacity: activeChapterIndex >= (currentBook.chapters?.length || 1) - 1 ? 0.3 : 1 }}
+              title="Next Chapter"
+            >
+              <SkipForward size={18} fill="currentColor" />
             </button>
 
             {/* Speed Toggle — hidden on mobile */}
