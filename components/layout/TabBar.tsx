@@ -2,25 +2,46 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BookOpen, Heart, Quote } from 'lucide-react';
+import { Home, BookOpen, Heart, Quote, BookmarkPlus, Clock, User } from 'lucide-react';
+import { useUserStore } from '@/lib/store/userStore';
+import { useEffect, useState } from 'react';
 
-const tabs = [
-  { href: '/',           label: 'Home',      icon: Home     },
-  { href: '/audiobooks', label: 'Browse',    icon: BookOpen },
-  { href: '/favorites',  label: 'Favorites', icon: Heart    },
-  { href: '/quotes',     label: 'Quotes',    icon: Quote    },
-];
+const allTabs: Record<string, { href: string; label: string; icon: React.ElementType }> = {
+  home: { href: '/', label: 'Home', icon: Home },
+  browse: { href: '/audiobooks', label: 'Browse', icon: BookOpen },
+  favorites: { href: '/favorites', label: 'Favorites', icon: Heart },
+  bookmarks: { href: '/bookmarks', label: 'Bookmarks', icon: BookmarkPlus },
+  quotes: { href: '/quotes', label: 'Quotes', icon: Quote },
+  history: { href: '/history', label: 'History', icon: Clock },
+  status: { href: '/status', label: 'My Status', icon: User },
+};
+
+const DEFAULT_TABS = ['home', 'browse', 'favorites', 'quotes'];
 
 export function TabBar() {
   const pathname = usePathname();
+  const mobileNavActions = useUserStore((s) => s.mobileNavActions);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Use default tabs during SSR to prevent hydration mismatch
+  const tabsToRender = mounted && mobileNavActions?.length > 0 ? mobileNavActions : DEFAULT_TABS;
 
   return (
     <nav className="tab-bar">
-      {tabs.map(({ href, label, icon: Icon }) => {
+      {tabsToRender.map((key) => {
+        const tab = allTabs[key];
+        if (!tab) return null;
+        
+        const { href, label, icon: Icon } = tab;
         const active = pathname === href || (href !== '/' && pathname.startsWith(href));
+        
         return (
           <Link
-            key={href}
+            key={key}
             href={href}
             style={{
               flex: 1,

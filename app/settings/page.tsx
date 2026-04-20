@@ -5,6 +5,7 @@ import { useUserStore } from '@/lib/store/userStore';
 import {
   Settings, GripVertical, Check, List, BookmarkPlus, Heart,
   Share2, Moon, BookOpen, ChevronRight, Gauge, Info,
+  Home, Quote, Clock, User
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -18,33 +19,35 @@ const ALL_ACTIONS = [
   { id: 'readalong', label: 'Read Along', description: 'Follow along with the transcript',            icon: BookOpen },
 ];
 
-const MAX_ACTIONS = 5;
+// All possible nav buttons
+const ALL_NAV_ACTIONS = [
+  { id: 'home',      label: 'Home',      description: 'Go to the home page',                 icon: Home },
+  { id: 'browse',    label: 'Browse',    description: 'Explore all audiobooks',              icon: BookOpen },
+  { id: 'favorites', label: 'Favorites', description: 'Your favorite audiobooks',            icon: Heart },
+  { id: 'bookmarks', label: 'Bookmarks', description: 'Your saved bookmarks',                icon: BookmarkPlus },
+  { id: 'quotes',    label: 'Quotes',    description: 'Your saved quotes',                   icon: Quote },
+  { id: 'history',   label: 'History',   description: 'Recently listened to audiobooks',     icon: Clock },
+  { id: 'status',    label: 'My Status', description: 'Your listening profile and stats',    icon: User },
+];
 
-export default function SettingsPage() {
-  const {
-    skipInterval, setSkipInterval,
-    playerQuickActions, setPlayerQuickActions,
-    notificationsEnabled, toggleNotifications,
-    quoteSettings, updateQuoteSettings,
-    readAlongFontSize, setReadAlongFontSize,
-  } = useUserStore();
-
-  // Local copy for drag state
-  const [actions, setActions] = useState<string[]>(playerQuickActions);
+function ActionPickerSection({
+  title, description, allActions, maxActions, savedActions, onSave
+}: {
+  title: string; description: string; allActions: { id: string; label: string; description: string; icon: any }[]; maxActions: number; savedActions: string[]; onSave: (a: string[]) => void;
+}) {
+  const [actions, setActions] = useState<string[]>(savedActions);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
   const [saved, setSaved] = useState(false);
 
-  // ── Toggle an action on/off ────────────────────────────────────────────────
   function toggleAction(id: string) {
     setActions(prev => {
       if (prev.includes(id)) return prev.filter(a => a !== id);
-      if (prev.length >= MAX_ACTIONS) return prev;
+      if (prev.length >= maxActions) return prev;
       return [...prev, id];
     });
   }
 
-  // ── Drag-and-drop reorder ──────────────────────────────────────────────────
   function onDragStart(idx: number) { setDragIdx(idx); }
   function onDragOver(e: React.DragEvent, idx: number) {
     e.preventDefault();
@@ -60,14 +63,153 @@ export default function SettingsPage() {
   }
   function reset() { setDragIdx(null); setDragOverIdx(null); }
 
-  // ── Save ──────────────────────────────────────────────────────────────────
   function save() {
-    setPlayerQuickActions(actions);
+    onSave(actions);
     setSaved(true);
     setTimeout(() => setSaved(false), 2200);
   }
 
   const activeSet = new Set(actions);
+
+  return (
+    <section style={{ marginBottom: 32 }}>
+      <h2 style={{ fontSize: '0.875rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-muted)', marginBottom: 4 }}>
+        {title}
+      </h2>
+      <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
+        {description}
+      </p>
+
+      <div className="card" style={{ padding: 8, marginBottom: 16 }}>
+        {allActions.map(action => {
+          const isActive = activeSet.has(action.id);
+          const isDisabled = !isActive && actions.length >= maxActions;
+          return (
+            <button
+              key={action.id}
+              onClick={() => toggleAction(action.id)}
+              disabled={isDisabled}
+              style={{
+                width: '100%',
+                display: 'flex', alignItems: 'center', gap: 14,
+                padding: '12px 14px', borderRadius: 'var(--radius-md)',
+                background: isActive ? 'rgba(46,106,167,0.06)' : 'transparent',
+                border: 'none', cursor: isDisabled ? 'not-allowed' : 'pointer',
+                opacity: isDisabled ? 0.4 : 1,
+                transition: 'background 0.15s',
+                textAlign: 'left',
+              }}
+            >
+              <div style={{
+                width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                background: isActive ? 'var(--color-brand)' : 'var(--color-surface-2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'background 0.15s',
+              }}>
+                <action.icon size={16} color={isActive ? 'white' : 'var(--color-text-secondary)'} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--color-text-primary)' }}>
+                  {action.label}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                  {action.description}
+                </div>
+              </div>
+              <div style={{
+                width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                border: `2px solid ${isActive ? 'var(--color-brand)' : 'var(--color-border)'}`,
+                background: isActive ? 'var(--color-brand)' : 'transparent',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.15s',
+              }}>
+                {isActive && <Check size={12} color="white" strokeWidth={3} />}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {actions.length > 0 && (
+        <>
+          <p style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--color-text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Order ({actions.length}/{maxActions})
+          </p>
+          <div className="card" style={{ padding: 8, marginBottom: 16 }}>
+            {actions.map((id, idx) => {
+              const action = allActions.find(a => a.id === id)!;
+              if (!action) return null;
+              const isDragOver = dragOverIdx === idx && dragIdx !== idx;
+              return (
+                <div
+                  key={id}
+                  draggable
+                  onDragStart={() => onDragStart(idx)}
+                  onDragOver={e => onDragOver(e, idx)}
+                  onDrop={() => onDrop(idx)}
+                  onDragEnd={reset}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '11px 14px', borderRadius: 'var(--radius-md)',
+                    background: isDragOver ? 'rgba(46,106,167,0.08)' : dragIdx === idx ? 'var(--color-surface-2)' : 'transparent',
+                    border: isDragOver ? '1.5px dashed var(--color-brand)' : '1.5px solid transparent',
+                    cursor: 'grab', transition: 'background 0.1s, border 0.1s',
+                    opacity: dragIdx === idx ? 0.5 : 1,
+                  }}
+                >
+                  <GripVertical size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
+                  <div style={{
+                    width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                    background: 'var(--color-brand)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <action.icon size={15} color="white" />
+                  </div>
+                  <span style={{ fontWeight: 600, fontSize: '0.9rem', flex: 1, color: 'var(--color-text-primary)' }}>
+                    {action.label}
+                  </span>
+                  <span style={{
+                    width: 22, height: 22, borderRadius: '50%',
+                    background: 'var(--color-surface-2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.72rem', fontWeight: 800, color: 'var(--color-text-muted)',
+                    flexShrink: 0,
+                  }}>
+                    {idx + 1}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      <button
+        onClick={save}
+        style={{
+          width: '100%', padding: '13px 20px',
+          background: saved ? '#22c55e' : 'var(--color-brand)',
+          color: 'white', border: 'none', borderRadius: 'var(--radius-lg)',
+          fontWeight: 700, fontSize: '0.9375rem', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          transition: 'background 0.3s',
+        }}
+      >
+        {saved ? <><Check size={18} strokeWidth={3} /> Saved!</> : 'Save Quick Actions'}
+      </button>
+    </section>
+  );
+}
+
+export default function SettingsPage() {
+  const {
+    skipInterval, setSkipInterval,
+    playerQuickActions, setPlayerQuickActions,
+    mobileNavActions, setMobileNavActions,
+    notificationsEnabled, toggleNotifications,
+    quoteSettings, updateQuoteSettings,
+    readAlongFontSize, setReadAlongFontSize,
+  } = useUserStore();
 
   return (
     <div className="page pb-24" style={{ maxWidth: 680, margin: '0 auto' }}>
@@ -88,138 +230,23 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* ────────────────────────────────────────────────────────────────────── */}
-      {/* Section: Player Quick Actions                                         */}
-      {/* ────────────────────────────────────────────────────────────────────── */}
-      <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: '0.875rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-muted)', marginBottom: 4 }}>
-          Mobile Player — Quick Actions
-        </h2>
-        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
-          Choose up to {MAX_ACTIONS} buttons to show in the quick-access row beneath the player controls. Drag to reorder them.
-        </p>
+      <ActionPickerSection
+        title="Mobile Navigation"
+        description="Choose up to 5 buttons to show in the mobile app bottom tab bar. Drag to reorder them."
+        allActions={ALL_NAV_ACTIONS}
+        maxActions={5}
+        savedActions={mobileNavActions}
+        onSave={(a) => setMobileNavActions(a)}
+      />
 
-        {/* Available toggles */}
-        <div className="card" style={{ padding: 8, marginBottom: 16 }}>
-          {ALL_ACTIONS.map(action => {
-            const isActive = activeSet.has(action.id);
-            const isDisabled = !isActive && actions.length >= MAX_ACTIONS;
-            return (
-              <button
-                key={action.id}
-                onClick={() => toggleAction(action.id)}
-                disabled={isDisabled}
-                style={{
-                  width: '100%',
-                  display: 'flex', alignItems: 'center', gap: 14,
-                  padding: '12px 14px', borderRadius: 'var(--radius-md)',
-                  background: isActive ? 'rgba(46,106,167,0.06)' : 'transparent',
-                  border: 'none', cursor: isDisabled ? 'not-allowed' : 'pointer',
-                  opacity: isDisabled ? 0.4 : 1,
-                  transition: 'background 0.15s',
-                  textAlign: 'left',
-                }}
-              >
-                <div style={{
-                  width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                  background: isActive ? 'var(--color-brand)' : 'var(--color-surface-2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'background 0.15s',
-                }}>
-                  <action.icon size={16} color={isActive ? 'white' : 'var(--color-text-secondary)'} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--color-text-primary)' }}>
-                    {action.label}
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-                    {action.description}
-                  </div>
-                </div>
-                <div style={{
-                  width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
-                  border: `2px solid ${isActive ? 'var(--color-brand)' : 'var(--color-border)'}`,
-                  background: isActive ? 'var(--color-brand)' : 'transparent',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.15s',
-                }}>
-                  {isActive && <Check size={12} color="white" strokeWidth={3} />}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Ordered list (drag to reorder) */}
-        {actions.length > 0 && (
-          <>
-            <p style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--color-text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Order ({actions.length}/{MAX_ACTIONS})
-            </p>
-            <div className="card" style={{ padding: 8, marginBottom: 16 }}>
-              {actions.map((id, idx) => {
-                const action = ALL_ACTIONS.find(a => a.id === id)!;
-                if (!action) return null;
-                const isDragOver = dragOverIdx === idx && dragIdx !== idx;
-                return (
-                  <div
-                    key={id}
-                    draggable
-                    onDragStart={() => onDragStart(idx)}
-                    onDragOver={e => onDragOver(e, idx)}
-                    onDrop={() => onDrop(idx)}
-                    onDragEnd={reset}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 12,
-                      padding: '11px 14px', borderRadius: 'var(--radius-md)',
-                      background: isDragOver ? 'rgba(46,106,167,0.08)' : dragIdx === idx ? 'var(--color-surface-2)' : 'transparent',
-                      border: isDragOver ? '1.5px dashed var(--color-brand)' : '1.5px solid transparent',
-                      cursor: 'grab', transition: 'background 0.1s, border 0.1s',
-                      opacity: dragIdx === idx ? 0.5 : 1,
-                    }}
-                  >
-                    <GripVertical size={18} color="var(--color-text-muted)" style={{ flexShrink: 0 }} />
-                    <div style={{
-                      width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                      background: 'var(--color-brand)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <action.icon size={15} color="white" />
-                    </div>
-                    <span style={{ fontWeight: 600, fontSize: '0.9rem', flex: 1, color: 'var(--color-text-primary)' }}>
-                      {action.label}
-                    </span>
-                    <span style={{
-                      width: 22, height: 22, borderRadius: '50%',
-                      background: 'var(--color-surface-2)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '0.72rem', fontWeight: 800, color: 'var(--color-text-muted)',
-                      flexShrink: 0,
-                    }}>
-                      {idx + 1}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
-
-        {/* Save button */}
-        <button
-          onClick={save}
-          style={{
-            width: '100%', padding: '13px 20px',
-            background: saved ? '#22c55e' : 'var(--color-brand)',
-            color: 'white', border: 'none', borderRadius: 'var(--radius-lg)',
-            fontWeight: 700, fontSize: '0.9375rem', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            transition: 'background 0.3s',
-          }}
-        >
-          {saved ? <><Check size={18} strokeWidth={3} /> Saved!</> : 'Save Quick Actions'}
-        </button>
-      </section>
+      <ActionPickerSection
+        title="Mobile Player — Quick Actions"
+        description={`Choose up to 5 buttons to show in the quick-access row beneath the player controls. Drag to reorder them.`}
+        allActions={ALL_ACTIONS}
+        maxActions={5}
+        savedActions={playerQuickActions}
+        onSave={(a) => setPlayerQuickActions(a)}
+      />
 
       {/* ────────────────────────────────────────────────────────────────────── */}
       {/* Section: Playback                                                     */}
