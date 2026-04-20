@@ -8,65 +8,11 @@ import Link from 'next/link';
 import { Headphones, ChevronRight, ChevronLeft, BookOpen } from 'lucide-react';
 import { NotificationBanner } from '@/components/ui/NotificationBanner';
 import { BookCard } from '@/components/ui/BookCard';
+import { ScrollRow } from '@/components/ui/ScrollRow';
 import { useState, useEffect } from 'react';
 
 const BOOK_CARD_WIDTH = 168;
 const CL_CARD_WIDTH = 134; // Slightly smaller for Continue Listening
-
-// ── Scroll Row with desktop arrow + right fade ────────────────────────────────
-function ScrollRow({ books, cardWidth = BOOK_CARD_WIDTH, compact = false }: { books: Audiobook[]; cardWidth?: number; compact?: boolean }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
-  const checkScroll = () => {
-    if (ref.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = ref.current;
-      setCanScrollLeft(scrollLeft > 5);
-      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth - 5);
-    }
-  };
-
-  useEffect(() => {
-    checkScroll();
-    window.addEventListener('resize', checkScroll);
-    return () => window.removeEventListener('resize', checkScroll);
-  }, [books]);
-
-  const scrollLeft = () => {
-    if (ref.current) ref.current.scrollBy({ left: -((cardWidth + 16) * 3), behavior: 'smooth' });
-  };
-  const scrollRight = () => {
-    if (ref.current) ref.current.scrollBy({ left: (cardWidth + 16) * 3, behavior: 'smooth' });
-  };
-  return (
-    <div className="scroll-row-wrapper" onMouseEnter={checkScroll}>
-      <div className="scroll-row" ref={ref} onScroll={checkScroll}>
-        {books.map((book) => (
-          <BookCard key={book.id} book={book} width={cardWidth} compact={compact} />
-        ))}
-      </div>
-      
-      {canScrollLeft && (
-        <>
-          <div className="scroll-fade left" />
-          <button className="scroll-arrow left" onClick={scrollLeft} aria-label="Scroll left">
-            <ChevronLeft size={18} />
-          </button>
-        </>
-      )}
-      
-      {canScrollRight && (
-        <>
-          <div className="scroll-fade right" />
-          <button className="scroll-arrow right" onClick={scrollRight} aria-label="Scroll right">
-            <ChevronRight size={18} />
-          </button>
-        </>
-      )}
-    </div>
-  );
-}
 
 // ── Article thumbnail colors ───────────────────────────────────────────────────
 const ARTICLE_GRADIENTS = [

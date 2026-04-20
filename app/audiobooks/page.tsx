@@ -5,6 +5,7 @@ import { useLibraryStore, slugify } from '@/lib/store/libraryStore';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { BookCard } from '@/components/ui/BookCard';
+import { ScrollRow } from '@/components/ui/ScrollRow';
 import {
   Search, SlidersHorizontal, LayoutGrid, List as ListIcon,
   ChevronDown, X, Clock, TrendingUp, ArrowDownAZ, Calendar,
@@ -138,6 +139,17 @@ function AudiobooksPageContent() {
           }
         </p>
       </div>
+
+      {/* Recommended Audiobooks (Only show if no search/filters active and in grid mode) */}
+      {!searchQuery && activeFilterCount === 0 && viewMode === 'grid' && (
+        <div style={{ marginBottom: 48 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <TrendingUp size={22} color="var(--color-brand)" />
+            <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Recommended for You</h2>
+          </div>
+          <ScrollRow books={[...audiobooks].sort((a,b) => b.plays - a.plays).slice(0, 10)} />
+        </div>
+      )}
 
       {/* Search + Controls Bar */}
       <div style={{
