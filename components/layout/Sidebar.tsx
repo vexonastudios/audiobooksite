@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash, Bell, Trophy, BookMarked, ChevronUp } from 'lucide-react';
+import { useUIStore } from '@/lib/store/uiStore';
+import { useEffect } from 'react';
 
 const mainGroup = [
   { href: '/',            label: 'Home',       icon: Home       },
@@ -27,8 +29,15 @@ const moreGroup = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { sidebarOpen, closeSidebar } = useUIStore();
 
-  function renderGroup(items: any[]) {
+  // Close sidebar whenever route changes (mobile navigation)
+  useEffect(() => {
+    closeSidebar();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
+  function renderGroup(items: { href: string; label: string; icon: any }[]) {
     return items.map(({ href, label, icon: Icon }) => {
       const active = pathname === href || (href !== '/' && pathname.startsWith(href));
       return (
@@ -58,43 +67,54 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="sidebar">
-      {/* Logo */}
-      <div style={{ padding: '24px 20px 16px' }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <img src="/logo.png" alt="ScrollReader Logo" style={{ width: 'auto', height: 36, objectFit: 'contain' }} />
-          <span style={{ fontWeight: 800, fontSize: '1.0625rem', color: 'var(--color-text-primary)', letterSpacing: '-0.01em' }}>
-            ScrollReader
-          </span>
-        </Link>
-        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 4, marginLeft: 46 }}>
-          Free Christian Audiobooks
-        </p>
-      </div>
+    <>
+      {/* Dark overlay — sits behind sidebar, closes it when tapped (mobile only) */}
+      {sidebarOpen && (
+        <div
+          onClick={closeSidebar}
+          aria-hidden="true"
+          className="sidebar-overlay"
+        />
+      )}
 
-      {/* Nav */}
-      <nav style={{ flex: 1, padding: '8px 12px' }}>
-        {renderGroup(mainGroup)}
-
-        <div style={{ height: 1, background: 'var(--color-border)', margin: '16px 8px' }} />
-
-        <div style={{ padding: '0 12px', marginBottom: 8, fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>
-          You
+      <aside className={`sidebar${sidebarOpen ? ' is-open' : ''}`}>
+        {/* Logo */}
+        <div style={{ padding: '24px 20px 16px' }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+            <img src="/logo.png" alt="ScrollReader Logo" style={{ width: 'auto', height: 36, objectFit: 'contain' }} />
+            <span style={{ fontWeight: 800, fontSize: '1.0625rem', color: 'var(--color-text-primary)', letterSpacing: '-0.01em' }}>
+              ScrollReader
+            </span>
+          </Link>
+          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 4, marginLeft: 46 }}>
+            Free Christian Audiobooks
+          </p>
         </div>
-        {renderGroup(youGroup)}
 
-        <div style={{ height: 1, background: 'var(--color-border)', margin: '16px 8px' }} />
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: '8px 12px', overflowY: 'auto' }}>
+          {renderGroup(mainGroup)}
 
-        <div style={{ padding: '0 12px', marginBottom: 8, fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center' }}>
-          More <ChevronUp size={16} style={{ strokeWidth: 2.5, marginLeft: 4 }} />
+          <div style={{ height: 1, background: 'var(--color-border)', margin: '16px 8px' }} />
+
+          <div style={{ padding: '0 12px', marginBottom: 8, fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>
+            You
+          </div>
+          {renderGroup(youGroup)}
+
+          <div style={{ height: 1, background: 'var(--color-border)', margin: '16px 8px' }} />
+
+          <div style={{ padding: '0 12px', marginBottom: 8, fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center' }}>
+            More <ChevronUp size={16} style={{ strokeWidth: 2.5, marginLeft: 4 }} />
+          </div>
+          {renderGroup(moreGroup)}
+        </nav>
+
+        {/* Footer */}
+        <div style={{ padding: '16px 20px', borderTop: '1px solid var(--color-border)', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+          © {new Date().getFullYear()} ScrollReader
         </div>
-        {renderGroup(moreGroup)}
-      </nav>
-
-      {/* Footer */}
-      <div style={{ padding: '16px 20px', borderTop: '1px solid var(--color-border)', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-        © {new Date().getFullYear()} ScrollReader
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }

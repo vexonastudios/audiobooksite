@@ -155,23 +155,28 @@ button {
   backdrop-filter: blur(12px);
 }
 
-/* Mobile: sidebar becomes bottom tab bar */
+/* Mobile: sidebar becomes a slide-in overlay from the left */
 @media (max-width: 768px) {
   .sidebar {
-    top: auto;
-    bottom: calc(var(--player-height) + var(--tab-bar-height));
+    top: 0;
+    bottom: 0;
     left: 0;
-    right: 0;
-    width: 100%;
-    height: auto;
+    right: auto;
+    width: min(296px, 85vw);
+    height: 100dvh;
     transform: translateX(-100%);
-    border-right: none;
-    border-top: 1px solid var(--color-border);
+    border-right: 1px solid var(--color-border);
+    border-top: none;
+    z-index: 50;
+  }
+
+  .sidebar.is-open {
+    transform: translateX(0);
   }
 
   .main-content {
     margin-left: 0;
-    padding-bottom: calc(var(--player-height) + var(--tab-bar-height));
+    padding-bottom: calc(var(--player-height-dynamic) + var(--tab-bar-height));
   }
 
   .tab-bar {
@@ -182,13 +187,75 @@ button {
 .tab-bar {
   display: none;
   position: fixed;
-  bottom: var(--player-height);
+  bottom: var(--player-height-dynamic);
   left: 0;
   right: 0;
   height: var(--tab-bar-height);
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
   z-index: 45;
+}
+
+/* Sidebar backdrop overlay (mobile) */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 49;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* Show/hide utilities */
+.mobile-only {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: flex !important;
+  }
+  .desktop-only {
+    display: none !important;
+  }
+
+  /* Compact player bar on mobile */
+  .player-bar {
+    height: 64px;
+    padding: 0 12px;
+    gap: 10px;
+  }
+
+  /* Hide scrubber and speed button on mobile */
+  .player-desktop-only {
+    display: none !important;
+  }
+
+  /* Shrink info section so controls have room */
+  .player-info-section {
+    max-width: 130px !important;
+  }
+
+  .player-info-section img {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  /* Shrink play/skip buttons slightly */
+  .player-bar .btn-play-large {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .player-bar .btn-skip {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  /* Ensure TopBar padding is reduced on mobile */
+  header {
+    padding: 10px 12px !important;
+  }
 }
 
 /* ─── Typography ─────────────────────────────────────────────────────────────── */

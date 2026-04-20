@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, Settings, X, CheckSquare, Square } from 'lucide-react';
+import { Search, Settings, X, CheckSquare, Square, Menu } from 'lucide-react';
+import { useUIStore } from '@/lib/store/uiStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { useUserStore } from '@/lib/store/userStore';
 import { UserButton, SignInButton, useUser } from '@clerk/nextjs';
@@ -11,6 +12,7 @@ import type { Audiobook } from '@/lib/types';
 import Link from 'next/link';
 
 export function TopBar() {
+  const { toggleSidebar } = useUIStore();
   const router = useRouter();
   const currentPath = usePathname();
   const [query, setQuery] = useState('');

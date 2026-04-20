@@ -2,21 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, BookOpen, Clock, Bookmark, Quote } from 'lucide-react';
+import { Home, BookOpen, Clock, Quote } from 'lucide-react';
 
 const tabs = [
-  { href: '/',           label: 'Home',      icon: Home     },
-  { href: '/search',     label: 'Search',    icon: Search   },
-  { href: '/categories', label: 'Browse',    icon: BookOpen },
-  { href: '/quotes',     label: 'Quotes',    icon: Quote    },
-  { href: '/bookmarks',  label: 'Saved',     icon: Bookmark },
+  { href: '/',           label: 'Home',    icon: Home     },
+  { href: '/categories', label: 'Browse',  icon: BookOpen },
+  { href: '/history',    label: 'History', icon: Clock    },
+  { href: '/quotes',     label: 'Quotes',  icon: Quote    },
 ];
 
 export function TabBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="tab-bar" style={{ display: 'none' }}>
+    <nav className="tab-bar">
       {tabs.map(({ href, label, icon: Icon }) => {
         const active = pathname === href || (href !== '/' && pathname.startsWith(href));
         return (
@@ -29,15 +28,16 @@ export function TabBar() {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 3,
+              gap: 4,
               color: active ? 'var(--color-brand)' : 'var(--color-text-muted)',
               fontSize: '0.6875rem',
               fontWeight: active ? 600 : 400,
-              padding: '6px 0',
+              padding: '8px 0',
               transition: 'color var(--transition-fast)',
+              textDecoration: 'none',
             }}
           >
-            <Icon size={20} />
+            <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
             {label}
           </Link>
         );

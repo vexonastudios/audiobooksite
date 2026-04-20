@@ -45,7 +45,7 @@ export function GlobalAudioPlayer() {
       <div className="player-bar animate-fade-in">
 
         {/* Cover + Info */}
-        <Link href={`/audiobook/${currentBook.slug}`} style={{
+        <Link href={`/audiobook/${currentBook.slug}`} className="player-info-section" style={{
           display: 'flex', alignItems: 'center', gap: 12,
           minWidth: 0, flex: '0 0 auto', maxWidth: 240, textDecoration: 'none',
         }}>
@@ -105,8 +105,9 @@ export function GlobalAudioPlayer() {
               <span className="skip-label">{skipInterval}</span>
             </button>
 
-            {/* Speed Toggle */}
+            {/* Speed Toggle — hidden on mobile */}
             <button
+              className="player-speed-btn player-desktop-only"
               onClick={() => {
                 const currentIndex = SPEEDS.indexOf(playbackSpeed);
                 const nextIndex = currentIndex === -1 || currentIndex === SPEEDS.length - 1 ? 0 : currentIndex + 1;
@@ -136,8 +137,8 @@ export function GlobalAudioPlayer() {
 
           </div>
 
-          {/* Scrubber */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', maxWidth: 460 }}>
+          {/* Scrubber — hidden on mobile */}
+          <div className="player-desktop-only" style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', maxWidth: 460 }}>
             <span style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)', minWidth: 38, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
               {formatTime(currentTime)}
             </span>
