@@ -727,11 +727,11 @@ export default function AudiobookPage() {
 
         {/* More Like This */}
         {related.length > 0 && (
-          <div style={{ marginTop: 64, width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
+          <div style={{ marginTop: 64, display: 'block', width: 'auto', minWidth: 0 }}>
             <div className="section-header">
               <h2 className="section-title">More Like This</h2>
             </div>
-            <div className="scroll-row-wrapper">
+            <div className="scroll-row-wrapper" style={{ minWidth: 0, width: '100%' }}>
               <div className="scroll-row">
                 {related.map(rBook => (
                    <BookCard key={rBook.id} book={rBook} />
