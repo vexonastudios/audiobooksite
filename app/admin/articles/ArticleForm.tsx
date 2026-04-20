@@ -36,12 +36,14 @@ export interface ArticleData {
   voice_id?: string;
   duration_secs?: number;
   length_str?: string;
+  source_audiobook_slug?: string;
 }
 
 interface Metadata {
   categories: string[];
   topics: string[];
   authors: string[];
+  audiobooks: { slug: string, title: string }[];
 }
 
 const QUILL_MODULES = {
@@ -249,7 +251,7 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [slugEdited, setSlugEdited] = useState(false);
-  const [meta, setMeta] = useState<Metadata>({ categories: [], topics: [], authors: [] });
+  const [meta, setMeta] = useState<Metadata>({ categories: [], topics: [], authors: [], audiobooks: [] });
 
   // Audio TTS state
   const [audioUrl, setAudioUrl] = useState(initialData?.audio_url ?? '');
@@ -257,6 +259,7 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
   const [audioGenerating, setAudioGenerating] = useState(false);
   const [audioMsg, setAudioMsg] = useState('');
   const [audioLengthStr, setAudioLengthStr] = useState(initialData?.length_str ?? '');
+  const [sourceAudiobookSlug, setSourceAudiobookSlug] = useState(initialData?.source_audiobook_slug ?? '');
   const savedId = useRef(initialData?.id ?? '');
 
   useEffect(() => {
@@ -287,6 +290,7 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
       pub_date: new Date(pubDate).toISOString(),
       author_name: authorName.trim() || 'admin',
       cover_image: coverImage.trim(),
+      source_audiobook_slug: sourceAudiobookSlug.trim(),
       categories,
       topics,
       published,
@@ -440,12 +444,29 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
             </div>
           </div>
 
-          {/* Author */}
+          {/* Author & Source */}
           <div className="card">
-            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><User size={13} /> Author</h2>
-            <div className="form-group">
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><User size={13} /> Details</h2>
+            <div className="form-group" style={{ marginBottom: 16 }}>
               <label>Author Name</label>
               <AuthorInput value={authorName} onChange={setAuthorName} suggestions={meta.authors} />
+            </div>
+            
+            <div className="form-group">
+              <label>Source Audiobook (Optional)</label>
+              <select 
+                value={sourceAudiobookSlug} 
+                onChange={e => setSourceAudiobookSlug(e.target.value)}
+                style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid #E2E8F0', outline: 'none', background: '#fff' }}
+              >
+                <option value="">-- None --</option>
+                {meta.audiobooks?.map(book => (
+                  <option key={book.slug} value={book.slug}>{book.title}</option>
+                ))}
+              </select>
+              <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6, lineHeight: 1.4 }}>
+                If this article is derived from an audiobook, selecting it here will link readers to the full listen.
+              </p>
             </div>
           </div>
 

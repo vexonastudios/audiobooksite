@@ -14,7 +14,7 @@ export async function GET() {
 
   const rows = await sql`
     SELECT id, slug, title, author_name, pub_date, published,
-           categories, cover_image, excerpt
+           categories, cover_image, excerpt, source_audiobook_slug
     FROM articles
     ORDER BY pub_date DESC
   `;
@@ -34,6 +34,7 @@ export async function POST(req: Request) {
     id, slug, title, excerpt = '', content = '', pub_date,
     author_name = 'admin', cover_image = '',
     categories = [], topics = [], published = true,
+    source_audiobook_slug = '',
   } = body;
 
   if (!slug || !title) {
@@ -45,11 +46,13 @@ export async function POST(req: Request) {
   const [row] = await sql`
     INSERT INTO articles (
       id, slug, title, excerpt, content, pub_date,
-      author_name, cover_image, categories, topics, published
+      author_name, cover_image, categories, topics, published,
+      source_audiobook_slug
     ) VALUES (
       ${finalId}, ${slug}, ${title}, ${excerpt}, ${content},
       ${pub_date ?? new Date().toISOString()},
-      ${author_name}, ${cover_image}, ${categories}, ${topics}, ${published}
+      ${author_name}, ${cover_image}, ${categories}, ${topics}, ${published},
+      ${source_audiobook_slug}
     )
     RETURNING *
   `;

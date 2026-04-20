@@ -43,6 +43,7 @@ export interface Article {
   voiceId?: string;
   durationSecs?: number;
   lengthStr?: string;
+  sourceAudiobookSlug?: string;
 }
 
 export interface Bookmark {

@@ -14,7 +14,8 @@ async function getAllArticles() {
            author_name AS "authorName", cover_image AS "coverImage",
            categories, topics, published,
            audio_url AS "audioUrl", voice_id AS "voiceId",
-           duration_secs AS "durationSecs", length_str AS "lengthStr"
+           duration_secs AS "durationSecs", length_str AS "lengthStr",
+           source_audiobook_slug AS "sourceAudiobookSlug"
     FROM articles
     WHERE published = true
     ORDER BY pub_date DESC

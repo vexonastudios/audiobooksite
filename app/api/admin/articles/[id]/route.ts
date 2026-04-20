@@ -21,7 +21,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const {
     slug, title, excerpt, content, pub_date,
     author_name, cover_image, categories, topics, published,
-    audio_url, voice_id, duration_secs, length_str,
+    audio_url, voice_id, duration_secs, length_str, source_audiobook_slug,
   } = body;
 
   const [row] = await sql`
@@ -40,6 +40,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       voice_id      = COALESCE(${voice_id ?? null}, voice_id),
       duration_secs = COALESCE(${duration_secs ?? null}, duration_secs),
       length_str    = COALESCE(${length_str ?? null}, length_str),
+      source_audiobook_slug = COALESCE(${source_audiobook_slug ?? null}, source_audiobook_slug),
       updated_at    = now()
     WHERE id = ${id}
     RETURNING *

@@ -12,6 +12,7 @@ export default function ArticleDetail() {
   const slug = params.slug as string;
   const isLoaded = useLibraryStore((s) => s.isLoaded);
   const article = useLibraryStore((s) => s.getArticleBySlug(slug));
+  const sourceAudiobook = useLibraryStore((s) => article?.sourceAudiobookSlug ? s.getBySlug(article.sourceAudiobookSlug) : undefined);
   const { currentBook, isPlaying, loadBook, setPlaying } = usePlayerStore();
   const isThisPlaying = isPlaying && currentBook?.id === article?.id;
 
@@ -179,6 +180,40 @@ export default function ArticleDetail() {
           className="article-body"
           dangerouslySetInnerHTML={{ __html: article.description }}
         />
+
+        {/* Source Audiobook Link */}
+        {sourceAudiobook && (
+          <div style={{
+            marginTop: 56, padding: '24px 32px', borderRadius: 16, background: 'var(--color-surface-hover)',
+            display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap',
+            border: '1px solid var(--color-border)',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.04)'
+          }}>
+            <img 
+              src={sourceAudiobook.thumbnailUrl || sourceAudiobook.coverImage} 
+              alt={sourceAudiobook.title} 
+              style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} 
+            />
+            <div style={{ flex: 1, minWidth: 260 }}>
+              <h3 style={{ margin: '0 0 6px', fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                Listen to the Full Audiobook
+              </h3>
+              <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
+                This article is derived from <strong>{sourceAudiobook.title}</strong>. The entire book is available to listen to right now.
+              </p>
+            </div>
+            <div>
+              <Link href={`/audiobook/${sourceAudiobook.slug}`} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                background: 'var(--color-brand)', color: '#fff', padding: '12px 24px', borderRadius: 999,
+                fontWeight: 600, fontSize: '0.95rem', textDecoration: 'none',
+                boxShadow: '0 4px 14px rgba(46,106,167,0.35)', transition: 'all 0.2s'
+              }}>
+                <Headphones size={18} /> Listen to Audiobook
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
 
       <style>{`
