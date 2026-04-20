@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, Bell, Settings, X, CheckSquare, Square } from 'lucide-react';
+import { Search, Settings, X, CheckSquare, Square } from 'lucide-react';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { useUserStore } from '@/lib/store/userStore';
 import { UserButton, SignInButton, useUser } from '@clerk/nextjs';
@@ -24,10 +24,8 @@ export function TopBar() {
   const updateQuoteSettings = useUserStore((s) => s.updateQuoteSettings);
   const { isSignedIn } = useUser();
   const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
   
   const [mounted, setMounted] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
   useEffect(() => setMounted(true), []);
 
   // Close search whenever the route changes
@@ -37,24 +35,6 @@ export function TopBar() {
     setResults([]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPath]);
-
-  // Close on any click outside the form OR the portal dropdown
-  // IMPORTANT: only call setOpen when open is true — calling setState on every
-  // mousedown causes a React re-render between mousedown and click, which
-  // replaces Link anchor elements in the DOM and swallows the click event.
-  useEffect(() => {
-    function handleOutsideClick(e: MouseEvent) {
-      if (!open) return;
-      const target = e.target as Node;
-      const inForm = formRef.current?.contains(target);
-      const inDropdown = dropdownRef.current?.contains(target);
-      if (!inForm && !inDropdown) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [open]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const q = e.target.value;
@@ -89,8 +69,9 @@ export function TopBar() {
       backdropFilter: 'blur(8px)',
       overflow: 'visible',
     }}>
-      {/* Search */}
-      <form ref={formRef} onSubmit={handleSubmit} style={{ flex: 1, maxWidth: 480, position: 'relative', alignSelf: 'center' }}>
+      {/* Search — standard combobox pattern: onBlur closes, onMouseDown on results
+          prevents blur so the link click can fire. No global listeners needed. */}
+      <form onSubmit={handleSubmit} style={{ flex: 1, maxWidth: 480, position: 'relative', alignSelf: 'center' }}>
         <div className="search-input-wrap">
           <Search size={16} className="search-icon" />
           <input
@@ -100,32 +81,20 @@ export function TopBar() {
             value={query}
             onChange={handleChange}
             onFocus={() => query.length > 1 && setOpen(true)}
+            onBlur={() => setOpen(false)}
             className="search-input"
             id="global-search"
           />
         </div>
 
-        {/* Dropdown results — rendered via portal to avoid sticky stacking context blocking page clicks */}
-        {open && results.length > 0 && mounted && createPortal(
-          <div
-            ref={dropdownRef}
-            style={{
-            position: 'fixed',
-            top: (() => {
-              const input = inputRef.current;
-              if (!input) return 64;
-              return input.getBoundingClientRect().bottom + 6;
-            })(),
-            left: (() => {
-              const input = inputRef.current;
-              if (!input) return 0;
-              return input.getBoundingClientRect().left;
-            })(),
-            width: (() => {
-              const input = inputRef.current;
-              if (!input) return 480;
-              return input.getBoundingClientRect().width;
-            })(),
+        {/* Dropdown — position:absolute, NO portal. The sticky header has overflow:visible
+            so the dropdown correctly extends below the header into the page. */}
+        {open && results.length > 0 && (
+          <div style={{
+            position: 'absolute',
+            top: 'calc(100% + 6px)',
+            left: 0,
+            right: 0,
             background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
             borderRadius: 'var(--radius-lg)',
@@ -137,6 +106,9 @@ export function TopBar() {
               <Link
                 key={book.id}
                 href={`/audiobook/${book.slug}`}
+                // onMouseDown prevents the input's onBlur from firing before the
+                // link's onClick, which is the standard accessible combobox pattern.
+                onMouseDown={(e) => e.preventDefault()}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -161,12 +133,13 @@ export function TopBar() {
             ))}
             <Link
               href={`/search?q=${encodeURIComponent(query)}`}
+              onMouseDown={(e) => e.preventDefault()}
               style={{ display: 'block', padding: '10px 14px', textAlign: 'center', fontSize: '0.875rem', color: 'var(--color-brand)', fontWeight: 500 }}
             >
-              See all results for "{query}"
+              See all results for &quot;{query}&quot;
             </Link>
           </div>
-        , document.body)}
+        )}
       </form>
 
       {/* User */}
@@ -228,7 +201,7 @@ export function TopBar() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                     <div onClick={() => updateQuoteSettings({ useQuotes: !quoteSettings.useQuotes })} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
                       {quoteSettings.useQuotes ? <CheckSquare size={20} color="var(--color-brand)" /> : <Square size={20} color="var(--color-border)" />}
-                      Add quotation marks {"\" \""} around text
+                      Add quotation marks {`" "`} around text
                     </div>
                     <div onClick={() => updateQuoteSettings({ includeBook: !quoteSettings.includeBook })} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: '0.95rem' }}>
                       {quoteSettings.includeBook ? <CheckSquare size={20} color="var(--color-brand)" /> : <Square size={20} color="var(--color-border)" />}
