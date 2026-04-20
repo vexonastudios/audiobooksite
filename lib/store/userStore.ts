@@ -131,6 +131,7 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: 'scrollreader-user', // localStorage key
+      skipHydration: true,       // prevent SSR/client mismatch that breaks React event system
     }
   )
 );
