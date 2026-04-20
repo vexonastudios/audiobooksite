@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Static export for Capacitor (mobile apps)
-  // Comment out 'output' line when running dev server
+  // Uncomment BOTH lines below when building for Capacitor:
   // output: 'export',
-  trailingSlash: true,
+  // trailingSlash: true,
   images: {
     unoptimized: true,
     remotePatterns: [
