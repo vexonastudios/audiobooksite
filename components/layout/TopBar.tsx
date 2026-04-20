@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Search, Bell, Settings, X, CheckSquare, Square } from 'lucide-react';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { useUserStore } from '@/lib/store/userStore';
@@ -12,6 +12,7 @@ import Link from 'next/link';
 
 export function TopBar() {
   const router = useRouter();
+  const currentPath = usePathname();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Audiobook[]>([]);
   const [open, setOpen] = useState(false);
@@ -26,6 +27,25 @@ export function TopBar() {
   
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Close search whenever the route changes
+  useEffect(() => {
+    setOpen(false);
+    setQuery('');
+    setResults([]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPath]);
+
+  // Close on any click outside the form
+  useEffect(() => {
+    function handleOutsideClick(e: MouseEvent) {
+      if (inputRef.current && !inputRef.current.closest('form')?.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const q = e.target.value;
@@ -58,6 +78,7 @@ export function TopBar() {
       alignItems: 'center',
       gap: 16,
       backdropFilter: 'blur(8px)',
+      overflow: 'visible',
     }}>
       {/* Search */}
       <form onSubmit={handleSubmit} style={{ flex: 1, maxWidth: 480, position: 'relative' }}>
@@ -87,7 +108,7 @@ export function TopBar() {
             borderRadius: 'var(--radius-lg)',
             boxShadow: 'var(--shadow-xl)',
             overflow: 'hidden',
-            zIndex: 999,
+            zIndex: 9999,
           }}>
             {results.map((book) => (
               <Link

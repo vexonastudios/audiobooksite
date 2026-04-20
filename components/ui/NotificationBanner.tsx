@@ -95,6 +95,7 @@ export function NotificationBanner() {
       style={{
         transform: visible ? 'translateY(0)' : 'translateY(-100%)',
         opacity: visible ? 1 : 0,
+        pointerEvents: visible ? 'auto' : 'none',
         transition: 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease',
         background: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)',
         borderBottom: '1.5px solid #FCD34D',
@@ -103,6 +104,7 @@ export function NotificationBanner() {
         alignItems: 'center',
         gap: 12,
         zIndex: 100,
+        position: 'relative',
         boxShadow: '0 2px 8px rgba(245,158,11,0.12)',
         flexWrap: 'wrap',
       }}
