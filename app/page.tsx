@@ -1,34 +1,130 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef } from 'react';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { useUserStore } from '@/lib/store/userStore';
-import { usePlayerStore } from '@/lib/store/playerStore';
-import type { Audiobook } from '@/lib/types';
+import type { Audiobook, Article } from '@/lib/types';
 import Link from 'next/link';
-import { Play, Headphones } from 'lucide-react';
+import { Headphones, ChevronRight, BookOpen } from 'lucide-react';
 import { NotificationBanner } from '@/components/ui/NotificationBanner';
+import { BookCard } from '@/components/ui/BookCard';
+import { useState } from 'react';
 
 const BOOK_CARD_WIDTH = 168;
-import { BookCard } from '@/components/ui/BookCard';
+const CL_CARD_WIDTH = 134; // Slightly smaller for Continue Listening
 
-function ScrollRow({ books }: { books: Audiobook[] }) {
+// ── Scroll Row with desktop arrow + right fade ────────────────────────────────
+function ScrollRow({ books, cardWidth = BOOK_CARD_WIDTH, compact = false }: { books: Audiobook[]; cardWidth?: number; compact?: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const scroll = () => {
+    if (ref.current) ref.current.scrollBy({ left: (cardWidth + 16) * 3, behavior: 'smooth' });
+  };
   return (
-    <div className="scroll-row">
-      {books.map((book) => (
-        <BookCard key={book.id} book={book} />
-      ))}
+    <div className="scroll-row-wrapper">
+      <div className="scroll-row" ref={ref}>
+        {books.map((book) => (
+          <BookCard key={book.id} book={book} width={cardWidth} compact={compact} />
+        ))}
+      </div>
+      <div className="scroll-fade" />
+      <button className="scroll-arrow" onClick={scroll} aria-label="Scroll right">
+        <ChevronRight size={18} />
+      </button>
     </div>
   );
 }
 
+// ── Article thumbnail colors ───────────────────────────────────────────────────
+const ARTICLE_GRADIENTS = [
+  'linear-gradient(135deg, #1e3a5f 0%, #2e6aa7 100%)',
+  'linear-gradient(135deg, #3d1f5f 0%, #7c3aed 100%)',
+  'linear-gradient(135deg, #1a4731 0%, #15803d 100%)',
+  'linear-gradient(135deg, #5f1c1c 0%, #b91c1c 100%)',
+  'linear-gradient(135deg, #3d2d0f 0%, #b45309 100%)',
+  'linear-gradient(135deg, #0f2d3d 0%, #0369a1 100%)',
+];
+
+function ArticleCard({ article, audiobooks, index }: { article: Article; audiobooks: Audiobook[]; index: number }) {
+  const sourceBook = article.sourceAudiobookSlug
+    ? audiobooks.find(b => b.slug === article.sourceAudiobookSlug)
+    : null;
+  const gradient = ARTICLE_GRADIENTS[index % ARTICLE_GRADIENTS.length];
+  const date = new Date(article.pubDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+
+  return (
+    <Link
+      href={`/articles/${article.slug}`}
+      style={{ textDecoration: 'none', flexShrink: 0, width: 240 }}
+    >
+      <div style={{
+        background: gradient,
+        borderRadius: 16,
+        padding: '20px 18px 16px',
+        height: 150,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+        cursor: 'pointer',
+      }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 10px 28px rgba(0,0,0,0.2)'; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)'; }}
+      >
+        <p style={{
+          color: 'rgba(255,255,255,0.95)', fontWeight: 700, fontSize: '0.875rem',
+          lineHeight: 1.35, margin: 0,
+          display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+        }}>
+          {article.title}
+        </p>
+        <div>
+          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.72rem', margin: '0 0 4px', fontWeight: 500 }}>
+            {article.authorName} · {date}
+          </p>
+          {sourceBook && (
+            <p style={{
+              color: 'rgba(255,255,255,0.6)', fontSize: '0.68rem', margin: 0,
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+              <BookOpen size={10} style={{ flexShrink: 0 }} /> From: {sourceBook.title}
+            </p>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function ArticleScrollRow({ articles, audiobooks }: { articles: Article[]; audiobooks: Audiobook[] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const scroll = () => {
+    if (ref.current) ref.current.scrollBy({ left: (240 + 14) * 3, behavior: 'smooth' });
+  };
+  return (
+    <div className="scroll-row-wrapper">
+      <div className="scroll-row" ref={ref}>
+        {articles.map((a, i) => (
+          <ArticleCard key={a.id} article={a} audiobooks={audiobooks} index={i} />
+        ))}
+      </div>
+      <div className="scroll-fade" />
+      <button className="scroll-arrow" onClick={scroll} aria-label="Scroll right">
+        <ChevronRight size={18} />
+      </button>
+    </div>
+  );
+}
+
+// ── Home Page ─────────────────────────────────────────────────────────────────
 export default function HomePage() {
-  const { audiobooks, isLoaded, getByCategory, getRecent } = useLibraryStore();
+  const { audiobooks, articles, isLoaded, getByCategory, getRecent } = useLibraryStore();
   const history = useUserStore((s) => s.history);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const categories = useLibraryStore((s) => s.getAllCategories());
   const recentBooks = getRecent(20);
+  const recentArticles = articles.slice(0, 20);
 
   // "Continue Listening" — map history bookId → audiobook
   const continueListening = history
@@ -65,14 +161,14 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* Continue Listening */}
+      {/* Continue Listening — compact, no title/author/length */}
       {continueListening.length > 0 && (
         <section style={{ marginBottom: 40 }}>
           <div className="section-header">
             <h2 className="section-title">Continue Listening</h2>
             <Link href="/history" className="see-all-link">See all</Link>
           </div>
-          <ScrollRow books={continueListening} />
+          <ScrollRow books={continueListening} cardWidth={CL_CARD_WIDTH} compact={true} />
         </section>
       )}
 
@@ -84,6 +180,17 @@ export default function HomePage() {
         </div>
         <ScrollRow books={recentBooks} />
       </section>
+
+      {/* Recent Articles */}
+      {recentArticles.length > 0 && (
+        <section style={{ marginBottom: 40 }}>
+          <div className="section-header">
+            <h2 className="section-title">Latest Articles</h2>
+            <Link href="/articles" className="see-all-link">Browse all</Link>
+          </div>
+          <ArticleScrollRow articles={recentArticles} audiobooks={audiobooks} />
+        </section>
+      )}
 
       {/* Explore */}
       <section style={{ marginBottom: 40 }}>

@@ -19,9 +19,10 @@ function getDurationSecs(book: Audiobook) {
 interface BookCardProps {
   book: Audiobook;
   width?: number | string;
+  compact?: boolean;
 }
 
-export function BookCard({ book, width = 168 }: BookCardProps) {
+export function BookCard({ book, width = 168, compact = false }: BookCardProps) {
   const loadBook = usePlayerStore((s) => s.loadBook);
   const historyEntry = useUserStore((s) => s.history.find(h => h.bookId === book.id));
   const [hovered, setHovered] = useState(false);
@@ -63,7 +64,7 @@ export function BookCard({ book, width = 168 }: BookCardProps) {
         {/* Progress bar overlay */}
         {progress !== null && (
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 6, background: 'rgba(0,0,0,0.5)', overflow: 'hidden' }}>
-             <div style={{ width: `${progress}%`, height: '100%', background: 'var(--color-brand)' }} />
+             <div style={{ width: `${progress}%`, height: '100%', background: '#22c55e' }} />
           </div>
         )}
 
@@ -91,11 +92,13 @@ export function BookCard({ book, width = 168 }: BookCardProps) {
           </button>
         )}
       </Link>
-      <div className="book-card-body">
-        <div className="book-card-title">{book.title}</div>
-        <div className="book-card-author">{book.authorName}</div>
-        {book.length && <div className="book-card-length">{book.length}</div>}
-      </div>
+      {!compact && (
+        <div className="book-card-body">
+          <div className="book-card-title">{book.title}</div>
+          <div className="book-card-author">{book.authorName}</div>
+          {book.length && <div className="book-card-length">{book.length}</div>}
+        </div>
+      )}
     </div>
   );
 }

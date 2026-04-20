@@ -265,6 +265,53 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
 }
 
 /* Horizontal scroll row */
+.scroll-row-wrapper {
+  position: relative;
+}
+
+.scroll-row-wrapper .scroll-fade {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  bottom: 8px;
+  right: 0;
+  width: 80px;
+  background: linear-gradient(to right, transparent, var(--color-bg));
+  z-index: 2;
+}
+
+.scroll-row-wrapper .scroll-arrow {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--color-text-primary);
+}
+
+.scroll-row-wrapper .scroll-arrow:hover {
+  background: var(--color-brand);
+  color: white;
+  border-color: var(--color-brand);
+}
+
+/* Hide arrow on mobile where native swipe handles scrolling */
+@media (max-width: 768px) {
+  .scroll-row-wrapper .scroll-arrow { display: none; }
+  .scroll-row-wrapper .scroll-fade { display: none; }
+}
+
 .scroll-row {
   display: flex;
   gap: 16px;
