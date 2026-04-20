@@ -512,7 +512,7 @@ export default function AudiobookPage() {
               </div>
 
               {/* Playback Buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, margin: '16px 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, margin: '16px 0' }}>
                 <button 
                   className="btn-icon" 
                   style={{ width: 44, height: 44, background: 'transparent', border: 'none', opacity: !isCurrent || currentChapterIdx === 0 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === 0 ? 'none' : 'auto' }}
@@ -525,7 +525,7 @@ export default function AudiobookPage() {
                   <RotateCcw size={32} strokeWidth={2} />
                   <span className="skip-label">{skipInterval}</span>
                 </button>
-                <button className="btn-play-large" onClick={handlePlayPause} style={{ width: 72, height: 72, background: 'var(--color-brand)', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(var(--color-brand-rgb, 0,0,0), 0.3)' }}>
+                <button className="btn-play-large" onClick={handlePlayPause} style={{ flexShrink: 0, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72, background: 'var(--color-brand)', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(var(--color-brand-rgb, 0,0,0), 0.3)' }}>
                   {isCurrent && isPlaying
                     ? <Pause size={32} strokeWidth={2.5} fill="currentColor" color="currentColor" />
                     : <Play size={32} strokeWidth={2.5} style={{ marginLeft: 4 }} fill="currentColor" color="currentColor" />
