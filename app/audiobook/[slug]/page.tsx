@@ -546,7 +546,7 @@ export default function AudiobookPage() {
                 <button 
                   className="btn btn-icon" 
                   onClick={() => { const nextSpeed = playbackSpeed >= 2 ? 0.75 : playbackSpeed + 0.25; setPlaybackSpeed(nextSpeed); }} 
-                  style={{ width: 48, height: 44, background: 'transparent', border: 'none', fontWeight: 800, fontSize: '1.15rem', color: 'var(--color-text-primary)' }}
+                  style={{ width: 48, height: 44, background: 'transparent', border: 'none', fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}
                   title="Playback speed"
                 >
                   {playbackSpeed}x
@@ -601,7 +601,7 @@ export default function AudiobookPage() {
                   ),
                 };
                 return (
-                  <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginTop: 32, paddingBottom: 16 }}>
+                  <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginTop: 24, padding: '12px 8px', background: 'var(--color-surface-2)', borderRadius: 'var(--radius-lg)' }}>
                     {playerQuickActions.map(id => actionMap[id] ?? null)}
                   </div>
                 );
