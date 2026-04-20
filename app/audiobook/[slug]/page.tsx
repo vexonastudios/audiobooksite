@@ -292,7 +292,7 @@ export default function AudiobookPage() {
     <div style={{ position: 'relative', minHeight: '100%' }}>
       {bgStyle.background && <div style={bgStyle} />}
       
-      <div className="page pb-24">
+      <div className="page pb-24" style={{ paddingTop: 32, paddingLeft: 24, paddingRight: 24 }}>
         
         {/* Layout: Cover Left | Info & Player Right */}
         <div className="audiobook-layout">
