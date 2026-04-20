@@ -8,6 +8,8 @@ import {
   Tag, Image as ImageIcon, Eye, EyeOff, Link as LinkIcon,
 } from 'lucide-react';
 
+import 'react-quill-new/dist/quill.snow.css';
+
 // Dynamically import React Quill to avoid SSR issues
 const ReactQuill = dynamic(() => import('react-quill-new'), {
   ssr: false,
@@ -30,6 +32,12 @@ export interface ArticleData {
   categories?: string[];
   topics?: string[];
   published?: boolean;
+}
+
+interface Metadata {
+  categories: string[];
+  topics: string[];
+  authors: string[];
 }
 
 const QUILL_MODULES = {
@@ -59,33 +67,103 @@ function slugify(str: string) {
     .replace(/-+/g, '-');
 }
 
-function TagInput({ value, onChange, placeholder }: { value: string[]; onChange: (v: string[]) => void; placeholder?: string }) {
+// ── Tag Input ──────────────────────────────────────────────────────────────────
+function TagInput({ label, value, onChange, suggestions }: {
+  label: string; value: string[]; onChange: (v: string[]) => void; suggestions: string[];
+}) {
   const [input, setInput] = useState('');
-  const add = () => {
-    const trim = input.trim();
-    if (trim && !value.includes(trim)) onChange([...value, trim]);
-    setInput('');
-  };
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const filtered = suggestions.filter(s => s.toLowerCase().includes(input.toLowerCase()) && !value.includes(s));
+
+  const add = (tag: string) => { const t = tag.trim(); if (t && !value.includes(t)) onChange([...value, t]); setInput(''); setOpen(false); };
+  const remove = (tag: string) => onChange(value.filter(t => t !== tag));
+
+  useEffect(() => {
+    const fn = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', fn);
+    return () => document.removeEventListener('mousedown', fn);
+  }, []);
+
   return (
-    <div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: value.length ? 8 : 0 }}>
+    <div ref={ref} style={{ position: 'relative' }}>
+      <div onClick={() => setOpen(true)} style={{
+        display: 'flex', flexWrap: 'wrap', gap: 6,
+        border: '1px solid #E2E8F0', borderRadius: 8, padding: '8px 10px',
+        background: '#fff', cursor: 'text', minHeight: 42, alignItems: 'center',
+      }}>
         {value.map(tag => (
-          <span key={tag} style={{ background: '#EBF5FF', color: '#2e6aa7', padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span key={tag} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            background: '#EFF6FF', color: '#1D4ED8',
+            borderRadius: 6, padding: '3px 8px', fontSize: 13, fontWeight: 500,
+          }}>
             {tag}
-            <button onClick={() => onChange(value.filter(t => t !== tag))} style={{ background: 'none', border: 'none', color: '#718096', cursor: 'pointer', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
+            <button type="button" onClick={e => { e.stopPropagation(); remove(tag); }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#93C5FD', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
           </span>
         ))}
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add(); } }}
-          placeholder={placeholder}
-          style={{ flex: 1 }}
+        <input value={input}
+          onChange={e => { setInput(e.target.value); setOpen(true); }}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); if (input.trim()) add(input); }
+            if (e.key === 'Backspace' && !input && value.length) remove(value[value.length - 1]);
+          }}
+          onFocus={() => setOpen(true)}
+          placeholder={value.length === 0 ? `Add ${label.toLowerCase()}…` : ''}
+          style={{ border: 'none', outline: 'none', background: 'transparent', fontSize: 14, padding: '2px 4px', minWidth: 100, flex: 1, width: 'auto' }}
         />
-        <button type="button" onClick={add} className="btn-secondary" style={{ flexShrink: 0 }}>Add</button>
       </div>
+      {open && filtered.length > 0 && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+          background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.1)', maxHeight: 200, overflowY: 'auto', marginTop: 4,
+        }}>
+          {filtered.map(s => (
+            <div key={s} onMouseDown={e => { e.preventDefault(); add(s); }}
+              style={{ padding: '9px 14px', cursor: 'pointer', fontSize: 14, color: '#1A202C' }}
+              className="tag-option">
+              {s}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Author Combobox ────────────────────────────────────────────────────────────
+function AuthorInput({ value, onChange, suggestions }: { value: string; onChange: (v: string) => void; suggestions: string[] }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const filtered = suggestions.filter(s => s.toLowerCase().includes(value.toLowerCase()) && s.toLowerCase() !== value.toLowerCase());
+
+  useEffect(() => {
+    const fn = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', fn);
+    return () => document.removeEventListener('mousedown', fn);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <input value={value} onChange={e => { onChange(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)} placeholder="Author name…" required />
+      {open && filtered.length > 0 && value.length > 0 && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+          background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.1)', maxHeight: 200, overflowY: 'auto', marginTop: 4,
+        }}>
+          {filtered.map(s => (
+            <div key={s} onMouseDown={e => { e.preventDefault(); onChange(s); setOpen(false); }}
+              style={{ padding: '9px 14px', cursor: 'pointer', fontSize: 14, color: '#1A202C' }}
+              className="tag-option">
+              {s}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -109,6 +187,11 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [slugEdited, setSlugEdited] = useState(false);
+  const [meta, setMeta] = useState<Metadata>({ categories: [], topics: [], authors: [] });
+
+  useEffect(() => {
+    fetch('/api/admin/metadata').then(r => r.json()).then(setMeta).catch(() => {});
+  }, []);
 
   // Auto-slug from title when creating new
   useEffect(() => {
@@ -264,7 +347,7 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><User size={13} /> Author</h2>
             <div className="form-group">
               <label>Author Name</label>
-              <input value={authorName} onChange={e => setAuthorName(e.target.value)} placeholder="e.g. Charles Spurgeon" />
+              <AuthorInput value={authorName} onChange={setAuthorName} suggestions={meta.authors} />
             </div>
           </div>
 
@@ -290,11 +373,11 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Tag size={13} /> Taxonomy</h2>
             <div className="form-group">
               <label>Categories</label>
-              <TagInput value={categories} onChange={setCategories} placeholder="e.g. Articles, Excerpts…" />
+              <TagInput label="Categories" value={categories} onChange={setCategories} suggestions={meta.categories} />
             </div>
             <div className="form-group">
               <label>Topics</label>
-              <TagInput value={topics} onChange={setTopics} placeholder="e.g. Prayer, Missions…" />
+              <TagInput label="Topics" value={topics} onChange={setTopics} suggestions={meta.topics} />
             </div>
           </div>
 
@@ -315,6 +398,7 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
       </div>
 
       <style>{`
+        .tag-option:hover { background: #F8FAFC; }
         .ql-toolbar { border-radius: 8px 8px 0 0 !important; border-color: #E2E8F0 !important; background: #F8F9FA; }
         .ql-container { border-radius: 0 0 8px 8px !important; border-color: #E2E8F0 !important; font-size: 15px !important; min-height: 380px; }
         .ql-editor { min-height: 360px; font-family: 'Lora', Georgia, serif !important; line-height: 1.8 !important; }
