@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
-import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon, Heart } from 'lucide-react';
 import { BookCard } from '@/components/ui/BookCard';
 import { ReadAlongPanel } from '@/components/ui/ReadAlongPanel';
 import { QuoteModal } from '@/components/ui/QuoteModal';
@@ -34,7 +34,7 @@ export default function AudiobookPage() {
   const { currentBook, isPlaying, currentTime, duration, playbackSpeed, 
           sleepTimerMode, sleepTimerEndsAt, setSleepTimer, clearSleepTimer,
           loadBook, setPlaying, setPlaybackSpeed, skipForward, skipBackward, jumpToChapter } = usePlayerStore();
-  const { history, addBookmark, getBookmarksByBook, removeBookmark, skipInterval } = useUserStore();
+  const { history, addBookmark, getBookmarksByBook, removeBookmark, skipInterval, isFavorited, toggleFavorite } = useUserStore();
 
   const searchParams = useSearchParams();
 
@@ -473,6 +473,25 @@ export default function AudiobookPage() {
                 <button onClick={(e) => { e.preventDefault(); setActiveTab('bookmarks'); setMobileTabOpen(true); }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}>
                   <BookmarkPlus size={22} color="currentColor" />
                   <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Bookmark</span>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (!book) return;
+                    toggleFavorite({
+                      type: 'audiobook',
+                      itemId: book.id,
+                      itemSlug: book.slug,
+                      title: book.title,
+                      author: book.authorName,
+                      cover: book.coverImage,
+                      thumbnail: book.thumbnailUrl,
+                    });
+                  }}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}
+                >
+                  <Heart size={22} fill={book && isFavorited(book.id) ? 'var(--color-error)' : 'none'} color={book && isFavorited(book.id) ? 'var(--color-error)' : 'currentColor'} />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Favorite</span>
                 </button>
               </div>
             </div>

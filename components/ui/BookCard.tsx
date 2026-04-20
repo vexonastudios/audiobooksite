@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Play } from 'lucide-react';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
-import { HeartButton } from '@/components/ui/HeartButton';
 import type { Audiobook } from '@/lib/types';
 
 function getDurationSecs(book: Audiobook) {
@@ -62,19 +61,7 @@ export function BookCard({ book, width = 168, compact = false }: BookCardProps) 
           </div>
         )}
 
-        {/* Favorite heart */}
-        <HeartButton
-          size={16}
-          item={{
-            type: 'audiobook',
-            itemId: book.id,
-            itemSlug: book.slug,
-            title: book.title,
-            author: book.authorName,
-            cover: book.coverImage,
-            thumbnail: book.thumbnailUrl,
-          }}
-        />
+
         
         {/* Progress bar overlay */}
         {progress !== null && (
