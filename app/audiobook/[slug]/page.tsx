@@ -898,13 +898,19 @@ export default function AudiobookPage() {
               </div>
             </div>
 
-            {/* CARD 3: Meta & Description */}
+            {/* CARD 3: Categories & Topics */}
+            {(book.categories.length > 0 || book.topics.length > 0) && (
+              <div className="card" style={{ padding: '20px 24px' }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {book.categories.map(c => <Link key={c} href={`/categories/${encodeURIComponent(c)}`} className="pill">{c}</Link>)}
+                  {book.topics.map(t => <Link key={t} href={`/topics/${encodeURIComponent(t)}`} className="pill" style={{ background: 'rgba(46,106,167,0.06)' }}>#{t}</Link>)}
+                </div>
+              </div>
+            )}
+
+            {/* CARD 4: Description */}
             <div className="card">
               <h3 style={{ marginBottom: 16 }}>About the Book</h3>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
-                {book.categories.map(c => <Link key={c} href={`/categories/${encodeURIComponent(c)}`} className="pill">{c}</Link>)}
-                {book.topics.map(t => <Link key={t} href={`/topics/${encodeURIComponent(t)}`} className="pill">#{t}</Link>)}
-              </div>
               
               <div 
                 className="prose"
