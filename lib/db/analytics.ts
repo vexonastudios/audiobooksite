@@ -9,9 +9,18 @@ export async function recordPlay(
   startPosition: number,
   userId?: string | null,
 ) {
+  // 1. Record the detailed analytics event
   await sql`
     INSERT INTO play_events (audiobook_id, session_id, user_id, platform, start_position)
     VALUES (${audiobookId}, ${sessionId}, ${userId ?? null}, ${platform}, ${startPosition})
+  `;
+
+  // 2. Increment the legacy lifetime 'plays' counter on the audiobook itself 
+  // so existing views aren't lost and new plays add to it
+  await sql`
+    UPDATE audiobooks 
+    SET plays = plays + 1 
+    WHERE id = ${audiobookId}
   `;
 }
 
