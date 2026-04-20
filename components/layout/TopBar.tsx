@@ -133,14 +133,14 @@ export function TopBar() {
         overflow: 'visible',
       }}>
 
-        {/* ─── Mobile left: logo + hamburger (hidden on desktop) ─── */}
+        {/* ─── Mobile left: hamburger + logo (hidden on desktop) ─── */}
         <div className="topbar-mobile-nav">
-          <Link href="/" aria-label="Home" style={{ display: 'flex', alignItems: 'center' }}>
-            <img src="/logo.png" alt="ScrollReader" style={{ height: 30, width: 'auto', objectFit: 'contain' }} />
-          </Link>
-          <button className="btn btn-icon" onClick={toggleSidebar} aria-label="Open menu" style={{ flexShrink: 0 }}>
-            <Menu size={20} />
+          <button className="btn btn-icon" onClick={toggleSidebar} aria-label="Open menu" style={{ flexShrink: 0, paddingLeft: 0 }}>
+            <Menu size={24} />
           </button>
+          <Link href="/" aria-label="Home" style={{ display: 'flex', alignItems: 'center', marginLeft: 4 }}>
+            <img src="/logo.png" alt="ScrollReader" style={{ height: 32, width: 'auto', objectFit: 'contain' }} />
+          </Link>
         </div>
 
         {/* ─── Desktop search (hidden on mobile) ─── */}

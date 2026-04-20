@@ -290,18 +290,30 @@ button {
 
   /* Audiobook Page Layout — Mobile styling to match app design */
   .audiobook-layout {
+    display: flex !important;
     flex-direction: column !important;
+    align-items: center !important;
     gap: 16px !important;
+    padding: 0 16px !important;
   }
   .audiobook-cover-col {
-    width: 65% !important;
+    width: 260px !important; /* Fixed width for better control */
+    max-width: 100% !important;
     margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
   .audiobook-cover-img {
+    width: 100% !important;
+    height: auto !important;
     aspect-ratio: 1 / 1 !important;
+    border-radius: var(--radius-lg) !important;
+    object-position: center top !important; /* Better cropping for book covers */
   }
   .audiobook-right-col {
-    min-width: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important; /* prevent overflow */
   }
   .audiobook-stats {
     display: none !important; /* App layout hides stats on main screen */
@@ -357,7 +369,37 @@ button {
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   line-height: 1.25;
-  color: var(--color-text-primary);
+  margin-bottom: 0.5em;
+  letter-spacing: -0.015em;
+}
+
+/* ─── Custom Scrubber Slider ─────────────────────────────────────────────────── */
+input[type="range"].scrubber {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  outline: none;
+  border-radius: 4px;
+}
+input[type="range"].scrubber::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  cursor: pointer;
+  border: 2px solid var(--color-bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+input[type="range"].scrubber::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  cursor: pointer;
+  border: 2px solid var(--color-bg);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
 h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); }

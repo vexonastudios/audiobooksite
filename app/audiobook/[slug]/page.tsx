@@ -419,10 +419,10 @@ export default function AudiobookPage() {
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
                   <span className="skip-label" style={{ bottom: 10, fontSize: '0.6rem' }}>{skipInterval}</span>
                 </button>
-                <button className="btn-play-large" onClick={handlePlayPause} style={{ width: 64, height: 64, background: 'var(--color-text-primary)', color: 'var(--color-surface)', boxShadow: 'none' }}>
+                <button className="btn-play-large" onClick={handlePlayPause} style={{ width: 64, height: 64, background: 'var(--color-brand)', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(var(--color-brand-rgb, 0,0,0), 0.3)' }}>
                   {isCurrent && isPlaying
-                    ? <Pause size={28} strokeWidth={2.5} fill="currentColor" />
-                    : <Play size={28} strokeWidth={2.5} style={{ marginLeft: 4 }} fill="currentColor" />
+                    ? <Pause size={28} strokeWidth={2.5} fill="currentColor" color="currentColor" />
+                    : <Play size={28} strokeWidth={2.5} style={{ marginLeft: 4 }} fill="currentColor" color="currentColor" />
                   }
                 </button>
                 <button className="btn-skip" style={{ width: 48, height: 48, background: 'transparent', border: 'none' }} onClick={skipForward} disabled={!isCurrent} title={`Forward ${skipInterval}s`}>
@@ -443,16 +443,16 @@ export default function AudiobookPage() {
                 <button onClick={() => {
                   const nextSpeed = playbackSpeed >= 2 ? 0.75 : playbackSpeed + 0.25;
                   setPlaybackSpeed(nextSpeed);
-                }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)' }}>
+                }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}>
                   <span style={{ fontSize: '1.2rem', fontWeight: 800 }}>{playbackSpeed}x</span>
                   <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Speed</span>
                 </button>
-                <button onClick={() => setActiveTab('chapters')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)' }}>
-                  <List size={22} />
+                <button onClick={() => setActiveTab('chapters')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}>
+                  <List size={22} color="currentColor" />
                   <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Chapters</span>
                 </button>
-                <button onClick={(e) => { e.preventDefault(); /* Mobile bookmark handler */ }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)' }}>
-                  <BookmarkPlus size={22} />
+                <button onClick={(e) => { e.preventDefault(); /* Mobile bookmark handler */ }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}>
+                  <BookmarkPlus size={22} color="currentColor" />
                   <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Bookmark</span>
                 </button>
               </div>
