@@ -295,6 +295,8 @@ button {
     align-items: center !important;
     gap: 16px !important;
     padding: 0 16px !important;
+    max-width: 440px !important;
+    margin: 0 auto !important;
   }
   .audiobook-cover-col {
     width: 260px !important; /* Fixed width for better control */

@@ -406,7 +406,7 @@ export default function AudiobookPage() {
               </div>
 
               {/* Playback Buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 24, margin: '16px 0' }}>
                 <button 
                   className="btn-icon" 
                   style={{ width: 44, height: 44, background: 'transparent', border: 'none', opacity: !isCurrent || currentChapterIdx === 0 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === 0 ? 'none' : 'auto' }}
@@ -419,10 +419,10 @@ export default function AudiobookPage() {
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
                   <span className="skip-label" style={{ bottom: 10, fontSize: '0.6rem' }}>{skipInterval}</span>
                 </button>
-                <button className="btn-play-large" onClick={handlePlayPause} style={{ width: 64, height: 64, background: 'var(--color-brand)', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(var(--color-brand-rgb, 0,0,0), 0.3)' }}>
+                <button className="btn-play-large" onClick={handlePlayPause} style={{ width: 72, height: 72, background: 'var(--color-brand)', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(var(--color-brand-rgb, 0,0,0), 0.3)' }}>
                   {isCurrent && isPlaying
-                    ? <Pause size={28} strokeWidth={2.5} fill="currentColor" color="currentColor" />
-                    : <Play size={28} strokeWidth={2.5} style={{ marginLeft: 4 }} fill="currentColor" color="currentColor" />
+                    ? <Pause size={32} strokeWidth={2.5} fill="currentColor" color="currentColor" />
+                    : <Play size={32} strokeWidth={2.5} style={{ marginLeft: 4 }} fill="currentColor" color="currentColor" />
                   }
                 </button>
                 <button className="btn-skip" style={{ width: 48, height: 48, background: 'transparent', border: 'none' }} onClick={skipForward} disabled={!isCurrent} title={`Forward ${skipInterval}s`}>
