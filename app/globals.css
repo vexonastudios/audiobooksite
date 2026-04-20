@@ -211,6 +211,28 @@ button {
   display: none !important;
 }
 
+/* TopBar layout classes */
+.topbar-mobile-nav {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Desktop search bar (hide on mobile) */
+.topbar-search-desktop {
+  display: flex;
+  flex: 1;
+  max-width: 480px;
+  position: relative;
+  align-self: center;
+}
+
+/* Search icon in right actions: hide on desktop, show on mobile */
+.topbar-search-icon {
+  display: none !important;
+}
+
 @media (max-width: 768px) {
   .mobile-only {
     display: flex !important;
@@ -219,9 +241,23 @@ button {
     display: none !important;
   }
 
-  /* Compact player bar on mobile */
+  /* Show mobile nav (logo + hamburger) */
+  .topbar-mobile-nav {
+    display: flex !important;
+  }
+
+  /* Hide full desktop search bar on mobile */
+  .topbar-search-desktop {
+    display: none !important;
+  }
+
+  /* Show search icon on mobile */
+  .topbar-search-icon {
+    display: inline-flex !important;
+  }
+
+  /* Compact player bar on mobile (keep height=80px to match --player-height var) */
   .player-bar {
-    height: 64px;
     padding: 0 12px;
     gap: 10px;
   }
@@ -243,18 +279,13 @@ button {
 
   /* Shrink play/skip buttons slightly */
   .player-bar .btn-play-large {
-    width: 42px !important;
-    height: 42px !important;
+    width: 40px !important;
+    height: 40px !important;
   }
 
   .player-bar .btn-skip {
-    width: 38px !important;
-    height: 38px !important;
-  }
-
-  /* Ensure TopBar padding is reduced on mobile */
-  header {
-    padding: 10px 12px !important;
+    width: 36px !important;
+    height: 36px !important;
   }
 }
 
