@@ -236,9 +236,9 @@ export default function AudiobookPage() {
     }
 
     return (
-      <div className={`external-links-container ${className || ''}`} style={{ marginBottom: 24 }}>
+      <div className={`external-links-container ${className || ''}`} style={{ marginBottom: 24, display: 'flex', justifyContent: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <h4 style={{ margin: 0, fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-tertiary)', minWidth: 'min-content' }}>
+          <h4 style={{ margin: 0, fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-tertiary)', minWidth: 'min-content', textAlign: 'right' }}>
             Also<br/>On
           </h4>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -536,53 +536,53 @@ export default function AudiobookPage() {
               {/* Mobile-Only Bottom Options Row — dynamically ordered from user preferences */}
               {(() => {
                 // Settings flex: 1 ensures equal columns. align-content handles text wrapping gracefully.
-                const btnStyle: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', textAlign: 'center' };
+                const btnStyle: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: 4, color: 'var(--color-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', textAlign: 'center' };
                 const actionMap: Record<string, React.ReactNode> = {
                   chapters: (
                     <button key="chapters" onClick={() => { setActiveTab('chapters'); setMobileTabOpen(true); }} style={btnStyle}>
                       <List size={22} />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Chapters</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Chapters</span>
                     </button>
                   ),
                   bookmark: (
                     <button key="bookmark" onClick={(e) => { e.preventDefault(); setActiveTab('bookmarks'); setMobileTabOpen(true); }} style={btnStyle}>
                       <BookmarkPlus size={22} />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Bookmark</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Bookmark</span>
                     </button>
                   ),
                   favorite: (
                     <button key="favorite" onClick={(e) => { e.preventDefault(); if (!book) return; toggleFavorite({ type: 'audiobook', itemId: book.id, itemSlug: book.slug, title: book.title, author: book.authorName, cover: book.coverImage, thumbnail: book.thumbnailUrl }); }} style={btnStyle}>
                       <Heart size={22} fill={book && isFavorited(book.id) ? 'var(--color-error)' : 'none'} color={book && isFavorited(book.id) ? 'var(--color-error)' : 'currentColor'} />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Favorite</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Favorite</span>
                     </button>
                   ),
                   quote: (
                     <button key="quote" onClick={() => { setQuoteModalOpen(true); if (isPlaying) setPlaying(false); }} style={{ ...btnStyle, opacity: transcriptStatus === 'unavailable' ? 0.3 : transcriptStatus === 'loading' ? 0.5 : 1 }} disabled={transcriptStatus !== 'available'}>
                       <Quote size={22} />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Quote</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Quote</span>
                     </button>
                   ),
                   share: (
                     <button key="share" onClick={() => { setActiveTab('share'); setMobileTabOpen(true); }} style={btnStyle}>
                       <Share2 size={22} />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Share</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Share</span>
                     </button>
                   ),
                   timer: (
                     <button key="timer" onClick={() => { setActiveTab('timer'); setMobileTabOpen(true); }} style={btnStyle}>
                       <Moon size={22} />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Timer</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Timer</span>
                     </button>
                   ),
                   readalong: (
                     <button key="readalong" onClick={() => setReadAlongOpen(true)} style={{ ...btnStyle, opacity: transcriptStatus === 'unavailable' ? 0.3 : transcriptStatus === 'loading' ? 0.5 : 1 }} disabled={transcriptStatus !== 'available'}>
                       <BookOpen size={22} />
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Read Along</span>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Read Along</span>
                     </button>
                   ),
                 };
                 return (
-                  <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 24, padding: '12px 6px', background: 'var(--color-surface-2)', borderRadius: 'var(--radius-lg)' }}>
+                  <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 24, padding: '12px 2px', background: 'var(--color-surface-2)', borderRadius: 'var(--radius-lg)' }}>
                     {playerQuickActions.map(id => actionMap[id] ?? null)}
                   </div>
                 );
