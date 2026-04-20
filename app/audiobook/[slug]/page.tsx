@@ -352,21 +352,24 @@ export default function AudiobookPage() {
           <div className="audiobook-right-col" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 20, width: '100%' }}>
             
               {/* Desktop: Title & Author row */}
-              <h1 className="desktop-only" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '8px 0 4px 0', lineHeight: 1.15 }}>
+              <h1 className="desktop-only" style={{ fontSize: '2.4rem', fontWeight: 700, margin: '8px 0 6px 0', lineHeight: 1.2, letterSpacing: '-0.02em', color: 'var(--color-text-primary)' }}>
                 {book.title}
               </h1>
-              <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
                 {authorRecord?.image && (
                   <img src={authorRecord.image} alt={book.authorName}
-                    style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                    style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid var(--color-border)' }}
                   />
                 )}
                 <div>
-                  <p style={{ fontSize: '1.05rem', color: 'var(--color-brand)', fontWeight: 600, margin: 0 }}>
-                    By <Link href={`/authors/${encodeURIComponent(book.authorName)}`} style={{ textDecoration: 'underline' }}>{book.authorName}</Link>
+                  <p style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', fontWeight: 500 }}>By</span>
+                    <Link href={`/authors/${encodeURIComponent(book.authorName)}`} style={{ fontSize: '1.1rem', color: 'var(--color-brand)', fontWeight: 600, textDecoration: 'none' }}>
+                      {book.authorName}
+                    </Link>
                   </p>
                   {authorRecord?.dates && (
-                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: 0 }}>{authorRecord.dates}</p>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: '2px 0 0 0' }}>{authorRecord.dates}</p>
                   )}
                 </div>
               </div>
