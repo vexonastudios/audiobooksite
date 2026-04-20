@@ -43,7 +43,7 @@ export function BookCard({ book, width = 168, compact = false }: BookCardProps) 
   return (
     <div
       className="book-card"
-      style={{ width, flexShrink: 0 }}
+      style={{ width, flexShrink: 0, position: 'relative' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -68,30 +68,37 @@ export function BookCard({ book, width = 168, compact = false }: BookCardProps) 
           </div>
         )}
 
-        {hovered && (
-          <button
-            onClick={(e) => { e.preventDefault(); loadBook(book, historyEntry?.position); }}
-            style={{
-              position: 'absolute',
-              bottom: 12, right: 8,
-              width: 40, height: 40,
-              borderRadius: '50%',
-              background: 'var(--color-brand)',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: 'var(--shadow-md)',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'transform var(--transition-fast)',
-            }}
-            title={`Play ${book.title}`}
-          >
-            <Play size={18} style={{ marginLeft: 2 }} />
-          </button>
-        )}
       </Link>
+      
+      {hovered && (
+        <button
+          onClick={(e) => { e.preventDefault(); loadBook(book, historyEntry?.position); }}
+          style={{
+            position: 'absolute',
+            top: width === '100%' ? 'auto' : 100 /* A generic fallback, handled better via typical card layout */,
+            bottom: compact ? 12 : undefined, /* needs exact placement to look right */
+            right: 8,
+            width: 40, height: 40,
+            borderRadius: '50%',
+            background: 'var(--color-brand)',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: 'var(--shadow-md)',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'transform var(--transition-fast)',
+            // Dynamically position it perfectly into the bottom right corner of the *image* area
+            // The image aspect ratio is 1:1, so the bottom of the image is equal to 'width'
+            marginTop: typeof width === 'number' ? width - 52 : 'auto'
+          }}
+          title={`Play ${book.title}`}
+        >
+          <Play size={18} style={{ marginLeft: 2 }} />
+        </button>
+      )}
+
       {!compact && (
         <div className="book-card-body">
           <div className="book-card-title">{book.title}</div>
