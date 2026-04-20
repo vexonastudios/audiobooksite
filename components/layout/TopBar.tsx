@@ -24,6 +24,7 @@ export function TopBar() {
   const updateQuoteSettings = useUserStore((s) => s.updateQuoteSettings);
   const { isSignedIn } = useUser();
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   
   const [mounted, setMounted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -37,10 +38,13 @@ export function TopBar() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPath]);
 
-  // Close on any click outside the form
+  // Close on any click outside the form OR the portal dropdown
   useEffect(() => {
     function handleOutsideClick(e: MouseEvent) {
-      if (inputRef.current && !inputRef.current.closest('form')?.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const inForm = formRef.current?.contains(target);
+      const inDropdown = dropdownRef.current?.contains(target);
+      if (!inForm && !inDropdown) {
         setOpen(false);
       }
     }
@@ -82,7 +86,7 @@ export function TopBar() {
       overflow: 'visible',
     }}>
       {/* Search */}
-      <form ref={formRef} onSubmit={handleSubmit} style={{ flex: 1, maxWidth: 480, position: 'relative' }}>
+      <form ref={formRef} onSubmit={handleSubmit} style={{ flex: 1, maxWidth: 480, position: 'relative', alignSelf: 'center' }}>
         <div className="search-input-wrap">
           <Search size={16} className="search-icon" />
           <input
@@ -91,7 +95,6 @@ export function TopBar() {
             placeholder="Search audiobooks, authors..."
             value={query}
             onChange={handleChange}
-            onBlur={() => setTimeout(() => setOpen(false), 150)}
             onFocus={() => query.length > 1 && setOpen(true)}
             className="search-input"
             id="global-search"
@@ -100,7 +103,9 @@ export function TopBar() {
 
         {/* Dropdown results — rendered via portal to avoid sticky stacking context blocking page clicks */}
         {open && results.length > 0 && mounted && createPortal(
-          <div style={{
+          <div
+            ref={dropdownRef}
+            style={{
             position: 'fixed',
             top: (() => {
               const input = inputRef.current;
