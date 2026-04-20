@@ -150,7 +150,7 @@ export async function getAnalyticsSummary(days: number = 30) {
         COUNT(DISTINCT session_id) AS unique_sessions,
         COUNT(DISTINCT user_id) FILTER (WHERE user_id IS NOT NULL) AS registered_sessions
       FROM play_events
-      WHERE started_at >= NOW() - (${days} || ' days')::INTERVAL
+      WHERE started_at >= NOW() - ${days + ' days'}::interval
     `,
 
     // Plays per day
@@ -159,7 +159,7 @@ export async function getAnalyticsSummary(days: number = 30) {
         DATE(started_at AT TIME ZONE 'UTC') AS day,
         COUNT(*) AS plays
       FROM play_events
-      WHERE started_at >= NOW() - (${days} || ' days')::INTERVAL
+      WHERE started_at >= NOW() - ${days + ' days'}::interval
       GROUP BY day
       ORDER BY day ASC
     `,
@@ -170,7 +170,7 @@ export async function getAnalyticsSummary(days: number = 30) {
         DATE(recorded_at AT TIME ZONE 'UTC') AS day,
         ROUND(SUM(listened_secs) / 60.0, 1) AS listen_minutes
       FROM listen_time
-      WHERE recorded_at >= NOW() - (${days} || ' days')::INTERVAL
+      WHERE recorded_at >= NOW() - ${days + ' days'}::interval
       GROUP BY day
       ORDER BY day ASC
     `,
@@ -195,8 +195,8 @@ export async function getAnalyticsSummary(days: number = 30) {
       FROM listen_time lt
       JOIN audiobooks a ON a.id = lt.audiobook_id
       LEFT JOIN play_events pe ON pe.audiobook_id = lt.audiobook_id
-        AND pe.started_at >= NOW() - (${days} || ' days')::INTERVAL
-      WHERE lt.recorded_at >= NOW() - (${days} || ' days')::INTERVAL
+        AND pe.started_at >= NOW() - ${days + ' days'}::interval
+      WHERE lt.recorded_at >= NOW() - ${days + ' days'}::interval
       GROUP BY lt.audiobook_id, a.title, a.slug, a.cover_image, a.thumbnail_url, a.author_name, a.duration_secs
       ORDER BY listen_hours DESC
       LIMIT 20
@@ -206,7 +206,7 @@ export async function getAnalyticsSummary(days: number = 30) {
     sql`
       SELECT platform, COUNT(*) AS count
       FROM play_events
-      WHERE started_at >= NOW() - (${days} || ' days')::INTERVAL
+      WHERE started_at >= NOW() - ${days + ' days'}::interval
       GROUP BY platform
       ORDER BY count DESC
     `,
@@ -224,7 +224,7 @@ export async function getAnalyticsSummary(days: number = 30) {
         COUNT(*) FILTER (WHERE user_id IS NOT NULL) AS registered,
         COUNT(*) FILTER (WHERE user_id IS NULL) AS anonymous
       FROM play_events
-      WHERE started_at >= NOW() - (${days} || ' days')::INTERVAL
+      WHERE started_at >= NOW() - ${days + ' days'}::interval
     `,
   ]);
 
@@ -235,7 +235,7 @@ export async function getAnalyticsSummary(days: number = 30) {
   const listenHoursRow = await sql`
     SELECT COALESCE(ROUND(SUM(listened_secs) / 3600.0, 1), 0) AS hours
     FROM listen_time
-    WHERE recorded_at >= NOW() - (${days} || ' days')::INTERVAL
+    WHERE recorded_at >= NOW() - ${days + ' days'}::interval
   `;
 
   return {
