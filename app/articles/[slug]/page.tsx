@@ -195,7 +195,7 @@ export default function ArticleDetail() {
         {/* Article body */}
         <div
           className="article-body"
-          dangerouslySetInnerHTML={{ __html: article.description }}
+          dangerouslySetInnerHTML={{ __html: article.description.replace(/&nbsp;/g, ' ') }}
         />
 
         {/* Source Audiobook Link */}
