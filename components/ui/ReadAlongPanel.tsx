@@ -144,13 +144,16 @@ export function ReadAlongPanel({ slug, currentTime, isOpen, onClose, onSeek, boo
           .read-along-timestamp { display: none !important; }
           .read-along-cue {
             padding: 6px 20px !important;
-            display: inline !important;
           }
           .read-along-body {
             padding: 20px !important;
-            font-size: 1.0625rem !important;
-            line-height: 1.85 !important;
-            /* flowing paragraph rather than line-by-line */
+            font-size: 1.2rem !important;
+            line-height: 1.9 !important;
+          }
+          /* Increase active cue text size on mobile */
+          .read-along-cue-text {
+            font-size: 1.2rem !important;
+            line-height: 1.9 !important;
           }
         }
       `}</style>
@@ -305,14 +308,18 @@ export function ReadAlongPanel({ slug, currentTime, isOpen, onClose, onSeek, boo
                 </span>
 
                 {/* Text */}
-                <span style={{
-                  fontSize: '0.9375rem',
-                  lineHeight: 1.65,
-                  color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
-                  fontWeight: isActive ? 600 : 400,
-                  flex: 1,
-                }}>
-                  {cue.text}
+                <span
+                  className="read-along-cue-text"
+                  style={{
+                    fontSize: '0.9375rem',
+                    lineHeight: 1.65,
+                    color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+                    fontWeight: isActive ? 600 : 400,
+                    flex: 1,
+                  }}
+                >
+                  {/* Collapse tabs/multiple-spaces that VTT files sometimes embed */}
+                  {cue.text.replace(/[ \t]+/g, ' ').trim()}
                 </span>
 
                 {/* Selection checkmark */}

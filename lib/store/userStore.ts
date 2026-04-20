@@ -72,7 +72,7 @@ export const useUserStore = create<UserState>()(
       quoteSettings: { includeLink: true, includeBook: true, useQuotes: true },
       notificationsEnabled: true,
       heardNotificationIds: [],
-      playerQuickActions: ['speed', 'chapters', 'bookmark', 'favorite'],
+      playerQuickActions: ['speed', 'chapters', 'bookmark', 'favorite', 'quote'],
 
       addToHistory: (bookId, position) => {
         set((state) => {
