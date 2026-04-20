@@ -105,29 +105,34 @@ export function GlobalAudioPlayer() {
               <span className="skip-label">{skipInterval}</span>
             </button>
 
-            {/* Speed */}
-            <select
-              value={playbackSpeed}
-              onChange={e => setPlaybackSpeed(parseFloat(e.target.value))}
+            {/* Speed Toggle */}
+            <button
+              onClick={() => {
+                const currentIndex = SPEEDS.indexOf(playbackSpeed);
+                const nextIndex = currentIndex === -1 || currentIndex === SPEEDS.length - 1 ? 0 : currentIndex + 1;
+                setPlaybackSpeed(SPEEDS[nextIndex]);
+              }}
               style={{
                 padding: '5px 10px',
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 borderRadius: 20,
-                background: 'var(--color-surface-2)',
+                background: 'transparent',
                 color: 'var(--color-text-primary)',
-                border: '1.5px solid var(--color-border)',
-                appearance: 'none',
-                WebkitAppearance: 'none',
+                border: '1.5px solid var(--color-text-primary)', /* Solid border exactly like the screenshot */
                 cursor: 'pointer',
                 minWidth: 52,
                 textAlign: 'center',
+                transition: 'background var(--transition-fast), transform 0.1s',
               }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--color-surface-2)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.95)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+              title="Playback speed"
             >
-              {SPEEDS.map(s => (
-                <option key={s} value={s}>{s}x</option>
-              ))}
-            </select>
+              {playbackSpeed}x
+            </button>
 
           </div>
 
