@@ -26,6 +26,7 @@ export interface Audiobook {
   generatedColors: string | null;
   plays: number;
   chapters: Chapter[];
+  vttUrl?: string | null;
 }
 
 export interface Article {

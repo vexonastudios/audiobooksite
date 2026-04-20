@@ -22,6 +22,7 @@ interface FormData {
   mp3Url: string; mp3UrlLow: string;
   totalDuration: string; lengthStr: string; durationSecs: number;
   youtubeLink: string; spotifyLink: string; buyLink: string;
+  vttUrl: string;
   categories: string[]; topics: string[];
   generatedColors: string; plays: number;
   chapters: Chapter[];
@@ -46,7 +47,7 @@ const DEFAULT: FormData = {
   coverImage: '', thumbnailUrl: '',
   mp3Url: '', mp3UrlLow: '',
   totalDuration: '', lengthStr: '', durationSecs: 0,
-  youtubeLink: '', spotifyLink: '', buyLink: '',
+  youtubeLink: '', spotifyLink: '', buyLink: '', vttUrl: '',
   categories: [], topics: [],
   generatedColors: '', plays: 0, chapters: [],
 };
@@ -253,6 +254,56 @@ function CoverUploader({ label, hint, variant, slug, value, onChange }: {
             placeholder="Or paste URL directly…"
             style={{ fontSize: 12, color: '#718096', padding: '6px 10px' }} />
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ── VTT Uploader ──────────────────────────────────────────────────────────────
+function VttUploader({ slug, value, onChange }: { slug: string; value: string; onChange: (url: string) => void }) {
+  const [status, setStatus] = useState<'idle' | 'uploading'>('idle');
+
+  const handle = async (file: File) => {
+    setStatus('uploading');
+    try {
+      if (!file.name.endsWith('.vtt')) throw new Error('File must be a .vtt transcript.');
+      const tempKey = `transcripts/${slug || 'upload'}-${Date.now()}.vtt`;
+      const { uploadUrl, publicUrl } = await getPresignedUrl(tempKey, file.type || 'text/vtt');
+
+      const up = await fetch(uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type || 'text/vtt' } });
+      if (!up.ok) throw new Error(`R2 upload failed: ${up.status}`);
+
+      onChange(publicUrl);
+    } catch (e) {
+      alert(`Upload failed: ${String(e)}`);
+    } finally {
+      setStatus('idle');
+    }
+  };
+
+  return (
+    <div className="form-group" style={{ marginBottom: 12 }}>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+        <FileText size={12} />Transcript File (.vtt)
+      </label>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <label style={{
+          display: 'inline-flex', alignItems: 'center', gap: 7,
+          background: status === 'uploading' ? '#F0F4F8' : '#EFF6FF',
+          border: '1px solid #BFDBFE', borderRadius: 8,
+          padding: '8px 16px', cursor: status === 'uploading' ? 'wait' : 'pointer',
+          fontSize: 13, fontWeight: 500, color: '#2563EB',
+          transition: 'background 0.15s', flexShrink: 0,
+        }}>
+          <Upload size={14} />
+          {status === 'uploading' ? 'Uploading…' : 'Upload VTT'}
+          <input type="file" accept=".vtt" style={{ display: 'none' }}
+            disabled={status === 'uploading'}
+            onChange={e => e.target.files?.[0] && handle(e.target.files[0])} />
+        </label>
+        <input value={value} onChange={e => onChange(e.target.value)}
+          placeholder="Cloudflare R2 URL or local path (/transcripts/…)"
+          style={{ flex: 1, fontSize: 13 }} />
       </div>
     </div>
   );
@@ -509,6 +560,14 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
           <input value={form.lengthStr} onChange={e => set('lengthStr', e.target.value)} placeholder="5h 47m" />
         </div>
       </Row2>
+
+      {/* ── Transcripts ──────────────────────────────────────────────── */}
+      <Section icon={<FileText size={14} />} title="Transcripts" />
+      <VttUploader
+        slug={form.slug}
+        value={form.vttUrl}
+        onChange={url => set('vttUrl', url)}
+      />
 
       {/* ── External Links ───────────────────────────────────────────── */}
       <Section icon={<Link2 size={14} />} title="External Links" />

@@ -14,6 +14,7 @@ interface Props {
   onSeek: (time: number) => void;
   bookTitle: string;
   authorName: string;
+  vttUrl?: string | null;
 }
 
 function formatTimestamp(s: number) {
@@ -24,7 +25,7 @@ function formatTimestamp(s: number) {
   return `${m}:${String(sec).padStart(2, '0')}`;
 }
 
-export function ReadAlongPanel({ slug, currentTime, isOpen, onClose, onSeek, bookTitle, authorName }: Props) {
+export function ReadAlongPanel({ slug, currentTime, isOpen, onClose, onSeek, bookTitle, authorName, vttUrl }: Props) {
   const [cues, setCues] = useState<TranscriptCue[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -40,7 +41,10 @@ export function ReadAlongPanel({ slug, currentTime, isOpen, onClose, onSeek, boo
     if (!isOpen || cues.length > 0) return;
     setLoading(true);
     setError(false);
-    fetch(`/transcripts/${slug}.vtt`)
+    // fallback to local path if no cloud URL available
+    const url = vttUrl || `/transcripts/${slug}.vtt`;
+    
+    fetch(url)
       .then(r => {
         if (!r.ok) throw new Error('not found');
         return r.text();

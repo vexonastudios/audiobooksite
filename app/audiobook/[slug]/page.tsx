@@ -69,7 +69,8 @@ export default function AudiobookPage() {
   useEffect(() => {
     if (!book) return;
     setTranscriptStatus('loading');
-    fetch(`/transcripts/${book.slug}.vtt`)
+    const url = book.vttUrl || `/transcripts/${book.slug}.vtt`;
+    fetch(url)
       .then(r => r.ok ? r.text() : Promise.reject())
       .then(text => {
         setLoadedCues(parseVTT(text));
@@ -734,6 +735,7 @@ export default function AudiobookPage() {
         }}
         bookTitle={book.title}
         authorName={book.authorName}
+        vttUrl={book.vttUrl}
       />
 
       {/* Quote Modal */}

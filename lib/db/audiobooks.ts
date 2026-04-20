@@ -21,6 +21,7 @@ interface AudiobookRow {
   youtube_link: string | null;
   spotify_link: string | null;
   buy_link: string | null;
+  vtt_url: string | null;
   generated_colors: string | null;
   plays: number;
   published: boolean;
@@ -59,6 +60,7 @@ function rowToAudiobook(row: AudiobookRow, chapters: ChapterRow[] = []): Audiobo
     youtubeLink: row.youtube_link,
     spotifyLink: row.spotify_link,
     buyLink: row.buy_link,
+    vttUrl: row.vtt_url,
     generatedColors: row.generated_colors,
     plays: row.plays,
     categories: row.categories ?? [],
@@ -132,14 +134,14 @@ export async function createAudiobook(data: AudiobookInput): Promise<string> {
       id, slug, title, excerpt, description, pub_date, author_name,
       cover_image, thumbnail_url, mp3_url, mp3_url_low, total_duration,
       length_str, duration_secs, original_year, youtube_link, spotify_link,
-      buy_link, generated_colors, plays, published, categories, topics
+      buy_link, vtt_url, generated_colors, plays, published, categories, topics
     ) VALUES (
       ${id}, ${data.slug}, ${data.title}, ${data.excerpt ?? ''}, ${data.description ?? ''},
       ${data.pubDate ?? new Date().toISOString()}, ${data.authorName},
       ${data.coverImage ?? ''}, ${data.thumbnailUrl ?? ''}, ${data.mp3Url ?? ''},
       ${data.mp3UrlLow ?? ''}, ${data.totalDuration ?? ''}, ${data.lengthStr ?? ''},
       ${data.durationSecs ?? 0}, ${data.originalYear ?? null}, ${data.youtubeLink ?? null},
-      ${data.spotifyLink ?? null}, ${data.buyLink ?? null}, ${data.generatedColors ?? null},
+      ${data.spotifyLink ?? null}, ${data.buyLink ?? null}, ${data.vttUrl ?? null}, ${data.generatedColors ?? null},
       ${data.plays ?? 0}, ${data.published ?? true},
       ${data.categories ?? []}, ${data.topics ?? []}
     )
@@ -178,6 +180,7 @@ export async function updateAudiobook(id: string, data: Partial<AudiobookInput>)
       youtube_link    = COALESCE(${data.youtubeLink ?? null}, youtube_link),
       spotify_link    = COALESCE(${data.spotifyLink ?? null}, spotify_link),
       buy_link        = COALESCE(${data.buyLink ?? null}, buy_link),
+      vtt_url         = COALESCE(${data.vttUrl ?? null}, vtt_url),
       generated_colors = COALESCE(${data.generatedColors ?? null}, generated_colors),
       plays           = COALESCE(${data.plays ?? null}, plays),
       published       = COALESCE(${data.published ?? null}, published),
@@ -228,6 +231,7 @@ export interface AudiobookInput {
   youtubeLink?: string | null;
   spotifyLink?: string | null;
   buyLink?: string | null;
+  vttUrl?: string | null;
   generatedColors?: string | null;
   plays?: number;
   published?: boolean;
