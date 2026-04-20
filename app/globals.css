@@ -287,6 +287,70 @@ button {
     width: 36px !important;
     height: 36px !important;
   }
+
+  /* Audiobook Page Layout — Mobile styling to match app design */
+  .audiobook-layout {
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  .audiobook-cover-col {
+    width: 65% !important;
+    margin: 0 auto !important;
+  }
+  .audiobook-cover-img {
+    aspect-ratio: 1 / 1 !important;
+  }
+  .audiobook-right-col {
+    min-width: 100% !important;
+  }
+  .audiobook-stats {
+    display: none !important; /* App layout hides stats on main screen */
+  }
+  .external-links-card {
+    display: none !important;
+  }
+  .audiobook-header-info {
+    display: none !important; /* We show chapter title in player */
+  }
+  .player-card-mobile {
+    padding: 16px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .tabs-card-desktop {
+    display: none !important; /* Uses mobile bottom icon row instead */
+  }
+  .mobile-player-options {
+    display: flex !important;
+  }
+  
+  /* We completely hide the bottom sticking GlobalAudioPlayer when on an audiobook page to avoid two players */
+  body:has(.player-card-mobile) .player-bar {
+    display: none !important;
+  }
+  body:has(.player-card-mobile) .tab-bar {
+    bottom: 0 !important;
+  }
+}
+
+.audiobook-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.audiobook-cover-col {
+  width: 340px;
+  max-width: 100%;
+}
+.audiobook-cover-img {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+}
+.mobile-player-options {
+  display: none;
 }
 
 /* ─── Typography ─────────────────────────────────────────────────────────────── */

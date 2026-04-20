@@ -207,16 +207,17 @@ export default function AudiobookPage() {
       <div className="page pb-24">
         
         {/* Layout: Cover Left | Info & Player Right */}
-        <div style={{ display: 'flex', flexDirection: 'row', gap: 32, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <div className="audiobook-layout">
           
           {/* Left Column: Cover */}
-          <div style={{ width: 340, maxWidth: '100%', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="audiobook-cover-col" style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
              <img 
                src={book.coverImage || '/placeholder.png'} 
                alt={book.title} 
-               style={{ width: '100%', aspectRatio: '2 / 3', objectFit: 'cover', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-lg)' }}
+               className="audiobook-cover-img"
+               style={{ objectFit: 'cover', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-lg)' }}
              />
-             <div style={{ display: 'flex', justifyContent: 'center', gap: 24, padding: '8px 0' }}>
+             <div className="audiobook-stats" style={{ display: 'flex', justifyContent: 'center', gap: 24, padding: '8px 0' }}>
                <div style={{ textAlign: 'center' }}>
                  <div style={{ fontWeight: 700, fontSize: '1.25rem' }}>{(book.plays / 1000).toFixed(1)}k</div>
                  <div className="text-muted text-xs">Total Plays</div>
@@ -229,7 +230,7 @@ export default function AudiobookPage() {
 
              {/* External Links */}
              {(book.youtubeLink || book.spotifyLink || book.buyLink) && (
-               <div className="card" style={{ padding: 16 }}>
+               <div className="card external-links-card" style={{ padding: 16 }}>
                  <h4 style={{ marginBottom: 12, fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>Read / Watch</h4>
                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                    {book.youtubeLink && <a href={book.youtubeLink} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ justifyContent: 'flex-start' }}>YouTube</a>}
@@ -241,10 +242,10 @@ export default function AudiobookPage() {
           </div>
 
           {/* Right Column: Stacked Cards */}
-          <div style={{ flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div className="audiobook-right-col" style={{ flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', gap: 20 }}>
             
-            {/* Header info (Mobile mostly, but useful here too) */}
-            <div>
+            {/* Header info */}
+            <div className="audiobook-header-info">
               <h1 style={{ marginBottom: 4 }}>{book.title}</h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, marginTop: 8 }}>
                 {authorRecord?.image && (
@@ -290,7 +291,7 @@ export default function AudiobookPage() {
             </div>
 
             {/* CARD 1: Player Controls */}
-            <div className="card" style={{ padding: '24px' }}>
+            <div className="card player-card-mobile" style={{ padding: '24px' }}>
 
               {/* Timestamped-link banner */}
               {!isCurrent && timedStart !== null && (
@@ -315,7 +316,7 @@ export default function AudiobookPage() {
               )}
 
               {book.chapters[currentChapterIdx] ? (
-                <div style={{ textAlign: 'center', marginBottom: 12, fontWeight: 600, fontSize: '1.25rem' }}>
+                <div style={{ textAlign: 'center', marginBottom: 16, fontWeight: 600, fontSize: '1.25rem' }}>
                   {book.chapters[currentChapterIdx].title}
                 </div>
               ) : null}
@@ -336,7 +337,7 @@ export default function AudiobookPage() {
                 const pPct = cMax > 0 ? (cVal / cMax) * 100 : 0;
                 
                 return (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <div className="scrubber-row" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                     <input
                       type="range"
                       min={0}
@@ -352,11 +353,13 @@ export default function AudiobookPage() {
                       className="scrubber"
                       style={{ 
                         flex: 1, 
-                        background: `linear-gradient(to right, var(--color-brand) ${pPct}%, var(--color-surface-2) ${pPct}%)`
+                        background: `linear-gradient(to right, var(--color-brand) ${pPct}%, var(--color-surface-2) ${pPct}%)`,
+                        height: 6
                       }}
                     />
                     
-                    <div style={{ position: 'relative' }}>
+                    {/* Speed dropdown text (Desktop only, mobile moves it below) */}
+                    <div className="desktop-only" style={{ position: 'relative' }}>
                       <select 
                         value={playbackSpeed}
                         onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
@@ -388,56 +391,75 @@ export default function AudiobookPage() {
 
               {/* Time displays */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, marginBottom: 24, fontSize: '0.875rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
-                <div style={{ width: 80, textAlign: 'left' }}>
+                <div style={{ width: 80, textAlign: 'left', color: 'var(--color-text-primary)' }}>
                   {book.chapters[currentChapterIdx] ? formatTime(displayTime - book.chapters[currentChapterIdx].startTime) : '0:00'}
                 </div>
-                <div style={{ flex: 1, textAlign: 'center', color: 'var(--color-text-primary)' }}>
-                  {!isCurrent ? (standbyTime > 0 ? 'Resume where you left off' : 'Ready to start') : (duration > 0 ? formatTime(duration - currentTime) + ' left in book' : '')}
+                <div style={{ flex: 1, textAlign: 'center', color: 'var(--color-brand)', fontWeight: 600 }}>
+                  {!isCurrent ? (standbyTime > 0 ? 'Resume' : '') : (duration > 0 ? formatTime(duration - currentTime) + ' left' : '')}
                 </div>
-                <div style={{ width: 80, textAlign: 'right' }}>
+                <div style={{ width: 80, textAlign: 'right', color: 'var(--color-text-primary)' }}>
                   {book.chapters[currentChapterIdx] && book.chapters[currentChapterIdx+1] ? 
-                    `- ${formatTime(book.chapters[currentChapterIdx+1].startTime - displayTime)}` : 
+                    `-${formatTime(book.chapters[currentChapterIdx+1].startTime - displayTime)}` : 
                     book.chapters[currentChapterIdx] && (duration > 0 || book.chapters[currentChapterIdx].duration) ? 
-                    `- ${formatTime((isCurrent ? duration : (book.chapters[currentChapterIdx].startTime + (book.chapters[currentChapterIdx].duration||0))) - displayTime)}` : '0:00'}
+                    `-${formatTime((isCurrent ? duration : (book.chapters[currentChapterIdx].startTime + (book.chapters[currentChapterIdx].duration||0))) - displayTime)}` : '0:00'}
                 </div>
               </div>
 
               {/* Playback Buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-evenly', gap: 12 }}>
                 <button 
                   className="btn-icon" 
-                  style={{ opacity: !isCurrent || currentChapterIdx === 0 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === 0 ? 'none' : 'auto' }}
+                  style={{ width: 44, height: 44, background: 'transparent', border: 'none', opacity: !isCurrent || currentChapterIdx === 0 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === 0 ? 'none' : 'auto' }}
                   onClick={() => jumpToChapter(currentChapterIdx - 1)}
                   title="Previous chapter"
                 >
-                  <SkipBack size={20} />
+                  <SkipBack size={24} fill="currentColor" />
                 </button>
-                <button className="btn-skip" onClick={skipBackward} disabled={!isCurrent} title={`Back ${skipInterval}s`}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                  <span className="skip-label">{skipInterval}</span>
+                <button className="btn-skip" style={{ width: 48, height: 48, background: 'transparent', border: 'none' }} onClick={skipBackward} disabled={!isCurrent} title={`Back ${skipInterval}s`}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                  <span className="skip-label" style={{ bottom: 10, fontSize: '0.6rem' }}>{skipInterval}</span>
                 </button>
-                <button className="btn-play-large" onClick={handlePlayPause} style={{ width: 72, height: 72 }}>
+                <button className="btn-play-large" onClick={handlePlayPause} style={{ width: 64, height: 64, background: 'var(--color-text-primary)', color: 'var(--color-surface)', boxShadow: 'none' }}>
                   {isCurrent && isPlaying
-                    ? <Pause size={30} strokeWidth={2.5} />
-                    : <Play size={30} strokeWidth={2.5} style={{ marginLeft: 4 }} />
+                    ? <Pause size={28} strokeWidth={2.5} fill="currentColor" />
+                    : <Play size={28} strokeWidth={2.5} style={{ marginLeft: 4 }} fill="currentColor" />
                   }
                 </button>
-                <button className="btn-skip" onClick={skipForward} disabled={!isCurrent} title={`Forward ${skipInterval}s`}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'scaleX(-1)' }}><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-                  <span className="skip-label">{skipInterval}</span>
+                <button className="btn-skip" style={{ width: 48, height: 48, background: 'transparent', border: 'none' }} onClick={skipForward} disabled={!isCurrent} title={`Forward ${skipInterval}s`}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'scaleX(-1)' }}><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                  <span className="skip-label" style={{ bottom: 10, fontSize: '0.6rem' }}>{skipInterval}</span>
                 </button>
                 <button 
                   className="btn btn-icon" 
-                  style={{ opacity: !isCurrent || currentChapterIdx === book.chapters.length - 1 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === book.chapters.length - 1 ? 'none' : 'auto' }}
+                  style={{ width: 44, height: 44, background: 'transparent', border: 'none', opacity: !isCurrent || currentChapterIdx === book.chapters.length - 1 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === book.chapters.length - 1 ? 'none' : 'auto' }}
                   onClick={() => jumpToChapter(currentChapterIdx + 1)}
                 >
-                  <SkipForward size={24} />
+                  <SkipForward size={24} fill="currentColor" />
+                </button>
+              </div>
+
+              {/* Mobile-Only Bottom Options Row */}
+              <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginTop: 32, paddingBottom: 16 }}>
+                <button onClick={() => {
+                  const nextSpeed = playbackSpeed >= 2 ? 0.75 : playbackSpeed + 0.25;
+                  setPlaybackSpeed(nextSpeed);
+                }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)' }}>
+                  <span style={{ fontSize: '1.2rem', fontWeight: 800 }}>{playbackSpeed}x</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Speed</span>
+                </button>
+                <button onClick={() => setActiveTab('chapters')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)' }}>
+                  <List size={22} />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Chapters</span>
+                </button>
+                <button onClick={(e) => { e.preventDefault(); /* Mobile bookmark handler */ }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)' }}>
+                  <BookmarkPlus size={22} />
+                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Bookmark</span>
                 </button>
               </div>
             </div>
 
             {/* CARD 2: Interactive Tabs (Chapters / Bookmarks / Share) */}
-            <div className="card" style={{ padding: '16px 24px 24px', flex: 1 }}>
+            <div className="card tabs-card-desktop" style={{ padding: '16px 24px 24px', flex: 1 }}>
               <div className="tabs">
                 <button className={`tab ${activeTab === 'chapters' ? 'active' : ''}`} onClick={() => setActiveTab('chapters')}>
                   <List size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: '-3px' }}/> Chapters
