@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { usePlayerStore } from '@/lib/store/playerStore';
 
 const HEARTBEAT_INTERVAL_MS = 30_000;
 const PLATFORM = 'web'; // Change to 'ios' or 'android' in Capacitor native wrapper
@@ -52,14 +53,15 @@ export function usePlayAnalytics({ audiobookId, isPlaying, currentTime }: UsePla
   // Helper: send a final heartbeat with whatever delta has accumulated
   const flushHeartbeat = (bookId: string) => {
     if (lastHeartbeatTimeRef.current === null) return;
-    const delta = currentTime - lastHeartbeatTimeRef.current;
+    const now = usePlayerStore.getState().currentTime;
+    const delta = now - lastHeartbeatTimeRef.current;
     if (delta > 0 && delta < 600) { // sanity cap at 10 min (handles seek edge cases)
       fireAndForget('/api/analytics/heartbeat', {
         audiobookId: bookId,
         sessionId: getSessionId(),
         platform: PLATFORM,
         listenedSecs: Math.round(delta),
-        position: currentTime,
+        position: now,
       });
     }
     lastHeartbeatTimeRef.current = null;
@@ -103,10 +105,7 @@ export function usePlayAnalytics({ audiobookId, isPlaying, currentTime }: UsePla
         intervalRef.current = setInterval(() => {
           const book = activeBookRef.current;
           if (!book || lastHeartbeatTimeRef.current === null) return;
-          // We read currentTime from the closure; the interval captures it at creation
-          // So we use a ref trick: the playerStore exposes currentTime on the audio element
-          const audio = document.querySelector('audio');
-          const now = audio ? audio.currentTime : currentTime;
+          const now = usePlayerStore.getState().currentTime;
           const delta = now - lastHeartbeatTimeRef.current!;
           if (delta > 0 && delta < 600) {
             fireAndForget('/api/analytics/heartbeat', {
