@@ -58,6 +58,11 @@ export function getAudioElement(): HTMLAudioElement {
   if (!audioEl && typeof window !== 'undefined') {
     audioEl = new Audio();
     audioEl.preload = 'metadata';
+    // Prevent the browser from automatically scanning the local network for Cast/AirPlay receivers, 
+    // which triggers an intrusive "Access other devices on your local network" permission prompt.
+    if ('disableRemotePlayback' in audioEl) {
+      (audioEl as any).disableRemotePlayback = true;
+    }
   }
   return audioEl!;
 }
