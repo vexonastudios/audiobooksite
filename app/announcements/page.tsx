@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Bell, Play, Volume2, Calendar } from 'lucide-react';
-import { getAudioElement } from '@/lib/store/playerStore';
+import { getAudioElement, usePlayerStore } from '@/lib/store/playerStore';
 
 interface Notification {
   id: string;
@@ -17,26 +17,48 @@ export default function AnnouncementsPage() {
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     fetch('/api/notifications/all')
       .then(r => r.ok ? r.json() : [])
       .then(data => { setItems(data); setLoading(false); })
       .catch(() => setLoading(false));
+      
+    // Cleanup isolated audio on unmount
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
   }, []);
 
   const handlePlay = (notif: Notification) => {
-    const audio = getAudioElement();
-    if (playingId === notif.id) {
-      audio.pause();
+    if (playingId === notif.id && audioRef.current) {
+      audioRef.current.pause();
       setPlayingId(null);
       return;
     }
-    audio.pause();
-    audio.src = notif.audio_url;
-    audio.load();
-    audio.onended = () => setPlayingId(null);
-    audio.play().catch(() => {});
+
+    // 1. Pause the main audiobook player so it doesn't overlap or get hijacked
+    const mainAudio = getAudioElement();
+    if (!mainAudio.paused) {
+      mainAudio.pause();
+      usePlayerStore.getState().setPlaying(false);
+    }
+
+    // 2. Play using our isolated audio element
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+    } else {
+      audioRef.current.pause();
+    }
+
+    audioRef.current.src = notif.audio_url;
+    audioRef.current.load();
+    audioRef.current.onended = () => setPlayingId(null);
+    audioRef.current.play().catch(() => {});
     setPlayingId(notif.id);
   };
 

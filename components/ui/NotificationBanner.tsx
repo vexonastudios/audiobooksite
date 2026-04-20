@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Volume2, Play, X, Bell } from 'lucide-react';
 import { useUserStore } from '@/lib/store/userStore';
-import { getAudioElement } from '@/lib/store/playerStore';
+import { getAudioElement, usePlayerStore } from '@/lib/store/playerStore';
 
 interface Notification {
   id: string;
@@ -54,27 +54,37 @@ export function NotificationBanner() {
 
   const handlePlay = () => {
     if (!notif?.audio_url) return;
-    const audio = getAudioElement();
-    if (playing) {
-      audio.pause();
+    
+    // Pause it if this notification is currently playing
+    if (playing && audioRef.current) {
+      audioRef.current.pause();
       setPlaying(false);
       return;
     }
-    // Play notification audio in the shared audio element
-    audio.pause();
-    audio.src = notif.audio_url;
-    audio.load();
-    audio.onended = () => {
-      setPlaying(false);
-      setPlayed(true);
-      markHeard(notif.id);
-      // Fade out banner after a moment
-      setTimeout(() => {
-        setVisible(false);
-        setTimeout(() => setNotif(null), 350);
-      }, 1800);
-    };
-    audio.play().catch(() => {});
+
+    // 1. Pause the main audiobook player so it doesn't overlap or get hijacked
+    const mainAudio = getAudioElement();
+    if (!mainAudio.paused) {
+      mainAudio.pause();
+      usePlayerStore.getState().setPlaying(false);
+    }
+
+    // 2. Initialize or play the isolated notification audio
+    if (!audioRef.current) {
+      audioRef.current = new Audio(notif.audio_url);
+      audioRef.current.onended = () => {
+        setPlaying(false);
+        setPlayed(true);
+        markHeard(notif.id);
+        // Fade out banner after a moment
+        setTimeout(() => {
+          setVisible(false);
+          setTimeout(() => setNotif(null), 350);
+        }, 1800);
+      };
+    }
+    
+    audioRef.current.play().catch(() => {});
     setPlaying(true);
   };
 
