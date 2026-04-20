@@ -342,46 +342,80 @@ export default function AudiobookPage() {
                 </div>
               </div>
               {transcriptStatus !== 'unavailable' && (
-                <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
-                  <button
-                    className="btn btn-secondary"
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', opacity: transcriptStatus === 'loading' ? 0.5 : 1 }}
-                    onClick={() => setReadAlongOpen(true)}
-                    disabled={transcriptStatus === 'loading'}
-                  >
-                    <BookOpen size={16} />
-                    Read Along
-                    {loadedCues.length > 0 && (
-                      <span style={{ background: 'var(--color-brand)', color: 'white', borderRadius: 20, padding: '1px 8px', fontSize: '0.7rem', fontWeight: 700 }}>Live Sync</span>
-                    )}
-                  </button>
-                  <button
-                    className="btn btn-secondary"
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', opacity: transcriptStatus === 'loading' ? 0.5 : 1 }}
-                    onClick={() => {
-                      setQuoteModalOpen(true);
-                      if (isPlaying) setPlaying(false);
-                    }}
-                    disabled={transcriptStatus === 'loading'}
-                  >
-                    <Quote size={16} />
-                    Share Quote
-                  </button>
-                  {/* Inline Heart for desktop; on mobile the cover-card overlay handles it */}
-                  <HeartButton
-                    size={20}
-                    variant="inline"
-                    item={{
-                      type: 'audiobook',
-                      itemId: book.id,
-                      itemSlug: book.slug,
-                      title: book.title,
-                      author: book.authorName,
-                      cover: book.coverImage,
-                      thumbnail: book.thumbnailUrl,
-                    }}
-                  />
-                </div>
+                <>
+                  {/* Desktop: full-width buttons */}
+                  <div className="desktop-only" style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
+                    <button
+                      className="btn btn-secondary"
+                      style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', opacity: transcriptStatus === 'loading' ? 0.5 : 1 }}
+                      onClick={() => setReadAlongOpen(true)}
+                      disabled={transcriptStatus === 'loading'}
+                    >
+                      <BookOpen size={16} />
+                      Read Along
+                      {loadedCues.length > 0 && (
+                        <span style={{ background: 'var(--color-brand)', color: 'white', borderRadius: 20, padding: '1px 8px', fontSize: '0.7rem', fontWeight: 700 }}>Live Sync</span>
+                      )}
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', opacity: transcriptStatus === 'loading' ? 0.5 : 1 }}
+                      onClick={() => { setQuoteModalOpen(true); if (isPlaying) setPlaying(false); }}
+                      disabled={transcriptStatus === 'loading'}
+                    >
+                      <Quote size={16} />
+                      Share Quote
+                    </button>
+                    <HeartButton size={20} variant="inline" item={{ type: 'audiobook', itemId: book.id, itemSlug: book.slug, title: book.title, author: book.authorName, cover: book.coverImage, thumbnail: book.thumbnailUrl }} />
+                  </div>
+
+                  {/* Mobile: compact icon row */}
+                  <div className="mobile-only" style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
+                    <button
+                      onClick={() => setReadAlongOpen(true)}
+                      disabled={transcriptStatus === 'loading'}
+                      title="Read Along"
+                      style={{
+                        width: 42, height: 42, borderRadius: '50%',
+                        border: '1.5px solid var(--color-border)',
+                        background: 'var(--color-surface)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: 'var(--color-brand)', cursor: 'pointer',
+                        opacity: transcriptStatus === 'loading' ? 0.5 : 1,
+                        position: 'relative',
+                      }}
+                    >
+                      <BookOpen size={18} />
+                      {loadedCues.length > 0 && (
+                        <span style={{
+                          position: 'absolute', top: -3, right: -3,
+                          width: 10, height: 10, borderRadius: '50%',
+                          background: 'var(--color-brand)', border: '2px solid var(--color-bg)',
+                        }} />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => { setQuoteModalOpen(true); if (isPlaying) setPlaying(false); }}
+                      disabled={transcriptStatus === 'loading'}
+                      title="Share Quote"
+                      style={{
+                        width: 42, height: 42, borderRadius: '50%',
+                        border: '1.5px solid var(--color-border)',
+                        background: 'var(--color-surface)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: 'var(--color-text-secondary)', cursor: 'pointer',
+                        opacity: transcriptStatus === 'loading' ? 0.5 : 1,
+                      }}
+                    >
+                      <Quote size={18} />
+                    </button>
+                    <HeartButton
+                      size={18}
+                      variant="inline"
+                      item={{ type: 'audiobook', itemId: book.id, itemSlug: book.slug, title: book.title, author: book.authorName, cover: book.coverImage, thumbnail: book.thumbnailUrl }}
+                    />
+                  </div>
+                </>
               )}
             </div>
 
