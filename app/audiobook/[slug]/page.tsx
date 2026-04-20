@@ -10,6 +10,7 @@ import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, C
 import { BookCard } from '@/components/ui/BookCard';
 import { ReadAlongPanel } from '@/components/ui/ReadAlongPanel';
 import { QuoteModal } from '@/components/ui/QuoteModal';
+import { HeartButton } from '@/components/ui/HeartButton';
 import { parseVTT, getContextText } from '@/lib/parseVTT';
 import type { TranscriptCue } from '@/lib/parseVTT';
 import authorsData from '@/public/data/authors.json';
@@ -212,12 +213,15 @@ export default function AudiobookPage() {
           
           {/* Left Column: Cover */}
           <div className="audiobook-cover-col" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-             <img 
-               src={book.coverImage || '/placeholder.png'} 
-               alt={book.title} 
-               className="audiobook-cover-img"
-               style={{ objectFit: 'cover', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-lg)' }}
-             />
+             <picture>
+               <source media="(max-width: 768px)" srcSet={book.thumbnailUrl || book.coverImage || '/placeholder.png'} />
+               <img 
+                 src={book.coverImage || '/placeholder.png'} 
+                 alt={book.title} 
+                 className="audiobook-cover-img"
+                 style={{ objectFit: 'cover', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-lg)' }}
+               />
+             </picture>
              <div className="audiobook-stats" style={{ display: 'flex', justifyContent: 'center', gap: 24, padding: '8px 0' }}>
                <div style={{ textAlign: 'center' }}>
                  <div style={{ fontWeight: 700, fontSize: '1.25rem' }}>{(book.plays / 1000).toFixed(1)}k</div>
@@ -287,6 +291,20 @@ export default function AudiobookPage() {
                     <Quote size={16} />
                     Share Quote
                   </button>
+                  {/* Inline Heart for desktop; on mobile the cover-card overlay handles it */}
+                  <HeartButton
+                    size={20}
+                    variant="inline"
+                    item={{
+                      type: 'audiobook',
+                      itemId: book.id,
+                      itemSlug: book.slug,
+                      title: book.title,
+                      author: book.authorName,
+                      cover: book.coverImage,
+                      thumbnail: book.thumbnailUrl,
+                    }}
+                  />
                 </div>
               )}
             </div>

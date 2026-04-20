@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { HistoryEntry, Bookmark, SavedQuote } from '@/lib/types';
+import type { HistoryEntry, Bookmark, SavedQuote, Favorite } from '@/lib/types';
 
 export interface QuoteSettings {
   includeLink: boolean;
@@ -14,6 +14,7 @@ interface UserState {
   history: HistoryEntry[];
   bookmarks: Bookmark[];
   quotes: SavedQuote[];
+  favorites: Favorite[];
   skipInterval: number;
 
   // Notifications
@@ -42,6 +43,12 @@ interface UserState {
   saveQuote: (quote: Omit<SavedQuote, 'id' | 'createdAt'>) => void;
   removeQuote: (id: string) => void;
 
+  // Favorites
+  addFavorite: (item: Omit<Favorite, 'id' | 'createdAt'>) => void;
+  removeFavorite: (itemId: string) => void;
+  isFavorited: (itemId: string) => boolean;
+  toggleFavorite: (item: Omit<Favorite, 'id' | 'createdAt'>) => void;
+
   // Settings
   quoteSettings: QuoteSettings;
   setSkipInterval: (val: number) => void;
@@ -58,6 +65,7 @@ export const useUserStore = create<UserState>()(
       history: [],
       bookmarks: [],
       quotes: [],
+      favorites: [],
       skipInterval: 15,
       quoteSettings: { includeLink: true, includeBook: true, useQuotes: true },
       notificationsEnabled: true,
@@ -127,6 +135,31 @@ export const useUserStore = create<UserState>()(
 
       removeQuote: (id) => {
         set((state) => ({ quotes: state.quotes.filter(q => q.id !== id) }));
+      },
+
+      addFavorite: (item) => {
+        const id = `fav_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        set((state) => {
+          if (state.favorites.some(f => f.itemId === item.itemId)) return state;
+          return { favorites: [{ id, createdAt: Date.now(), ...item }, ...state.favorites] };
+        });
+      },
+
+      removeFavorite: (itemId) => {
+        set((state) => ({ favorites: state.favorites.filter(f => f.itemId !== itemId) }));
+      },
+
+      isFavorited: (itemId) => {
+        return !!get().favorites.find(f => f.itemId === itemId);
+      },
+
+      toggleFavorite: (item) => {
+        const exists = get().favorites.some(f => f.itemId === item.itemId);
+        if (exists) {
+          get().removeFavorite(item.itemId);
+        } else {
+          get().addFavorite(item);
+        }
       },
     }),
     {

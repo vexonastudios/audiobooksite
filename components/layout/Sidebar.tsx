@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash, Bell, Trophy, BookMarked, ChevronUp } from 'lucide-react';
+import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash, Bell, Trophy, BookMarked, ChevronUp, Heart } from 'lucide-react';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useEffect } from 'react';
 
@@ -17,10 +17,11 @@ const mainGroup = [
 ];
 
 const youGroup = [
-  { href: '/bookmarks',   label: 'Bookmarks',  icon: Bookmark   },
-  { href: '/quotes',      label: 'Quotes',     icon: Quote      },
-  { href: '/history',     label: 'History',    icon: Clock      },
-  { href: '/stats',       label: 'My Stats',   icon: Trophy     },
+  { href: '/favorites',   label: 'Favorites',  icon: Heart     },
+  { href: '/bookmarks',   label: 'Bookmarks',  icon: Bookmark  },
+  { href: '/quotes',      label: 'Quotes',     icon: Quote     },
+  { href: '/history',     label: 'History',    icon: Clock     },
+  { href: '/stats',       label: 'My Stats',   icon: Trophy    },
 ];
 
 const moreGroup = [

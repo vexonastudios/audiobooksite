@@ -68,6 +68,18 @@ export interface HistoryEntry {
   lastListened: number; // timestamp
 }
 
+export interface Favorite {
+  id: string;
+  type: 'audiobook' | 'article';
+  itemId: string;
+  itemSlug: string;
+  title: string;
+  author: string;
+  cover?: string;
+  thumbnail?: string;
+  createdAt: number;
+}
+
 export interface SavedQuote {
   id: string;
   text: string;

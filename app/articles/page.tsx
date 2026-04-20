@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { BookOpen } from 'lucide-react';
+import { HeartButton } from '@/components/ui/HeartButton';
 
 export default function ArticlesIndex() {
   const articles = useLibraryStore((s) => s.articles);
@@ -125,6 +126,18 @@ export default function ArticlesIndex() {
                     <BookOpen size={48} color="#fff" />
                   </div>
                 )}
+                {/* Favorite heart overlay */}
+                <HeartButton
+                  size={16}
+                  item={{
+                    type: 'article',
+                    itemId: article.id,
+                    itemSlug: article.slug,
+                    title: article.title,
+                    author: article.authorName,
+                    cover: article.coverImage,
+                  }}
+                />
               </div>
 
               {/* Card body */}

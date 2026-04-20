@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BookOpen, Clock, Quote } from 'lucide-react';
+import { Home, BookOpen, Heart, Quote } from 'lucide-react';
 
 const tabs = [
-  { href: '/',           label: 'Home',    icon: Home     },
-  { href: '/categories', label: 'Browse',  icon: BookOpen },
-  { href: '/history',    label: 'History', icon: Clock    },
-  { href: '/quotes',     label: 'Quotes',  icon: Quote    },
+  { href: '/',           label: 'Home',      icon: Home     },
+  { href: '/categories', label: 'Browse',    icon: BookOpen },
+  { href: '/favorites',  label: 'Favorites', icon: Heart    },
+  { href: '/quotes',     label: 'Quotes',    icon: Quote    },
 ];
 
 export function TabBar() {

@@ -325,7 +325,7 @@ button {
     display: none !important; /* App layout hides stats on main screen */
   }
   .external-links-card {
-    display: none !important;
+    width: 100% !important;
   }
   .audiobook-header-info {
     display: none !important; /* We show chapter title in player */

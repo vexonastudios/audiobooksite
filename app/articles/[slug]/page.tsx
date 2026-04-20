@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { AlertCircle, ArrowLeft, Calendar, User, Headphones, Pause, Twitter, Facebook, Link2, Check } from 'lucide-react';
+import { HeartButton } from '@/components/ui/HeartButton';
 import type { Audiobook } from '@/lib/types';
 
 export default function ArticleDetail() {
@@ -178,6 +179,20 @@ export default function ArticleDetail() {
                 {copied ? <Check size={16} /> : <Link2 size={16} />}
               </button>
             </div>
+
+            {/* Favorite */}
+            <HeartButton
+              size={20}
+              variant="inline"
+              item={{
+                type: 'article',
+                itemId: article.id,
+                itemSlug: article.slug,
+                title: article.title,
+                author: article.authorName,
+                cover: article.coverImage,
+              }}
+            />
           </div>
         </div>
 
