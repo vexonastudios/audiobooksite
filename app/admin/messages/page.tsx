@@ -5,7 +5,17 @@ import AdminMessagesClient from './AdminMessagesClient';
 
 const sql = neon(process.env.DATABASE_URL!);
 
-async function getMessages() {
+interface Message {
+  id: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+}
+
+async function getMessages(): Promise<Message[]> {
   try {
     await sql`
       CREATE TABLE IF NOT EXISTS contact_messages (
@@ -23,7 +33,7 @@ async function getMessages() {
       FROM contact_messages
       ORDER BY read ASC, created_at DESC
     `;
-    return rows;
+    return rows as Message[];
   } catch {
     return [];
   }
@@ -34,7 +44,7 @@ export default async function AdminMessagesPage() {
   if (!userId) redirect('/sign-in');
 
   const messages = await getMessages();
-  const unreadCount = messages.filter((m: any) => !m.read).length;
+  const unreadCount = messages.filter(m => !m.read).length;
 
   return <AdminMessagesClient messages={messages} unreadCount={unreadCount} />;
 }
