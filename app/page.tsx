@@ -5,10 +5,10 @@ import { useLibraryStore } from '@/lib/store/libraryStore';
 import { useUserStore } from '@/lib/store/userStore';
 import type { Audiobook, Article } from '@/lib/types';
 import Link from 'next/link';
-import { Headphones, ChevronRight, BookOpen } from 'lucide-react';
+import { Headphones, ChevronRight, ChevronLeft, BookOpen } from 'lucide-react';
 import { NotificationBanner } from '@/components/ui/NotificationBanner';
 import { BookCard } from '@/components/ui/BookCard';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const BOOK_CARD_WIDTH = 168;
 const CL_CARD_WIDTH = 134; // Slightly smaller for Continue Listening
@@ -16,20 +16,54 @@ const CL_CARD_WIDTH = 134; // Slightly smaller for Continue Listening
 // ── Scroll Row with desktop arrow + right fade ────────────────────────────────
 function ScrollRow({ books, cardWidth = BOOK_CARD_WIDTH, compact = false }: { books: Audiobook[]; cardWidth?: number; compact?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
-  const scroll = () => {
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = () => {
+    if (ref.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = ref.current;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [books]);
+
+  const scrollLeft = () => {
+    if (ref.current) ref.current.scrollBy({ left: -((cardWidth + 16) * 3), behavior: 'smooth' });
+  };
+  const scrollRight = () => {
     if (ref.current) ref.current.scrollBy({ left: (cardWidth + 16) * 3, behavior: 'smooth' });
   };
   return (
-    <div className="scroll-row-wrapper">
-      <div className="scroll-row" ref={ref}>
+    <div className="scroll-row-wrapper" onMouseEnter={checkScroll}>
+      <div className="scroll-row" ref={ref} onScroll={checkScroll}>
         {books.map((book) => (
           <BookCard key={book.id} book={book} width={cardWidth} compact={compact} />
         ))}
       </div>
-      <div className="scroll-fade" />
-      <button className="scroll-arrow" onClick={scroll} aria-label="Scroll right">
-        <ChevronRight size={18} />
-      </button>
+      
+      {canScrollLeft && (
+        <>
+          <div className="scroll-fade left" />
+          <button className="scroll-arrow left" onClick={scrollLeft} aria-label="Scroll left">
+            <ChevronLeft size={18} />
+          </button>
+        </>
+      )}
+      
+      {canScrollRight && (
+        <>
+          <div className="scroll-fade right" />
+          <button className="scroll-arrow right" onClick={scrollRight} aria-label="Scroll right">
+            <ChevronRight size={18} />
+          </button>
+        </>
+      )}
     </div>
   );
 }
@@ -98,20 +132,55 @@ function ArticleCard({ article, audiobooks, index }: { article: Article; audiobo
 
 function ArticleScrollRow({ articles, audiobooks }: { articles: Article[]; audiobooks: Audiobook[] }) {
   const ref = useRef<HTMLDivElement>(null);
-  const scroll = () => {
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = () => {
+    if (ref.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = ref.current;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [articles]);
+
+  const scrollLeft = () => {
+    if (ref.current) ref.current.scrollBy({ left: -(240 + 14) * 3, behavior: 'smooth' });
+  };
+  const scrollRight = () => {
     if (ref.current) ref.current.scrollBy({ left: (240 + 14) * 3, behavior: 'smooth' });
   };
+
   return (
-    <div className="scroll-row-wrapper">
-      <div className="scroll-row" ref={ref}>
+    <div className="scroll-row-wrapper" onMouseEnter={checkScroll}>
+      <div className="scroll-row" ref={ref} onScroll={checkScroll}>
         {articles.map((a, i) => (
           <ArticleCard key={a.id} article={a} audiobooks={audiobooks} index={i} />
         ))}
       </div>
-      <div className="scroll-fade" />
-      <button className="scroll-arrow" onClick={scroll} aria-label="Scroll right">
-        <ChevronRight size={18} />
-      </button>
+      
+      {canScrollLeft && (
+        <>
+          <div className="scroll-fade left" />
+          <button className="scroll-arrow left" onClick={scrollLeft} aria-label="Scroll left">
+            <ChevronLeft size={18} />
+          </button>
+        </>
+      )}
+      
+      {canScrollRight && (
+        <>
+          <div className="scroll-fade right" />
+          <button className="scroll-arrow right" onClick={scrollRight} aria-label="Scroll right">
+            <ChevronRight size={18} />
+          </button>
+        </>
+      )}
     </div>
   );
 }
@@ -120,11 +189,29 @@ function ArticleScrollRow({ articles, audiobooks }: { articles: Article[]; audio
 export default function HomePage() {
   const { audiobooks, articles, isLoaded, getByCategory, getRecent } = useLibraryStore();
   const history = useUserStore((s) => s.history);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [dailyTags, setDailyTags] = useState<string[]>([]);
 
   const categories = useLibraryStore((s) => s.getAllCategories());
+  const topics = useLibraryStore((s) => s.getAllTopics());
   const recentBooks = getRecent(20);
   const recentArticles = articles.slice(0, 20);
+
+  useEffect(() => {
+    // Merge categories and topics, remove duplicates
+    const allTags = Array.from(new Set([...categories, ...topics])).sort();
+    if (allTags.length > 0) {
+      // Use current day as pseudo-random seed to rotate tags daily
+      const seed = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+      const shuffled = [...allTags].sort((a, b) => {
+         const hashA = (a.charCodeAt(0) + seed) % 100;
+         const hashB = (b.charCodeAt(0) + seed) % 100;
+         return hashA - hashB;
+      });
+      // Show ~15 random distinct tags each day
+      setDailyTags(shuffled.slice(0, 15));
+    }
+  }, [categories, topics]);
 
   // "Continue Listening" — map history bookId → audiobook
   const continueListening = history
@@ -132,9 +219,9 @@ export default function HomePage() {
     .map((h) => audiobooks.find((b) => b.id === h.bookId))
     .filter(Boolean) as Audiobook[];
 
-  // "Explore" row — filtered by selected category pill, or all
-  const exploreBooks = activeCategory
-    ? getByCategory(activeCategory).slice(0, 20)
+  // "Explore" row — filtered by selected tag, checking both category and topic arrays
+  const exploreBooks = activeTag
+    ? audiobooks.filter(b => b.categories?.includes(activeTag) || b.topics?.includes(activeTag)).slice(0, 20)
     : audiobooks.slice(0, 20);
 
   if (!isLoaded) {
@@ -201,18 +288,18 @@ export default function HomePage() {
         {/* Category pill filter row */}
         <div className="scroll-row" style={{ marginBottom: 20, paddingBottom: 4 }}>
           <button
-            className={`pill ${activeCategory === null ? 'active' : ''}`}
-            onClick={() => setActiveCategory(null)}
+            className={`pill ${activeTag === null ? 'active' : ''}`}
+            onClick={() => setActiveTag(null)}
           >
             All
           </button>
-          {categories.map((cat) => (
+          {dailyTags.map((tag) => (
             <button
-              key={cat}
-              className={`pill ${activeCategory === cat ? 'active' : ''}`}
-              onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
+              key={tag}
+              className={`pill ${activeTag === tag ? 'active' : ''}`}
+              onClick={() => setActiveTag(activeTag === tag ? null : tag)}
             >
-              {cat}
+              {tag}
             </button>
           ))}
         </div>

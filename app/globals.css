@@ -269,7 +269,7 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
   position: relative;
 }
 
-.scroll-row-wrapper .scroll-fade {
+.scroll-row-wrapper .scroll-fade.right {
   pointer-events: none;
   position: absolute;
   top: 0;
@@ -280,9 +280,19 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
   z-index: 2;
 }
 
+.scroll-row-wrapper .scroll-fade.left {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  bottom: 8px;
+  left: 0;
+  width: 80px;
+  background: linear-gradient(to left, transparent, var(--color-bg));
+  z-index: 2;
+}
+
 .scroll-row-wrapper .scroll-arrow {
   position: absolute;
-  right: 4px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 3;
@@ -299,6 +309,9 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
   transition: all 0.2s;
   color: var(--color-text-primary);
 }
+
+.scroll-row-wrapper .scroll-arrow.right { right: 4px; }
+.scroll-row-wrapper .scroll-arrow.left { left: 4px; }
 
 .scroll-row-wrapper .scroll-arrow:hover {
   background: var(--color-brand);
