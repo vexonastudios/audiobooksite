@@ -115,26 +115,30 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
       </div>
 
       {/* Actions */}
-      <div style={{ padding: '10px 16px', borderTop: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <div className="text-xs text-muted" style={{ flex: 1 }}>
-          {new Date(q.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+      <div style={{ padding: '12px 16px', borderTop: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="text-xs text-muted" style={{ fontWeight: 500 }}>
+            {new Date(q.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+          </div>
+          <button onClick={onDelete} className="btn btn-icon" style={{ width: 28, height: 28, color: 'var(--color-error)' }} title="Delete quote">
+            <X size={16} />
+          </button>
         </div>
-        <button onClick={handlePlay} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: '0.8rem' }}>
-          <Play size={12} /> Play
-        </button>
-        <button onClick={handleCopy} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: '0.8rem' }}>
-          {copied ? <Check size={12} /> : <Copy size={12} />}
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
-        <button onClick={handleExportImage} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: '0.8rem' }} disabled={isRenderingImage}>
-          <ImageIcon size={12} /> {isRenderingImage ? 'Rendering...' : 'Image'}
-        </button>
-        <button onClick={handleShare} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: '0.8rem' }}>
-          <Share2 size={12} /> Share
-        </button>
-        <button onClick={onDelete} className="btn btn-icon" style={{ width: 30, height: 30, color: 'var(--color-error)' }} title="Delete quote">
-          <X size={14} />
-        </button>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(70px, 1fr))', gap: 8 }}>
+          <button onClick={handlePlay} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '8px 0', fontSize: '0.8rem' }}>
+            <Play size={14} /> Play
+          </button>
+          <button onClick={handleCopy} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '8px 0', fontSize: '0.8rem' }}>
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+          <button onClick={handleExportImage} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '8px 0', fontSize: '0.8rem' }} disabled={isRenderingImage}>
+            <ImageIcon size={14} /> {isRenderingImage ? '...' : 'Image'}
+          </button>
+          <button onClick={handleShare} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '8px 0', fontSize: '0.8rem' }}>
+            <Share2 size={14} /> Share
+          </button>
+        </div>
       </div>
 
     </div>
