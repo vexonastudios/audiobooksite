@@ -490,9 +490,9 @@ export default function AudiobookPage() {
               </div>
 
               {/* Playback Buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, margin: '16px 0' }}>
-                {/* 48px invisible spacer to mathematically balance the 48px Speed button on the right, keeping Play button dead center */}
-                <div style={{ width: 48, flexShrink: 0 }} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, margin: '16px 0' }}>
+                {/* 48px invisible spacer mathematically balances the 48px Speed button on the right. Both can shrink equally. */}
+                <div style={{ width: 48, height: 44 }} />
                 <button 
                   className="btn-icon" 
                   style={{ width: 44, height: 44, background: 'transparent', border: 'none', opacity: !isCurrent || currentChapterIdx === 0 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === 0 ? 'none' : 'auto' }}
