@@ -348,23 +348,26 @@ button {
   }
 }
 
-.audiobook-layout {
-  display: flex;
-  flex-direction: row;
-  gap: 32px;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-.audiobook-cover-col {
-  width: 340px;
-  max-width: 100%;
-}
-.audiobook-cover-img {
-  width: 100%;
-  aspect-ratio: 2 / 3;
-}
-.mobile-player-options {
-  display: none;
+/* Desktop-only audiobook layout  */
+@media (min-width: 769px) {
+  .audiobook-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    align-items: flex-start;
+  }
+  .audiobook-cover-col {
+    width: 340px;
+    max-width: 340px;
+    flex-shrink: 0;
+  }
+  .audiobook-cover-img {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+  }
+  .mobile-player-options {
+    display: none;
+  }
 }
 
 /* ─── Typography ─────────────────────────────────────────────────────────────── */

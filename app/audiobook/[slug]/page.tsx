@@ -210,7 +210,7 @@ export default function AudiobookPage() {
         <div className="audiobook-layout">
           
           {/* Left Column: Cover */}
-          <div className="audiobook-cover-col" style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="audiobook-cover-col" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
              <img 
                src={book.coverImage || '/placeholder.png'} 
                alt={book.title} 
