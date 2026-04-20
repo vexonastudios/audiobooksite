@@ -1,10 +1,11 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
-import { AlertCircle, ArrowLeft, Calendar, User, Headphones, Pause } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Calendar, User, Headphones, Pause, Twitter, Facebook, Link2, Check } from 'lucide-react';
 import type { Audiobook } from '@/lib/types';
 
 export default function ArticleDetail() {
@@ -15,6 +16,20 @@ export default function ArticleDetail() {
   const sourceAudiobook = useLibraryStore((s) => article?.sourceAudiobookSlug ? s.getBySlug(article.sourceAudiobookSlug) : undefined);
   const { currentBook, isPlaying, loadBook, setPlaying } = usePlayerStore();
   const isThisPlaying = isPlaying && currentBook?.id === article?.id;
+  const [copied, setCopied] = useState(false);
+
+  // Compute share links safely
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const shareTitle = article?.title || '';
+  const twitterLink = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareTitle)}`;
+  const facebookLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+
+  const handleCopy = () => {
+    if (!shareUrl) return;
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (!isLoaded) {
     return (
@@ -91,78 +106,80 @@ export default function ArticleDetail() {
           {article.title}
         </h1>
 
-        {/* Meta */}
+        {/* Meta & Actions Wrapper */}
         <div style={{
-          display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 16,
-          color: 'var(--color-text-secondary)', fontSize: '0.9375rem',
-          marginBottom: article?.audioUrl ? 20 : 40,
-          paddingBottom: article?.audioUrl ? 20 : 32,
-          borderBottom: '1px solid var(--color-border)',
+          marginBottom: 40, paddingBottom: 32, borderBottom: '1px solid var(--color-border)'
         }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <User size={14} />
-            <strong style={{ color: 'var(--color-text-primary)' }}>{article.authorName}</strong>
-          </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Calendar size={14} />
-            {formattedDate}
-          </span>
-          {article.lengthStr && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--color-brand)', fontWeight: 600 }}>
-              <Headphones size={14} /> {article.lengthStr} listen
+          {/* Meta Line */}
+          <div style={{
+            display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 16,
+            color: 'var(--color-text-secondary)', fontSize: '0.9375rem',
+            marginBottom: 24,
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <User size={14} />
+              <strong style={{ color: 'var(--color-text-primary)' }}>{article.authorName}</strong>
             </span>
-          )}
-        </div>
-
-        {/* Play Article Button */}
-        {article.audioUrl && (
-          <div style={{ marginBottom: 40, paddingBottom: 32, borderBottom: '1px solid var(--color-border)' }}>
-            <button
-              onClick={() => {
-                if (isThisPlaying) {
-                  setPlaying(false);
-                } else {
-                  // Build a fake Audiobook object so the shared player can play it
-                  const pseudoBook: Audiobook = {
-                    id: article.id,
-                    slug: article.slug,
-                    title: article.title,
-                    authorName: article.authorName,
-                    coverImage: article.coverImage || '',
-                    thumbnailUrl: article.coverImage || '',
-                    mp3Url: article.audioUrl!,
-                    excerpt: article.excerpt,
-                    description: article.description,
-                    pubDate: article.pubDate,
-                    categories: article.categories,
-                    topics: article.topics,
-                    totalDuration: article.lengthStr || '',
-                    length: article.lengthStr || '',
-                    originalYear: '',
-                    youtubeLink: null,
-                    spotifyLink: null,
-                    buyLink: null,
-                    generatedColors: null,
-                    plays: 0,
-                    chapters: [],
-                  };
-                  loadBook(pseudoBook);
-                }
-              }}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 10,
-                background: isThisPlaying ? 'rgba(46,106,167,0.12)' : 'var(--color-brand)',
-                color: isThisPlaying ? 'var(--color-brand)' : '#fff',
-                border: isThisPlaying ? '2px solid var(--color-brand)' : 'none',
-                borderRadius: 999, padding: '12px 28px',
-                fontSize: '1rem', fontWeight: 700, cursor: 'pointer',
-                transition: 'all 0.2s', boxShadow: isThisPlaying ? 'none' : '0 4px 14px rgba(46,106,167,0.35)',
-              }}
-            >
-              {isThisPlaying ? <><Pause size={18} /> Pause</> : <><Headphones size={18} /> Listen to this Article</>}
-            </button>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Calendar size={14} />
+              {formattedDate}
+            </span>
+            {article.lengthStr && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--color-brand)', fontWeight: 600 }}>
+                <Headphones size={14} /> {article.lengthStr} listen
+              </span>
+            )}
           </div>
-        )}
+
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 20, justifyContent: 'space-between' }}>
+            {/* Play Article Button */}
+            {article.audioUrl ? (
+              <button
+                onClick={() => {
+                  if (isThisPlaying) {
+                    setPlaying(false);
+                  } else {
+                    const pseudoBook: Audiobook = {
+                      id: article.id, slug: article.slug, title: article.title, authorName: article.authorName,
+                      coverImage: article.coverImage || '', thumbnailUrl: article.coverImage || '',
+                      mp3Url: article.audioUrl!, excerpt: article.excerpt, description: article.description,
+                      pubDate: article.pubDate, categories: article.categories, topics: article.topics,
+                      totalDuration: article.lengthStr || '', length: article.lengthStr || '',
+                      originalYear: '', youtubeLink: null, spotifyLink: null, buyLink: null,
+                      generatedColors: null, plays: 0, chapters: [], vttUrl: null
+                    };
+                    loadBook(pseudoBook);
+                  }
+                }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 10,
+                  background: isThisPlaying ? 'rgba(46,106,167,0.12)' : 'var(--color-brand)',
+                  color: isThisPlaying ? 'var(--color-brand)' : '#fff',
+                  border: isThisPlaying ? '2px solid var(--color-brand)' : 'none',
+                  borderRadius: 999, padding: '12px 28px',
+                  fontSize: '1rem', fontWeight: 700, cursor: 'pointer',
+                  transition: 'all 0.2s', boxShadow: isThisPlaying ? 'none' : '0 4px 14px rgba(46,106,167,0.35)',
+                }}
+              >
+                {isThisPlaying ? <><Pause size={18} /> Pause</> : <><Headphones size={18} /> Listen to this Article</>}
+              </button>
+            ) : <div />}
+
+            {/* Share Links */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--color-text-tertiary)', fontWeight: 600, marginRight: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Share</span>
+              <a href={twitterLink} target="_blank" rel="noopener noreferrer" className="share-btn" aria-label="Share on X">
+                <Twitter size={16} />
+              </a>
+              <a href={facebookLink} target="_blank" rel="noopener noreferrer" className="share-btn" aria-label="Share on Facebook">
+                <Facebook size={16} />
+              </a>
+              <button onClick={handleCopy} className="share-btn" aria-label="Copy Link" style={{ background: copied ? 'var(--color-brand)' : undefined, color: copied ? '#fff' : undefined, borderColor: copied ? 'var(--color-brand)' : undefined }}>
+                {copied ? <Check size={16} /> : <Link2 size={16} />}
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* Hero cover */}
         {article.coverImage && (
@@ -268,6 +285,19 @@ export default function ArticleDetail() {
         }
         .article-body .tts-node { background: transparent !important; padding: 0 !important; border-radius: 0 !important; }
         .article-body [data-isttsnode], .article-body [class*="tts-"] { display: inline !important; }
+
+        .share-btn {
+          display: inline-flex; align-items: center; justify-content: center;
+          width: 36px; height: 36px; border-radius: 50%;
+          background: transparent; color: var(--color-text-secondary);
+          border: 1px solid var(--color-border); cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .share-btn:hover {
+          background: var(--color-surface-hover);
+          color: var(--color-brand);
+          border-color: var(--color-brand);
+        }
       `}</style>
     </div>
   );
