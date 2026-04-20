@@ -4,6 +4,15 @@ import { create } from 'zustand';
 import Fuse from 'fuse.js';
 import type { Audiobook, Article } from '@/lib/types';
 
+export function slugify(text: string): string {
+  return text.toString().toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+}
+
 export interface AuthorProfile {
   id: string;
   slug: string;
@@ -69,14 +78,18 @@ export const useLibraryStore = create<LibraryState>()((set, get) => ({
 
   getAuthorBySlug: (slug) => get().authors.find((a) => a.slug === slug),
 
-  getByCategory: (category) =>
+  getByCategory: (categoryIdentifier) =>
     get().audiobooks.filter((b) =>
-      b.categories.some((c) => c.toLowerCase() === category.toLowerCase())
+      b.categories.some((c) => 
+        slugify(c) === slugify(categoryIdentifier) || c.toLowerCase() === categoryIdentifier.toLowerCase()
+      )
     ),
 
-  getByTopic: (topic) =>
+  getByTopic: (topicIdentifier) =>
     get().audiobooks.filter((b) =>
-      b.topics.some((t) => t.toLowerCase() === topic.toLowerCase())
+      b.topics.some((t) => 
+        slugify(t) === slugify(topicIdentifier) || t.toLowerCase() === topicIdentifier.toLowerCase()
+      )
     ),
 
   getByAuthor: (name) =>

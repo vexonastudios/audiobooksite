@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useLibraryStore } from '@/lib/store/libraryStore';
+import { useLibraryStore, slugify } from '@/lib/store/libraryStore';
 
 export default function CategoriesIndex() {
   const categories = useLibraryStore((s) => s.getAllCategories());
@@ -17,7 +17,7 @@ export default function CategoriesIndex() {
         {categories.map((cat) => {
           const books = useLibraryStore.getState().getByCategory(cat);
           return (
-            <Link key={cat} href={`/categories/${encodeURIComponent(cat)}`} className="card" style={{ padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'transform var(--transition-fast)' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+            <Link key={cat} href={`/categories/${slugify(cat)}`} className="card" style={{ padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'transform var(--transition-fast)' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
                <div style={{ fontWeight: 600, fontSize: '1.125rem' }}>{cat}</div>
                <div className="pill" style={{ pointerEvents: 'none', background: 'var(--color-surface-2)', border: 'none' }}>{books.length} Books</div>
             </Link>

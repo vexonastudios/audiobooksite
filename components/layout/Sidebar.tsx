@@ -14,7 +14,7 @@ const navItems = [
   { href: '/quotes',      label: 'Quotes',     icon: Quote      },
   { href: '/history',     label: 'History',    icon: Clock      },
   { href: '/articles',       label: 'Articles',       icon: BookOpen   },
-  { href: '/books',          label: 'Printed Books',  icon: BookMarked },
+  { href: '/printed-books',  label: 'Printed Books',  icon: BookMarked },
   { href: '/announcements',  label: 'Announcements',  icon: Bell       },
   { href: '/stats',          label: 'My Stats',        icon: Trophy     },
 ];
