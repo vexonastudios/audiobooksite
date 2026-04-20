@@ -26,6 +26,7 @@ export function TopBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   
   const [mounted, setMounted] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   useEffect(() => setMounted(true), []);
 
   // Close search whenever the route changes
@@ -81,7 +82,7 @@ export function TopBar() {
       overflow: 'visible',
     }}>
       {/* Search */}
-      <form onSubmit={handleSubmit} style={{ flex: 1, maxWidth: 480, position: 'relative' }}>
+      <form ref={formRef} onSubmit={handleSubmit} style={{ flex: 1, maxWidth: 480, position: 'relative' }}>
         <div className="search-input-wrap">
           <Search size={16} className="search-icon" />
           <input
@@ -97,12 +98,25 @@ export function TopBar() {
           />
         </div>
 
-        {/* Dropdown results */}
-        {open && results.length > 0 && (
+        {/* Dropdown results — rendered via portal to avoid sticky stacking context blocking page clicks */}
+        {open && results.length > 0 && mounted && createPortal(
           <div style={{
-            position: 'absolute',
-            top: 'calc(100% + 6px)',
-            left: 0, right: 0,
+            position: 'fixed',
+            top: (() => {
+              const input = inputRef.current;
+              if (!input) return 64;
+              return input.getBoundingClientRect().bottom + 6;
+            })(),
+            left: (() => {
+              const input = inputRef.current;
+              if (!input) return 0;
+              return input.getBoundingClientRect().left;
+            })(),
+            width: (() => {
+              const input = inputRef.current;
+              if (!input) return 480;
+              return input.getBoundingClientRect().width;
+            })(),
             background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
             borderRadius: 'var(--radius-lg)',
@@ -143,7 +157,7 @@ export function TopBar() {
               See all results for "{query}"
             </Link>
           </div>
-        )}
+        , document.body)}
       </form>
 
       {/* User */}
