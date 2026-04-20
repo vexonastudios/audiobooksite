@@ -351,50 +351,25 @@ export default function AudiobookPage() {
           {/* Right Column: Stacked Cards */}
           <div className="audiobook-right-col" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 20, width: '100%' }}>
             
-              {/* Desktop: author row + action buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, marginTop: 8 }}>
+              {/* Desktop: Title & Author row */}
+              <h1 className="desktop-only" style={{ fontSize: '2.5rem', fontWeight: 800, margin: '8px 0 4px 0', lineHeight: 1.15 }}>
+                {book.title}
+              </h1>
+              <div className="desktop-only" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
                 {authorRecord?.image && (
                   <img src={authorRecord.image} alt={book.authorName}
                     style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-                    className="desktop-only"
                   />
                 )}
                 <div>
-                  <p style={{ fontSize: '1.05rem', color: 'var(--color-brand)', fontWeight: 600, margin: 0 }} className="desktop-only">
+                  <p style={{ fontSize: '1.05rem', color: 'var(--color-brand)', fontWeight: 600, margin: 0 }}>
                     By <Link href={`/authors/${encodeURIComponent(book.authorName)}`} style={{ textDecoration: 'underline' }}>{book.authorName}</Link>
                   </p>
                   {authorRecord?.dates && (
-                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: 0 }} className="desktop-only">{authorRecord.dates}</p>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: 0 }}>{authorRecord.dates}</p>
                   )}
                 </div>
               </div>
-              {transcriptStatus !== 'unavailable' && (
-                // Desktop only — mobile actions live in the quick-actions row
-                <div className="desktop-only" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  <button
-                    className="btn btn-secondary"
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', opacity: transcriptStatus === 'loading' ? 0.5 : 1 }}
-                    onClick={() => setReadAlongOpen(true)}
-                    disabled={transcriptStatus === 'loading'}
-                  >
-                    <BookOpen size={16} />
-                    Read Along
-                    {loadedCues.length > 0 && (
-                      <span style={{ background: 'var(--color-brand)', color: 'white', borderRadius: 20, padding: '1px 8px', fontSize: '0.7rem', fontWeight: 700 }}>Live Sync</span>
-                    )}
-                  </button>
-                  <button
-                    className="btn btn-secondary"
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', opacity: transcriptStatus === 'loading' ? 0.5 : 1 }}
-                    onClick={() => { setQuoteModalOpen(true); if (isPlaying) setPlaying(false); }}
-                    disabled={transcriptStatus === 'loading'}
-                  >
-                    <Quote size={16} />
-                    Share Quote
-                  </button>
-                  <HeartButton size={20} variant="inline" item={{ type: 'audiobook', itemId: book.id, itemSlug: book.slug, title: book.title, author: book.authorName, cover: book.coverImage, thumbnail: book.thumbnailUrl }} />
-                </div>
-              )}
 
             {/* CARD 1: Player Controls */}
             <div className="card player-card-mobile" style={{ padding: '24px' }}>
@@ -635,6 +610,26 @@ export default function AudiobookPage() {
                 </button>
                 <button className={`tab ${activeTab === 'timer' ? 'active' : ''}`} onClick={() => setActiveTab('timer')}>
                   <Moon size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: '-3px' }}/> Timer
+                </button>
+
+                {/* Desktop-only: Inject quick actions into the tabs row */}
+                {transcriptStatus !== 'unavailable' && (
+                  <button className="tab desktop-only" onClick={() => setReadAlongOpen(true)} disabled={transcriptStatus === 'loading'} style={{ opacity: transcriptStatus === 'loading' ? 0.5 : 1 }}>
+                    <BookOpen size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: '-3px' }}/> Read Along
+                    {loadedCues.length > 0 && <span style={{ background: 'var(--color-brand)', color: 'white', borderRadius: 20, padding: '1px 6px', fontSize: '0.65rem', fontWeight: 700, marginLeft: 6, verticalAlign: '1px' }}>Sync</span>}
+                  </button>
+                )}
+                {transcriptStatus !== 'unavailable' && (
+                  <button className="tab desktop-only" onClick={() => { setQuoteModalOpen(true); if (isPlaying) setPlaying(false); }} disabled={transcriptStatus === 'loading'} style={{ opacity: transcriptStatus === 'loading' ? 0.5 : 1 }}>
+                    <Quote size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: '-3px' }}/> Quote
+                  </button>
+                )}
+                <button 
+                  className="tab desktop-only" 
+                  onClick={(e) => { e.preventDefault(); if (!book) return; toggleFavorite({ type: 'audiobook', itemId: book.id, itemSlug: book.slug, title: book.title, author: book.authorName, cover: book.coverImage, thumbnail: book.thumbnailUrl }); }}
+                  style={{ color: book && isFavorited(book.id) ? 'var(--color-error)' : 'inherit' }}
+                >
+                  <Heart size={16} fill={book && isFavorited(book.id) ? 'currentColor' : 'none'} style={{ display: 'inline', marginRight: 6, verticalAlign: '-3px' }}/> Favorite
                 </button>
               </div>
 
