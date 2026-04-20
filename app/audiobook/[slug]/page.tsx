@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
-import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon, Heart, ExternalLink, RotateCcw, RotateCw } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon, Heart, ExternalLink, RotateCcw, RotateCw, Youtube, Book } from 'lucide-react';
 import { BookCard } from '@/components/ui/BookCard';
 import { ReadAlongPanel } from '@/components/ui/ReadAlongPanel';
 import { QuoteModal } from '@/components/ui/QuoteModal';
@@ -186,33 +186,46 @@ export default function AudiobookPage() {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
+  const SpotifyIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.84.241 1.2zM20.04 9.42C15.6 6.78 9.06 6.6 5.28 7.74c-.6.18-1.2-.18-1.38-.78-.18-.6.18-1.2.78-1.38 4.38-1.32 11.52-1.14 16.56 1.86.54.3.72 1.02.42 1.56-.3.48-1.02.72-1.62.42z"/>
+    </svg>
+  );
+
   const renderExternalLinks = (className?: string) => {
     if (!book.youtubeLink && !book.spotifyLink && !book.buyLink) return null;
     return (
       <div className={`external-links-container ${className || ''}`} style={{ marginTop: className === 'desktop-only' ? 8 : 24, marginBottom: className === 'mobile-only' ? 24 : 0 }}>
-        <h4 style={{ marginBottom: 12, fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-tertiary)', paddingLeft: 4 }}>Read / Watch</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {book.youtubeLink && (
-            <a href={book.youtubeLink} target="_blank" rel="noreferrer" 
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: 'var(--color-surface)', borderRadius: 14, color: 'var(--color-text-primary)', textDecoration: 'none', fontWeight: 600, transition: 'all 0.2s', border: '1px solid var(--color-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-              YouTube
-              <ExternalLink size={16} opacity={0.5} />
-            </a>
-          )}
-          {book.spotifyLink && (
-            <a href={book.spotifyLink} target="_blank" rel="noreferrer" 
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: 'var(--color-surface)', borderRadius: 14, color: 'var(--color-text-primary)', textDecoration: 'none', fontWeight: 600, transition: 'all 0.2s', border: '1px solid var(--color-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-              Spotify
-              <ExternalLink size={16} opacity={0.5} />
-            </a>
-          )}
-          {book.buyLink && (
-            <a href={book.buyLink} target="_blank" rel="noreferrer" 
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: 'var(--color-surface)', borderRadius: 14, color: 'var(--color-text-primary)', textDecoration: 'none', fontWeight: 600, transition: 'all 0.2s', border: '1px solid var(--color-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
-              Buy Physical Book
-              <ExternalLink size={16} opacity={0.5} />
-            </a>
-          )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <h4 style={{ margin: 0, fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-tertiary)', minWidth: 'min-content' }}>
+            Read /<br/>Watch
+          </h4>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {book.youtubeLink && (
+              <a href={book.youtubeLink} target="_blank" rel="noreferrer" title="Watch on YouTube"
+                  style={{ width: 46, height: 46, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-surface)', borderRadius: '50%', color: 'var(--color-text-secondary)', transition: 'all 0.2s', border: '1px solid var(--color-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.background = 'rgba(239,68,68,0.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = 'var(--color-surface)'; }}>
+                <Youtube size={22} />
+              </a>
+            )}
+            {book.spotifyLink && (
+              <a href={book.spotifyLink} target="_blank" rel="noreferrer" title="Listen on Spotify"
+                  style={{ width: 46, height: 46, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-surface)', borderRadius: '50%', color: 'var(--color-text-secondary)', transition: 'all 0.2s', border: '1px solid var(--color-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = '#22c55e'; e.currentTarget.style.borderColor = '#22c55e'; e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.background = 'rgba(34,197,94,0.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = 'var(--color-surface)'; }}>
+                <SpotifyIcon width={22} height={22} />
+              </a>
+            )}
+            {book.buyLink && (
+              <a href={book.buyLink} target="_blank" rel="noreferrer" title="Buy Physical Book"
+                  style={{ width: 46, height: 46, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-surface)', borderRadius: '50%', color: 'var(--color-text-secondary)', transition: 'all 0.2s', border: '1px solid var(--color-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-brand)'; e.currentTarget.style.borderColor = 'var(--color-brand)'; e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.background = 'rgba(46,106,167,0.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-secondary)'; e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = 'var(--color-surface)'; }}>
+                <Book size={20} style={{ marginLeft: 1 }} />
+              </a>
+            )}
+          </div>
         </div>
       </div>
     );
