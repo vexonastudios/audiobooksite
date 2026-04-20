@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash, Bell, Trophy, BookMarked, ChevronUp, Heart } from 'lucide-react';
+import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash, Bell, Trophy, BookMarked, ChevronUp, Heart, Mail, Settings2 } from 'lucide-react';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useEffect } from 'react';
 
 const mainGroup = [
   { href: '/',            label: 'Home',       icon: Home       },
-  { href: '/categories',  label: 'Browse',     icon: Headphones },
+  { href: '/audiobooks',  label: 'Browse',     icon: Headphones },
   { href: '/authors',     label: 'Authors',    icon: Users      },
   { href: '/categories',  label: 'Categories', icon: Tag        },
   { href: '/topics',      label: 'Topics',     icon: Hash       },
@@ -22,10 +22,12 @@ const youGroup = [
   { href: '/quotes',      label: 'Quotes',     icon: Quote     },
   { href: '/history',     label: 'History',    icon: Clock     },
   { href: '/stats',       label: 'My Stats',   icon: Trophy    },
+  { href: '/settings',    label: 'Settings',   icon: Settings2 },
 ];
 
 const moreGroup = [
   { href: '/announcements',  label: 'Announcements',  icon: Bell   },
+  { href: '/contact',        label: 'Contact Us',      icon: Mail   },
 ];
 
 export function Sidebar() {

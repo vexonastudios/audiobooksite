@@ -34,7 +34,7 @@ export default function AudiobookPage() {
   const { currentBook, isPlaying, currentTime, duration, playbackSpeed, 
           sleepTimerMode, sleepTimerEndsAt, setSleepTimer, clearSleepTimer,
           loadBook, setPlaying, setPlaybackSpeed, skipForward, skipBackward, jumpToChapter } = usePlayerStore();
-  const { history, addBookmark, getBookmarksByBook, removeBookmark, skipInterval, isFavorited, toggleFavorite } = useUserStore();
+  const { history, addBookmark, getBookmarksByBook, removeBookmark, skipInterval, isFavorited, toggleFavorite, playerQuickActions } = useUserStore();
 
   const searchParams = useSearchParams();
 
@@ -194,11 +194,52 @@ export default function AudiobookPage() {
 
   const renderExternalLinks = (className?: string) => {
     if (!book.youtubeLink && !book.spotifyLink && !book.buyLink) return null;
+    
+    if (className === 'desktop-only') {
+      return (
+        <div className={`external-links-container ${className}`} style={{ marginTop: 8 }}>
+          <h4 style={{ marginBottom: 12, fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-tertiary)', paddingLeft: 4 }}>Available On</h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {book.youtubeLink && (
+              <a href={book.youtubeLink} target="_blank" rel="noreferrer" 
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px', background: 'var(--color-surface)', borderRadius: 14, color: 'var(--color-text-primary)', textDecoration: 'none', fontWeight: 600, transition: 'all 0.2s', border: '1px solid var(--color-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.color = '#ef4444'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.color = 'var(--color-text-primary)'; }}>
+                <Youtube size={20} color="#ef4444" />
+                <span style={{ flex: 1 }}>YouTube</span>
+                <ExternalLink size={16} opacity={0.3} color="currentColor" />
+              </a>
+            )}
+            {book.spotifyLink && (
+              <a href={book.spotifyLink} target="_blank" rel="noreferrer" 
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px', background: 'var(--color-surface)', borderRadius: 14, color: 'var(--color-text-primary)', textDecoration: 'none', fontWeight: 600, transition: 'all 0.2s', border: '1px solid var(--color-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#22c55e'; e.currentTarget.style.color = '#22c55e'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.color = 'var(--color-text-primary)'; }}>
+                <SpotifyIcon width={20} height={20} color="#22c55e" />
+                <span style={{ flex: 1 }}>Spotify</span>
+                <ExternalLink size={16} opacity={0.3} color="currentColor" />
+              </a>
+            )}
+            {book.buyLink && (
+              <a href={book.buyLink} target="_blank" rel="noreferrer" 
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px', background: 'var(--color-surface)', borderRadius: 14, color: 'var(--color-text-primary)', textDecoration: 'none', fontWeight: 600, transition: 'all 0.2s', border: '1px solid var(--color-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-brand)'; e.currentTarget.style.color = 'var(--color-brand)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.color = 'var(--color-text-primary)'; }}>
+                <Book size={18} color="var(--color-brand)" />
+                <span style={{ flex: 1 }}>Buy Physical Book</span>
+                <ExternalLink size={16} opacity={0.3} color="currentColor" />
+              </a>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className={`external-links-container ${className || ''}`} style={{ marginTop: className === 'desktop-only' ? 8 : 24, marginBottom: className === 'mobile-only' ? 24 : 0 }}>
+      <div className={`external-links-container ${className || ''}`} style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <h4 style={{ margin: 0, fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-tertiary)', minWidth: 'min-content' }}>
-            Read /<br/>Watch
+            Also<br/>On
           </h4>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {book.youtubeLink && (
@@ -286,7 +327,7 @@ export default function AudiobookPage() {
             
             {/* Header info */}
             <div className="audiobook-header-info">
-              <h1 style={{ marginBottom: 4 }}>{book.title}</h1>
+              <h1 className="desktop-only" style={{ marginBottom: 4 }}>{book.title}</h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, marginTop: 8 }}>
                 {authorRecord?.image && (
                   <img src={authorRecord.image} alt={book.authorName} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
@@ -492,43 +533,59 @@ export default function AudiobookPage() {
                 </button>
               </div>
 
-              {/* Mobile-Only Bottom Options Row */}
-              <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginTop: 32, paddingBottom: 16 }}>
-                <button onClick={() => {
-                  const nextSpeed = playbackSpeed >= 2 ? 0.75 : playbackSpeed + 0.25;
-                  setPlaybackSpeed(nextSpeed);
-                }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}>
-                  <span style={{ fontSize: '1.2rem', fontWeight: 800 }}>{playbackSpeed}x</span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Speed</span>
-                </button>
-                <button onClick={() => { setActiveTab('chapters'); setMobileTabOpen(true); }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}>
-                  <List size={22} color="currentColor" />
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Chapters</span>
-                </button>
-                <button onClick={(e) => { e.preventDefault(); setActiveTab('bookmarks'); setMobileTabOpen(true); }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}>
-                  <BookmarkPlus size={22} color="currentColor" />
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Bookmark</span>
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (!book) return;
-                    toggleFavorite({
-                      type: 'audiobook',
-                      itemId: book.id,
-                      itemSlug: book.slug,
-                      title: book.title,
-                      author: book.authorName,
-                      cover: book.coverImage,
-                      thumbnail: book.thumbnailUrl,
-                    });
-                  }}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none' }}
-                >
-                  <Heart size={22} fill={book && isFavorited(book.id) ? 'var(--color-error)' : 'none'} color={book && isFavorited(book.id) ? 'var(--color-error)' : 'currentColor'} />
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Favorite</span>
-                </button>
-              </div>
+              {/* Mobile-Only Bottom Options Row — dynamically ordered from user preferences */}
+              {(() => {
+                const btnStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 8px' };
+                const actionMap: Record<string, React.ReactNode> = {
+                  speed: (
+                    <button key="speed" onClick={() => { const nextSpeed = playbackSpeed >= 2 ? 0.75 : playbackSpeed + 0.25; setPlaybackSpeed(nextSpeed); }} style={btnStyle}>
+                      <span style={{ fontSize: '1.2rem', fontWeight: 800, lineHeight: 1 }}>{playbackSpeed}x</span>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Speed</span>
+                    </button>
+                  ),
+                  chapters: (
+                    <button key="chapters" onClick={() => { setActiveTab('chapters'); setMobileTabOpen(true); }} style={btnStyle}>
+                      <List size={22} />
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Chapters</span>
+                    </button>
+                  ),
+                  bookmark: (
+                    <button key="bookmark" onClick={(e) => { e.preventDefault(); setActiveTab('bookmarks'); setMobileTabOpen(true); }} style={btnStyle}>
+                      <BookmarkPlus size={22} />
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Bookmark</span>
+                    </button>
+                  ),
+                  favorite: (
+                    <button key="favorite" onClick={(e) => { e.preventDefault(); if (!book) return; toggleFavorite({ type: 'audiobook', itemId: book.id, itemSlug: book.slug, title: book.title, author: book.authorName, cover: book.coverImage, thumbnail: book.thumbnailUrl }); }} style={btnStyle}>
+                      <Heart size={22} fill={book && isFavorited(book.id) ? 'var(--color-error)' : 'none'} color={book && isFavorited(book.id) ? 'var(--color-error)' : 'currentColor'} />
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Favorite</span>
+                    </button>
+                  ),
+                  share: (
+                    <button key="share" onClick={() => { setActiveTab('share'); setMobileTabOpen(true); }} style={btnStyle}>
+                      <Share2 size={22} />
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Share</span>
+                    </button>
+                  ),
+                  timer: (
+                    <button key="timer" onClick={() => { setActiveTab('timer'); setMobileTabOpen(true); }} style={btnStyle}>
+                      <Moon size={22} />
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Timer</span>
+                    </button>
+                  ),
+                  readalong: transcriptStatus !== 'unavailable' ? (
+                    <button key="readalong" onClick={() => setReadAlongOpen(true)} style={{ ...btnStyle, opacity: transcriptStatus === 'loading' ? 0.5 : 1 }} disabled={transcriptStatus === 'loading'}>
+                      <BookOpen size={22} />
+                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Read Along</span>
+                    </button>
+                  ) : null,
+                };
+                return (
+                  <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginTop: 32, paddingBottom: 16 }}>
+                    {playerQuickActions.map(id => actionMap[id] ?? null)}
+                  </div>
+                );
+              })()}
 
               {renderExternalLinks('mobile-only')}
             </div>

@@ -328,7 +328,7 @@ button {
     width: 100% !important;
   }
   .audiobook-header-info {
-    display: none !important; /* We show chapter title in player */
+    /* Title is hidden via .desktop-only class inside, but we keep the container visible for Author/Tools */
   }
   .player-card-mobile {
     padding: 16px !important;

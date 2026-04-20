@@ -263,7 +263,7 @@ export default function HomePage() {
       <section style={{ marginBottom: 40 }}>
         <div className="section-header">
           <h2 className="section-title">Recent Additions</h2>
-          <Link href="/categories" className="see-all-link">Browse all</Link>
+          <Link href="/audiobooks" className="see-all-link">Browse all</Link>
         </div>
         <ScrollRow books={recentBooks} />
       </section>

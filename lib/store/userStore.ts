@@ -53,6 +53,8 @@ interface UserState {
   quoteSettings: QuoteSettings;
   setSkipInterval: (val: number) => void;
   updateQuoteSettings: (settings: Partial<QuoteSettings>) => void;
+  playerQuickActions: string[];
+  setPlayerQuickActions: (actions: string[]) => void;
 
   // Notification actions
   toggleNotifications: () => void;
@@ -70,6 +72,7 @@ export const useUserStore = create<UserState>()(
       quoteSettings: { includeLink: true, includeBook: true, useQuotes: true },
       notificationsEnabled: true,
       heardNotificationIds: [],
+      playerQuickActions: ['speed', 'chapters', 'bookmark', 'favorite'],
 
       addToHistory: (bookId, position) => {
         set((state) => {
@@ -112,6 +115,7 @@ export const useUserStore = create<UserState>()(
       },
 
       setSkipInterval: (val) => set({ skipInterval: val }),
+      setPlayerQuickActions: (actions) => set({ playerQuickActions: actions }),
       updateQuoteSettings: (updates) => set((state) => ({
         quoteSettings: { ...state.quoteSettings, ...updates }
       })),
