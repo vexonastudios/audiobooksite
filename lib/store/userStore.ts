@@ -16,6 +16,10 @@ interface UserState {
   quotes: SavedQuote[];
   skipInterval: number;
 
+  // Notifications
+  notificationsEnabled: boolean;
+  heardNotificationIds: string[];
+
   // History
   addToHistory: (bookId: string, position: number) => void;
   clearHistory: () => void;
@@ -39,10 +43,13 @@ interface UserState {
   removeQuote: (id: string) => void;
 
   // Settings
-
   quoteSettings: QuoteSettings;
   setSkipInterval: (val: number) => void;
   updateQuoteSettings: (settings: Partial<QuoteSettings>) => void;
+
+  // Notification actions
+  toggleNotifications: () => void;
+  markNotificationHeard: (id: string) => void;
 }
 
 export const useUserStore = create<UserState>()(
@@ -53,6 +60,8 @@ export const useUserStore = create<UserState>()(
       quotes: [],
       skipInterval: 15,
       quoteSettings: { includeLink: true, includeBook: true, useQuotes: true },
+      notificationsEnabled: true,
+      heardNotificationIds: [],
 
       addToHistory: (bookId, position) => {
         set((state) => {
@@ -97,6 +106,16 @@ export const useUserStore = create<UserState>()(
       setSkipInterval: (val) => set({ skipInterval: val }),
       updateQuoteSettings: (updates) => set((state) => ({
         quoteSettings: { ...state.quoteSettings, ...updates }
+      })),
+
+      toggleNotifications: () => set((state) => ({
+        notificationsEnabled: !state.notificationsEnabled,
+      })),
+
+      markNotificationHeard: (id) => set((state) => ({
+        heardNotificationIds: state.heardNotificationIds.includes(id)
+          ? state.heardNotificationIds
+          : [...state.heardNotificationIds, id],
       })),
 
       saveQuote: (quote) => {

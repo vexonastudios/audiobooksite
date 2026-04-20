@@ -7,6 +7,7 @@ import { usePlayerStore } from '@/lib/store/playerStore';
 import type { Audiobook } from '@/lib/types';
 import Link from 'next/link';
 import { Play, Headphones } from 'lucide-react';
+import { NotificationBanner } from '@/components/ui/NotificationBanner';
 
 const BOOK_CARD_WIDTH = 168;
 import { BookCard } from '@/components/ui/BookCard';
@@ -55,6 +56,7 @@ export default function HomePage() {
 
   return (
     <div className="page">
+      <NotificationBanner />
       {/* Hero greeting */}
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ marginBottom: 6 }}>Free Christian Audiobooks</h1>

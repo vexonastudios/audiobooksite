@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash } from 'lucide-react';
+import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash, Bell } from 'lucide-react';
 
 const navItems = [
   { href: '/',            label: 'Home',       icon: Home       },
@@ -13,7 +13,8 @@ const navItems = [
   { href: '/bookmarks',   label: 'Bookmarks',  icon: Bookmark   },
   { href: '/quotes',      label: 'Quotes',     icon: Quote      },
   { href: '/history',     label: 'History',    icon: Clock      },
-  { href: '/articles',    label: 'Articles',   icon: BookOpen   },
+  { href: '/articles',       label: 'Articles',       icon: BookOpen   },
+  { href: '/announcements',  label: 'Announcements',  icon: Bell       },
 ];
 
 export function Sidebar() {
