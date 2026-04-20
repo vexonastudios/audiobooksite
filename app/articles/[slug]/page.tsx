@@ -131,7 +131,7 @@ export default function ArticleDetail() {
             )}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 20, justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 32, justifyContent: 'flex-start' }}>
             {/* Play Article Button */}
             {article.audioUrl ? (
               <button
