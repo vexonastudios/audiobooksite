@@ -16,8 +16,13 @@ export interface NotifData {
   published?: boolean;
   expires_at?: string;
 }
-
 const VOICE_ID = 'fnYMz3F5gMEDGMWcH1ex';
+
+function getLocalDatetime(dateObj?: string | Date) {
+  const d = dateObj ? new Date(dateObj) : new Date();
+  const offsetMs = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - offsetMs).toISOString().slice(0, 16);
+}
 
 export default function NotificationForm({
   initialData,
@@ -31,9 +36,7 @@ export default function NotificationForm({
   const [title, setTitle] = useState(initialData?.title ?? '');
   const [bodyText, setBodyText] = useState(initialData?.body_text ?? '');
   const [expiresAt, setExpiresAt] = useState(
-    initialData?.expires_at
-      ? new Date(initialData.expires_at).toISOString().slice(0, 16)
-      : ''
+    initialData?.expires_at ? getLocalDatetime(initialData.expires_at) : ''
   );
   const [published, setPublished] = useState(initialData?.published ?? false);
   const [audioUrl, setAudioUrl] = useState(initialData?.audio_url ?? '');

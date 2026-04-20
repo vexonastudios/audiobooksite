@@ -67,6 +67,12 @@ function slugify(str: string) {
     .replace(/-+/g, '-');
 }
 
+function getLocalDatetime(dateObj?: string | Date) {
+  const d = dateObj ? new Date(dateObj) : new Date();
+  const offsetMs = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - offsetMs).toISOString().slice(0, 16);
+}
+
 // ── Tag Input ──────────────────────────────────────────────────────────────────
 function TagInput({ label, value, onChange, suggestions }: {
   label: string; value: string[]; onChange: (v: string[]) => void; suggestions: string[];
@@ -175,9 +181,7 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
   const [slug, setSlug] = useState(initialData?.slug ?? '');
   const [excerpt, setExcerpt] = useState(initialData?.excerpt ?? '');
   const [content, setContent] = useState(initialData?.content ?? '');
-  const [pubDate, setPubDate] = useState(
-    initialData?.pub_date ? new Date(initialData.pub_date).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16)
-  );
+  const [pubDate, setPubDate] = useState(getLocalDatetime(initialData?.pub_date));
   const [authorName, setAuthorName] = useState(initialData?.author_name ?? '');
   const [coverImage, setCoverImage] = useState(initialData?.cover_image ?? '');
   const [categories, setCategories] = useState<string[]>(initialData?.categories ?? []);

@@ -33,9 +33,15 @@ interface Metadata {
   authors: string[];
 }
 
+function getLocalDateString() {
+  const d = new Date();
+  const offsetMs = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - offsetMs).toISOString().split('T')[0];
+}
+
 const DEFAULT: FormData = {
   title: '', slug: '', authorName: '', originalYear: '',
-  pubDate: new Date().toISOString().split('T')[0], published: true,
+  pubDate: getLocalDateString(), published: true,
   excerpt: '', description: '',
   coverImage: '', thumbnailUrl: '',
   mp3Url: '', mp3UrlLow: '',
