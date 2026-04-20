@@ -55,6 +55,8 @@ interface UserState {
   updateQuoteSettings: (settings: Partial<QuoteSettings>) => void;
   playerQuickActions: string[];
   setPlayerQuickActions: (actions: string[]) => void;
+  readAlongFontSize: number;
+  setReadAlongFontSize: (size: number) => void;
 
   // Notification actions
   toggleNotifications: () => void;
@@ -73,6 +75,7 @@ export const useUserStore = create<UserState>()(
       notificationsEnabled: true,
       heardNotificationIds: [],
       playerQuickActions: ['speed', 'chapters', 'bookmark', 'favorite', 'quote'],
+      readAlongFontSize: 1.2,
 
       addToHistory: (bookId, position) => {
         set((state) => {
@@ -116,6 +119,7 @@ export const useUserStore = create<UserState>()(
 
       setSkipInterval: (val) => set({ skipInterval: val }),
       setPlayerQuickActions: (actions) => set({ playerQuickActions: actions }),
+      setReadAlongFontSize: (size) => set({ readAlongFontSize: size }),
       updateQuoteSettings: (updates) => set((state) => ({
         quoteSettings: { ...state.quoteSettings, ...updates }
       })),

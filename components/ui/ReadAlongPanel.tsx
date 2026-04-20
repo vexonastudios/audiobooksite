@@ -82,6 +82,7 @@ export function ReadAlongPanel({ slug, currentTime, isOpen, onClose, onSeek, boo
     .trim();
 
   const quoteSettings = useUserStore(s => s.quoteSettings);
+  const readAlongFontSize = useUserStore(s => s.readAlongFontSize);
   let formattedText = quoteSettings.useQuotes ? `"${selectedText}"` : selectedText;
   if (quoteSettings.includeBook) formattedText += ` — ${authorName}, ${bookTitle}`;
   else formattedText += ` — ${authorName}`;
@@ -147,12 +148,12 @@ export function ReadAlongPanel({ slug, currentTime, isOpen, onClose, onSeek, boo
           }
           .read-along-body {
             padding: 20px !important;
-            font-size: 1.2rem !important;
+            font-size: var(--ra-font-size, 1.2rem) !important;
             line-height: 1.9 !important;
           }
           /* Increase active cue text size on mobile */
           .read-along-cue-text {
-            font-size: 1.2rem !important;
+            font-size: var(--ra-font-size, 1.2rem) !important;
             line-height: 1.9 !important;
           }
         }
@@ -250,7 +251,7 @@ export function ReadAlongPanel({ slug, currentTime, isOpen, onClose, onSeek, boo
         <div
           ref={panelBodyRef}
           className="read-along-body"
-          style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}
+          style={{ flex: 1, overflowY: 'auto', padding: '8px 0', '--ra-font-size': `${readAlongFontSize}rem` } as React.CSSProperties}
         >
           {loading && (
             <div style={{ padding: 40 }}>

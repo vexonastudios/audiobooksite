@@ -27,6 +27,7 @@ export default function SettingsPage() {
     playerQuickActions, setPlayerQuickActions,
     notificationsEnabled, toggleNotifications,
     quoteSettings, updateQuoteSettings,
+    readAlongFontSize, setReadAlongFontSize,
   } = useUserStore();
 
   // Local copy for drag state
@@ -254,6 +255,72 @@ export default function SettingsPage() {
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ────────────────────────────────────────────────────────────────────── */}
+      {/* Section: Read Along                                                   */}
+      {/* ────────────────────────────────────────────────────────────────────── */}
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: '0.875rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-muted)', marginBottom: 4 }}>
+          Read Along
+        </h2>
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
+          Controls the text size in the Read Along panel. Takes effect immediately.
+        </p>
+        <div className="card" style={{ padding: '16px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+            <div style={{ fontWeight: 600, fontSize: '0.9375rem' }}>Font Size</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--color-brand)', fontWeight: 700 }}>
+              {readAlongFontSize}rem
+            </div>
+          </div>
+
+          {/* Size picker */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+            {([
+              { label: 'S',   value: 0.9,  desc: 'Small'    },
+              { label: 'M',   value: 1.05, desc: 'Medium'   },
+              { label: 'L',   value: 1.2,  desc: 'Large'    },
+              { label: 'XL',  value: 1.4,  desc: 'X-Large'  },
+              { label: 'XXL', value: 1.65, desc: '2X-Large' },
+            ] as { label: string; value: number; desc: string }[]).map(opt => {
+              const isActive = Math.abs(readAlongFontSize - opt.value) < 0.01;
+              return (
+                <button
+                  key={opt.label}
+                  onClick={() => setReadAlongFontSize(opt.value)}
+                  style={{
+                    flex: 1, padding: '10px 4px',
+                    borderRadius: 'var(--radius-md)',
+                    border: `1.5px solid ${isActive ? 'var(--color-brand)' : 'var(--color-border)'}`,
+                    background: isActive ? 'var(--color-brand)' : 'var(--color-surface)',
+                    color: isActive ? 'white' : 'var(--color-text-primary)',
+                    cursor: 'pointer', transition: 'all 0.15s',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                  }}
+                >
+                  <span style={{ fontSize: `${opt.value * 0.85}rem`, fontWeight: 700, lineHeight: 1.1 }}>{opt.label}</span>
+                  <span style={{ fontSize: '0.64rem', opacity: 0.75, fontWeight: 500 }}>{opt.desc}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Live preview */}
+          <div style={{
+            padding: '14px 16px',
+            background: 'var(--color-surface-2)',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--color-border)',
+          }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+              Preview
+            </div>
+            <p style={{ fontSize: `${readAlongFontSize}rem`, lineHeight: 1.9, color: 'var(--color-text-primary)', margin: 0 }}>
+              "The soul must become quiet and wait before the Lord. He allows himself to be approached in this way."
+            </p>
           </div>
         </div>
       </section>
