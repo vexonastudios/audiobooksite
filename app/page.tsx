@@ -6,7 +6,7 @@ import { useUserStore } from '@/lib/store/userStore';
 import type { Audiobook, Article } from '@/lib/types';
 import Link from 'next/link';
 import { Headphones, ChevronRight, ChevronLeft, BookOpen } from 'lucide-react';
-import { NotificationBanner } from '@/components/ui/NotificationBanner';
+// import { NotificationBanner } from '@/components/ui/NotificationBanner'; // DIAGNOSTIC: temporarily removed to test navigation bug
 import { BookCard } from '@/components/ui/BookCard';
 import { useState, useEffect } from 'react';
 
@@ -239,7 +239,7 @@ export default function HomePage() {
 
   return (
     <div className="page">
-      <NotificationBanner />
+      {/* <NotificationBanner /> — temporarily removed for diagnostic */}
       {/* Hero greeting */}
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ marginBottom: 6 }}>Free Christian Audiobooks</h1>
