@@ -242,7 +242,7 @@ export default function AudiobookPage() {
           </div>
 
           {/* Right Column: Stacked Cards */}
-          <div className="audiobook-right-col" style={{ flex: 1, minWidth: 300, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div className="audiobook-right-col" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 20, width: '100%' }}>
             
             {/* Header info */}
             <div className="audiobook-header-info">
@@ -727,14 +727,16 @@ export default function AudiobookPage() {
 
         {/* More Like This */}
         {related.length > 0 && (
-          <div style={{ marginTop: 64 }}>
+          <div style={{ marginTop: 64, width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
             <div className="section-header">
               <h2 className="section-title">More Like This</h2>
             </div>
-            <div className="scroll-row">
-              {related.map(rBook => (
-                 <BookCard key={rBook.id} book={rBook} />
-              ))}
+            <div className="scroll-row-wrapper">
+              <div className="scroll-row">
+                {related.map(rBook => (
+                   <BookCard key={rBook.id} book={rBook} />
+                ))}
+              </div>
             </div>
           </div>
         )}
