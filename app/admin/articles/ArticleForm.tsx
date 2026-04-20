@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
+import 'react-quill-new/dist/quill.snow.css';
 import {
   Save, ArrowLeft, FileText, User, Calendar,
   Tag, Image as ImageIcon, Eye, EyeOff, Link as LinkIcon,
+  Upload, Mic, Loader2, Play, CheckCircle, Volume2,
 } from 'lucide-react';
-
-import 'react-quill-new/dist/quill.snow.css';
 
 // Dynamically import React Quill to avoid SSR issues
 const ReactQuill = dynamic(() => import('react-quill-new'), {
@@ -32,6 +32,10 @@ export interface ArticleData {
   categories?: string[];
   topics?: string[];
   published?: boolean;
+  audio_url?: string;
+  voice_id?: string;
+  duration_secs?: number;
+  length_str?: string;
 }
 
 interface Metadata {
@@ -57,6 +61,60 @@ const QUILL_FORMATS = [
   'list', 'bullet', 'blockquote', 'code-block',
   'link', 'image', 'align',
 ];
+
+// Helper to upload image to R2 via admin presigned URL
+async function uploadImageToR2(file: File, slug: string): Promise<string> {
+  const ext = file.name.split('.').pop() || 'jpg';
+  const tempKey = `articles/${slug || 'upload'}-${Date.now()}.${ext}`;
+  const res = await fetch(`/api/admin/upload-url?filename=${encodeURIComponent(tempKey)}&type=${encodeURIComponent(file.type)}`);
+  if (!res.ok) throw new Error('Could not get upload URL');
+  const { uploadUrl, publicUrl } = await res.json();
+  const up = await fetch(uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
+  if (!up.ok) throw new Error('Image upload failed');
+  return publicUrl;
+}
+
+// ── Cover Image Uploader ────────────────────────────────────────────────────
+function CoverUploader({ slug, value, onChange }: { slug: string; value: string; onChange: (url: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+
+  const handle = async (file: File) => {
+    setUploading(true);
+    try {
+      const url = await uploadImageToR2(file, slug || 'article');
+      onChange(url);
+    } catch (e) {
+      alert(`Upload failed: ${String(e)}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div>
+      {value && (
+        <img src={value} alt="Cover preview" style={{ width: '100%', borderRadius: 8, objectFit: 'cover', maxHeight: 180, display: 'block', marginBottom: 12 }}
+          onError={e => (e.currentTarget.style.display = 'none')} />
+      )}
+      <label style={{
+        display: 'inline-flex', alignItems: 'center', gap: 7,
+        background: uploading ? '#F0F4F8' : '#EFF6FF',
+        border: '1px solid #BFDBFE', borderRadius: 8,
+        padding: '8px 16px', cursor: uploading ? 'wait' : 'pointer',
+        fontSize: 13, fontWeight: 500, color: '#2563EB', marginBottom: 8,
+      }}>
+        <Upload size={14} />
+        {uploading ? 'Uploading…' : 'Upload image'}
+        <input type="file" accept="image/*" style={{ display: 'none' }}
+          disabled={uploading}
+          onChange={e => e.target.files?.[0] && handle(e.target.files[0])} />
+      </label>
+      <input value={value} onChange={e => onChange(e.target.value)}
+        placeholder="Or paste image URL directly…"
+        style={{ fontSize: 12, color: '#718096', padding: '6px 10px', display: 'block', width: '100%', boxSizing: 'border-box' }} />
+    </div>
+  );
+}
 
 function slugify(str: string) {
   return str
@@ -193,6 +251,14 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
   const [slugEdited, setSlugEdited] = useState(false);
   const [meta, setMeta] = useState<Metadata>({ categories: [], topics: [], authors: [] });
 
+  // Audio TTS state
+  const [audioUrl, setAudioUrl] = useState(initialData?.audio_url ?? '');
+  const [voiceId, setVoiceId] = useState(initialData?.voice_id ?? 'fnYMz3F5gMEDGMWcH1ex');
+  const [audioGenerating, setAudioGenerating] = useState(false);
+  const [audioMsg, setAudioMsg] = useState('');
+  const [audioLengthStr, setAudioLengthStr] = useState(initialData?.length_str ?? '');
+  const savedId = useRef(initialData?.id ?? '');
+
   useEffect(() => {
     fetch('/api/admin/metadata').then(r => r.json()).then(setMeta).catch(() => {});
   }, []);
@@ -250,6 +316,7 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
       setSuccess(isNew ? 'Article created!' : 'Article saved!');
       if (isNew) {
         const data = await res.json();
+        savedId.current = data.id;
         setTimeout(() => router.push(`/admin/articles/${data.id}/edit`), 1000);
       }
     } catch (e: any) {
@@ -258,6 +325,33 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
       setSaving(false);
     }
   };
+
+  const handleGenerateAudio = async () => {
+    const id = savedId.current || initialData?.id;
+    if (!id) { setAudioMsg('Save the article first before generating audio.'); return; }
+    if (!content || content.replace(/<[^>]*>/g,'').trim().length < 10) {
+      setAudioMsg('The article content is too short to generate audio.'); return;
+    }
+    setAudioGenerating(true);
+    setAudioMsg('');
+    try {
+      const res = await fetch('/api/admin/articles/generate-audio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ articleId: id, voiceId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Generation failed');
+      setAudioUrl(data.audio_url);
+      setAudioLengthStr(data.length_str);
+      setAudioMsg(`✅ Audio generated! (${data.length_str})`);
+    } catch (e: any) {
+      setAudioMsg(`❌ ${e.message}`);
+    } finally {
+      setAudioGenerating(false);
+    }
+  };
+
 
   return (
     <div>
@@ -358,17 +452,38 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
           {/* Cover Image */}
           <div className="card">
             <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><ImageIcon size={13} /> Cover Image</h2>
+            <CoverUploader slug={slug} value={coverImage} onChange={setCoverImage} />
+          </div>
+
+          {/* Audio Generation */}
+          <div className="card">
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Mic size={13} /> Audio (TTS)</h2>
+            {audioUrl ? (
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#059669', fontWeight: 600, fontSize: 13, marginBottom: 8 }}>
+                  <CheckCircle size={14} /> Audio ready {audioLengthStr && `(${audioLengthStr})`}
+                </div>
+                <audio controls src={audioUrl} style={{ width: '100%', borderRadius: 8 }} />
+              </div>
+            ) : (
+              <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 12, lineHeight: 1.5 }}>
+                Generate a spoken audio version of this article via ElevenLabs. Save the article first, then click Generate.
+              </p>
+            )}
             <div className="form-group">
-              <label>Image URL</label>
-              <input value={coverImage} onChange={e => setCoverImage(e.target.value)} placeholder="https://…" />
+              <label>Voice ID</label>
+              <input value={voiceId} onChange={e => setVoiceId(e.target.value)} placeholder="ElevenLabs voice ID" style={{ fontFamily: 'monospace', fontSize: 12 }} />
             </div>
-            {coverImage && (
-              <img
-                src={coverImage}
-                alt="Cover preview"
-                style={{ width: '100%', borderRadius: 8, objectFit: 'cover', maxHeight: 160, display: 'block' }}
-                onError={e => (e.currentTarget.style.display = 'none')}
-              />
+            <button
+              onClick={handleGenerateAudio}
+              disabled={audioGenerating}
+              className="btn-primary"
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '10px' }}
+            >
+              {audioGenerating ? <><Loader2 size={14} style={{ animation: 'spin 0.8s linear infinite' }} /> Generating…</> : <><Mic size={14} /> {audioUrl ? 'Regenerate Audio' : 'Generate Audio'}</>}
+            </button>
+            {audioMsg && (
+              <p style={{ fontSize: 12, marginTop: 8, color: audioMsg.startsWith('✅') ? '#059669' : '#DC2626' }}>{audioMsg}</p>
             )}
           </div>
 
@@ -403,6 +518,7 @@ export default function ArticleForm({ initialData, isNew = false }: { initialDat
 
       <style>{`
         .tag-option:hover { background: #F8FAFC; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .ql-toolbar { border-radius: 8px 8px 0 0 !important; border-color: #E2E8F0 !important; background: #F8F9FA; }
         .ql-container { border-radius: 0 0 8px 8px !important; border-color: #E2E8F0 !important; font-size: 15px !important; min-height: 380px; }
         .ql-editor { min-height: 360px; font-family: 'Lora', Georgia, serif !important; line-height: 1.8 !important; }

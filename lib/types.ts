@@ -39,6 +39,10 @@ export interface Article {
   coverImage: string;
   categories: string[];
   topics: string[];
+  audioUrl?: string;
+  voiceId?: string;
+  durationSecs?: number;
+  lengthStr?: string;
 }
 
 export interface Bookmark {

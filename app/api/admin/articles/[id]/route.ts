@@ -21,21 +21,26 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const {
     slug, title, excerpt, content, pub_date,
     author_name, cover_image, categories, topics, published,
+    audio_url, voice_id, duration_secs, length_str,
   } = body;
 
   const [row] = await sql`
     UPDATE articles SET
-      slug        = COALESCE(${slug ?? null}, slug),
-      title       = COALESCE(${title ?? null}, title),
-      excerpt     = COALESCE(${excerpt ?? null}, excerpt),
-      content     = COALESCE(${content ?? null}, content),
-      pub_date    = COALESCE(${pub_date ?? null}, pub_date),
-      author_name = COALESCE(${author_name ?? null}, author_name),
-      cover_image = COALESCE(${cover_image ?? null}, cover_image),
-      categories  = COALESCE(${categories ?? null}, categories),
-      topics      = COALESCE(${topics ?? null}, topics),
-      published   = COALESCE(${published ?? null}, published),
-      updated_at  = now()
+      slug          = COALESCE(${slug ?? null}, slug),
+      title         = COALESCE(${title ?? null}, title),
+      excerpt       = COALESCE(${excerpt ?? null}, excerpt),
+      content       = COALESCE(${content ?? null}, content),
+      pub_date      = COALESCE(${pub_date ?? null}, pub_date),
+      author_name   = COALESCE(${author_name ?? null}, author_name),
+      cover_image   = COALESCE(${cover_image ?? null}, cover_image),
+      categories    = COALESCE(${categories ?? null}, categories),
+      topics        = COALESCE(${topics ?? null}, topics),
+      published     = COALESCE(${published ?? null}, published),
+      audio_url     = COALESCE(${audio_url ?? null}, audio_url),
+      voice_id      = COALESCE(${voice_id ?? null}, voice_id),
+      duration_secs = COALESCE(${duration_secs ?? null}, duration_secs),
+      length_str    = COALESCE(${length_str ?? null}, length_str),
+      updated_at    = now()
     WHERE id = ${id}
     RETURNING *
   `;

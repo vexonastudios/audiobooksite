@@ -3,13 +3,17 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
-import { AlertCircle, ArrowLeft, Calendar, User } from 'lucide-react';
+import { usePlayerStore } from '@/lib/store/playerStore';
+import { AlertCircle, ArrowLeft, Calendar, User, Headphones, Pause } from 'lucide-react';
+import type { Audiobook } from '@/lib/types';
 
 export default function ArticleDetail() {
   const params = useParams();
   const slug = params.slug as string;
   const isLoaded = useLibraryStore((s) => s.isLoaded);
   const article = useLibraryStore((s) => s.getArticleBySlug(slug));
+  const { currentBook, isPlaying, loadBook, setPlaying } = usePlayerStore();
+  const isThisPlaying = isPlaying && currentBook?.id === article?.id;
 
   if (!isLoaded) {
     return (
@@ -90,8 +94,8 @@ export default function ArticleDetail() {
         <div style={{
           display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 16,
           color: 'var(--color-text-secondary)', fontSize: '0.9375rem',
-          marginBottom: 40,
-          paddingBottom: 32,
+          marginBottom: article?.audioUrl ? 20 : 40,
+          paddingBottom: article?.audioUrl ? 20 : 32,
           borderBottom: '1px solid var(--color-border)',
         }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -102,7 +106,62 @@ export default function ArticleDetail() {
             <Calendar size={14} />
             {formattedDate}
           </span>
+          {article.lengthStr && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--color-brand)', fontWeight: 600 }}>
+              <Headphones size={14} /> {article.lengthStr} listen
+            </span>
+          )}
         </div>
+
+        {/* Play Article Button */}
+        {article.audioUrl && (
+          <div style={{ marginBottom: 40, paddingBottom: 32, borderBottom: '1px solid var(--color-border)' }}>
+            <button
+              onClick={() => {
+                if (isThisPlaying) {
+                  setPlaying(false);
+                } else {
+                  // Build a fake Audiobook object so the shared player can play it
+                  const pseudoBook: Audiobook = {
+                    id: article.id,
+                    slug: article.slug,
+                    title: article.title,
+                    authorName: article.authorName,
+                    coverImage: article.coverImage || '',
+                    thumbnailUrl: article.coverImage || '',
+                    mp3Url: article.audioUrl!,
+                    excerpt: article.excerpt,
+                    description: article.description,
+                    pubDate: article.pubDate,
+                    categories: article.categories,
+                    topics: article.topics,
+                    totalDuration: article.lengthStr || '',
+                    length: article.lengthStr || '',
+                    originalYear: '',
+                    youtubeLink: null,
+                    spotifyLink: null,
+                    buyLink: null,
+                    generatedColors: null,
+                    plays: 0,
+                    chapters: [],
+                  };
+                  loadBook(pseudoBook);
+                }
+              }}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 10,
+                background: isThisPlaying ? 'rgba(46,106,167,0.12)' : 'var(--color-brand)',
+                color: isThisPlaying ? 'var(--color-brand)' : '#fff',
+                border: isThisPlaying ? '2px solid var(--color-brand)' : 'none',
+                borderRadius: 999, padding: '12px 28px',
+                fontSize: '1rem', fontWeight: 700, cursor: 'pointer',
+                transition: 'all 0.2s', boxShadow: isThisPlaying ? 'none' : '0 4px 14px rgba(46,106,167,0.35)',
+              }}
+            >
+              {isThisPlaying ? <><Pause size={18} /> Pause</> : <><Headphones size={18} /> Listen to this Article</>}
+            </button>
+          </div>
+        )}
 
         {/* Hero cover */}
         {article.coverImage && (

@@ -12,7 +12,9 @@ async function getAllArticles() {
   const rows = await sql`
     SELECT id, slug, title, excerpt, content AS description, pub_date AS "pubDate",
            author_name AS "authorName", cover_image AS "coverImage",
-           categories, topics, published
+           categories, topics, published,
+           audio_url AS "audioUrl", voice_id AS "voiceId",
+           duration_secs AS "durationSecs", length_str AS "lengthStr"
     FROM articles
     WHERE published = true
     ORDER BY pub_date DESC
