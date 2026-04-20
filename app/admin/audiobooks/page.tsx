@@ -81,12 +81,12 @@ export default function AudiobookList() {
             <tbody>
               {filtered.map(b => (
                 <tr key={b.id}>
-                  <td style={{ color: '#e8e8e8', maxWidth: 300 }}>
+                  <td style={{ color: '#1A202C', fontWeight: 600, maxWidth: 300 }}>
                     <span title={b.title}>{b.title.length > 55 ? b.title.slice(0, 55) + '…' : b.title}</span>
                   </td>
-                  <td style={{ color: '#aaa', whiteSpace: 'nowrap' }}>{b.authorName}</td>
-                  <td style={{ color: '#aaa', whiteSpace: 'nowrap' }}>{b.totalDuration}</td>
-                  <td style={{ color: '#aaa' }}>{b.plays?.toLocaleString()}</td>
+                  <td style={{ color: '#4A5568', whiteSpace: 'nowrap' }}>{b.authorName}</td>
+                  <td style={{ color: '#4A5568', whiteSpace: 'nowrap' }}>{b.totalDuration}</td>
+                  <td style={{ color: '#4A5568' }}>{b.plays?.toLocaleString()}</td>
                   <td>
                     <button
                       onClick={() => handleTogglePublish(b.id, b.published)}

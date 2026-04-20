@@ -18,6 +18,7 @@ interface Article {
 export default function AdminArticlesPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   const fetchArticles = async () => {
     setLoading(true);
@@ -50,6 +51,15 @@ export default function AdminArticlesPage() {
         </Link>
       </div>
 
+      <div style={{ marginBottom: 16 }}>
+        <input
+          placeholder="Search by title or author…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{ maxWidth: 360 }}
+        />
+      </div>
+
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {loading ? (
           <div style={{ padding: 48, textAlign: 'center', color: '#718096' }}>Loading articles…</div>
@@ -71,7 +81,9 @@ export default function AdminArticlesPage() {
               </tr>
             </thead>
             <tbody>
-              {articles.map(a => (
+              {articles
+                .filter(a => a.title.toLowerCase().includes(search.toLowerCase()) || a.author_name.toLowerCase().includes(search.toLowerCase()))
+                .map(a => (
                 <tr key={a.id}>
                   <td>
                     <div style={{ fontWeight: 600, color: '#1A202C', fontSize: 14 }}>{a.title}</div>
