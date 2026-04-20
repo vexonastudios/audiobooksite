@@ -68,8 +68,15 @@ export default function AnalyticsDashboard() {
     setLoading(true);
     fetch(`/api/admin/analytics?days=${period}`)
       .then(r => r.json())
-      .then(d => { setData(d); setLoading(false); })
-      .catch(() => setLoading(false));
+      .then(d => { 
+        if (d.error) {
+          setData(null);
+        } else {
+          setData(d); 
+        }
+        setLoading(false); 
+      })
+      .catch(() => { setData(null); setLoading(false); });
   }, [period]);
 
   const PERIODS: { label: string; value: Period }[] = [

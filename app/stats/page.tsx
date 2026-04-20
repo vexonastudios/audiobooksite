@@ -67,8 +67,15 @@ export default function StatsPage() {
     if (!isSignedIn) { setLoading(false); return; }
     fetch('/api/analytics/my-stats')
       .then(r => r.json())
-      .then(d => { setStats(d); setLoading(false); })
-      .catch(() => setLoading(false));
+      .then(d => { 
+        if (d.error) {
+          setStats(null);
+        } else {
+          setStats(d); 
+        }
+        setLoading(false); 
+      })
+      .catch(() => { setStats(null); setLoading(false); });
   }, [isLoaded, isSignedIn]);
 
   if (!isLoaded || loading) {
