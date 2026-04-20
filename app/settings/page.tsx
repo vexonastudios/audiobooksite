@@ -10,7 +10,6 @@ import Link from 'next/link';
 
 // All possible quick-action buttons
 const ALL_ACTIONS = [
-  { id: 'speed',     label: 'Speed',      description: 'Cycle playback speed (0.75x → 2x)',        icon: Gauge },
   { id: 'chapters',  label: 'Chapters',   description: 'Open chapter list',                          icon: List },
   { id: 'bookmark',  label: 'Bookmark',   description: 'Open bookmarks and add new',                 icon: BookmarkPlus },
   { id: 'favorite',  label: 'Favorite',   description: 'Mark/unmark as a favorite',                  icon: Heart },

@@ -539,8 +539,17 @@ export default function AudiobookPage() {
                   className="btn btn-icon" 
                   style={{ width: 44, height: 44, background: 'transparent', border: 'none', opacity: !isCurrent || currentChapterIdx === book.chapters.length - 1 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === book.chapters.length - 1 ? 'none' : 'auto' }}
                   onClick={() => jumpToChapter(currentChapterIdx + 1)}
+                  title="Next chapter"
                 >
                   <SkipForward size={24} fill="currentColor" />
+                </button>
+                <button 
+                  className="btn btn-icon" 
+                  onClick={() => { const nextSpeed = playbackSpeed >= 2 ? 0.75 : playbackSpeed + 0.25; setPlaybackSpeed(nextSpeed); }} 
+                  style={{ width: 48, height: 44, background: 'transparent', border: 'none', fontWeight: 800, fontSize: '1.15rem', color: 'var(--color-text-primary)' }}
+                  title="Playback speed"
+                >
+                  {playbackSpeed}x
                 </button>
               </div>
 
@@ -548,12 +557,6 @@ export default function AudiobookPage() {
               {(() => {
                 const btnStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 8px' };
                 const actionMap: Record<string, React.ReactNode> = {
-                  speed: (
-                    <button key="speed" onClick={() => { const nextSpeed = playbackSpeed >= 2 ? 0.75 : playbackSpeed + 0.25; setPlaybackSpeed(nextSpeed); }} style={btnStyle}>
-                      <span style={{ fontSize: '1.2rem', fontWeight: 800, lineHeight: 1 }}>{playbackSpeed}x</span>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Speed</span>
-                    </button>
-                  ),
                   chapters: (
                     <button key="chapters" onClick={() => { setActiveTab('chapters'); setMobileTabOpen(true); }} style={btnStyle}>
                       <List size={22} />

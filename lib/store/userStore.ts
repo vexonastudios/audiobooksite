@@ -74,7 +74,7 @@ export const useUserStore = create<UserState>()(
       quoteSettings: { includeLink: true, includeBook: true, useQuotes: true },
       notificationsEnabled: true,
       heardNotificationIds: [],
-      playerQuickActions: ['speed', 'chapters', 'bookmark', 'quote', 'readalong'],
+      playerQuickActions: ['chapters', 'bookmark', 'quote', 'readalong'],
       readAlongFontSize: 1.2,
 
       addToHistory: (bookId, position) => {
@@ -177,7 +177,8 @@ export const useUserStore = create<UserState>()(
       migrate: (persistedState: any, fromVersion: number) => {
         // v1 → v2: ensure quote and readalong are in playerQuickActions
         if (fromVersion < 2) {
-          const actions: string[] = persistedState.playerQuickActions ?? ['speed', 'chapters', 'bookmark', 'quote', 'readalong'];
+          let actions: string[] = persistedState.playerQuickActions ?? ['chapters', 'bookmark', 'quote', 'readalong'];
+          actions = actions.filter((a: string) => a !== 'speed'); // removed from quick actions
           if (!actions.includes('quote')) actions.push('quote');
           if (!actions.includes('readalong')) actions.push('readalong');
           persistedState.playerQuickActions = actions;
