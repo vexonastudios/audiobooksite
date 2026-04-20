@@ -25,6 +25,8 @@ export function TopBar() {
   const setSkipInterval = useUserStore((s) => s.setSkipInterval);
   const quoteSettings = useUserStore((s) => s.quoteSettings);
   const updateQuoteSettings = useUserStore((s) => s.updateQuoteSettings);
+  const readAlongFontSize = useUserStore((s) => s.readAlongFontSize);
+  const setReadAlongFontSize = useUserStore((s) => s.setReadAlongFontSize);
   const { isSignedIn } = useUser();
   const inputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
@@ -299,6 +301,37 @@ export function TopBar() {
                       {quoteSettings.includeLink && ' Listen at: https://scrollreader.com'}
                     </div>
                   </div>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 32 }}>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: 8, color: 'var(--color-brand)' }}>Read Along Text Size</h3>
+                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 12 }}>Font size used in the Read Along panel on mobile.</div>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+                  {([
+                    { label: 'S',   value: 0.9  },
+                    { label: 'M',   value: 1.05 },
+                    { label: 'L',   value: 1.2  },
+                    { label: 'XL',  value: 1.4  },
+                    { label: 'XXL', value: 1.65 },
+                  ] as { label: string; value: number }[]).map(opt => {
+                    const isActive = Math.abs(readAlongFontSize - opt.value) < 0.01;
+                    return (
+                      <button
+                        key={opt.label}
+                        onClick={() => setReadAlongFontSize(opt.value)}
+                        className={`btn ${isActive ? 'btn-primary' : 'btn-secondary'}`}
+                        style={{ flex: 1, padding: '10px 4px', fontSize: `${opt.value * 0.72}rem`, fontWeight: 700 }}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '12px 14px' }}>
+                  <p style={{ margin: 0, fontSize: `${readAlongFontSize}rem`, lineHeight: 1.8, color: 'var(--color-text-primary)' }}>
+                    "The soul must become quiet and wait before the Lord."
+                  </p>
                 </div>
               </div>
 
