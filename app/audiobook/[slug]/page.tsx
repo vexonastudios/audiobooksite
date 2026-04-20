@@ -491,6 +491,8 @@ export default function AudiobookPage() {
 
               {/* Playback Buttons */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, margin: '16px 0' }}>
+                {/* 48px invisible spacer to mathematically balance the 48px Speed button on the right, keeping Play button dead center */}
+                <div style={{ width: 48, flexShrink: 0 }} />
                 <button 
                   className="btn-icon" 
                   style={{ width: 44, height: 44, background: 'transparent', border: 'none', opacity: !isCurrent || currentChapterIdx === 0 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === 0 ? 'none' : 'auto' }}
@@ -533,7 +535,8 @@ export default function AudiobookPage() {
 
               {/* Mobile-Only Bottom Options Row — dynamically ordered from user preferences */}
               {(() => {
-                const btnStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 8px' };
+                // Settings flex: 1 ensures equal columns. align-content handles text wrapping gracefully.
+                const btnStyle: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', textAlign: 'center' };
                 const actionMap: Record<string, React.ReactNode> = {
                   chapters: (
                     <button key="chapters" onClick={() => { setActiveTab('chapters'); setMobileTabOpen(true); }} style={btnStyle}>
@@ -579,7 +582,7 @@ export default function AudiobookPage() {
                   ),
                 };
                 return (
-                  <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', marginTop: 24, padding: '12px 8px', background: 'var(--color-surface-2)', borderRadius: 'var(--radius-lg)' }}>
+                  <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 24, padding: '12px 6px', background: 'var(--color-surface-2)', borderRadius: 'var(--radius-lg)' }}>
                     {playerQuickActions.map(id => actionMap[id] ?? null)}
                   </div>
                 );
