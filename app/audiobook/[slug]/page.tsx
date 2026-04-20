@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
-import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon, Heart } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon, Heart, ExternalLink } from 'lucide-react';
 import { BookCard } from '@/components/ui/BookCard';
 import { ReadAlongPanel } from '@/components/ui/ReadAlongPanel';
 import { QuoteModal } from '@/components/ui/QuoteModal';
@@ -186,6 +186,38 @@ export default function AudiobookPage() {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
+  const renderExternalLinks = (className?: string) => {
+    if (!book.youtubeLink && !book.spotifyLink && !book.buyLink) return null;
+    return (
+      <div className={`external-links-container ${className || ''}`} style={{ marginTop: className === 'desktop-only' ? 8 : 24, marginBottom: className === 'mobile-only' ? 24 : 0 }}>
+        <h4 style={{ marginBottom: 12, fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-tertiary)', paddingLeft: 4 }}>Read / Watch</h4>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {book.youtubeLink && (
+            <a href={book.youtubeLink} target="_blank" rel="noreferrer" 
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: 'var(--color-surface)', borderRadius: 14, color: 'var(--color-text-primary)', textDecoration: 'none', fontWeight: 600, transition: 'all 0.2s', border: '1px solid var(--color-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+              YouTube
+              <ExternalLink size={16} opacity={0.5} />
+            </a>
+          )}
+          {book.spotifyLink && (
+            <a href={book.spotifyLink} target="_blank" rel="noreferrer" 
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: 'var(--color-surface)', borderRadius: 14, color: 'var(--color-text-primary)', textDecoration: 'none', fontWeight: 600, transition: 'all 0.2s', border: '1px solid var(--color-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+              Spotify
+              <ExternalLink size={16} opacity={0.5} />
+            </a>
+          )}
+          {book.buyLink && (
+            <a href={book.buyLink} target="_blank" rel="noreferrer" 
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', background: 'var(--color-surface)', borderRadius: 14, color: 'var(--color-text-primary)', textDecoration: 'none', fontWeight: 600, transition: 'all 0.2s', border: '1px solid var(--color-border)', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+              Buy Physical Book
+              <ExternalLink size={16} opacity={0.5} />
+            </a>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   // Set background color globally based on book
   const bgStyle = book.generatedColors 
     ? { 
@@ -233,17 +265,7 @@ export default function AudiobookPage() {
                </div>
              </div>
 
-             {/* External Links */}
-             {(book.youtubeLink || book.spotifyLink || book.buyLink) && (
-               <div className="card external-links-card" style={{ padding: 16 }}>
-                 <h4 style={{ marginBottom: 12, fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>Read / Watch</h4>
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                   {book.youtubeLink && <a href={book.youtubeLink} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ justifyContent: 'flex-start' }}>YouTube</a>}
-                   {book.spotifyLink && <a href={book.spotifyLink} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ justifyContent: 'flex-start' }}>Spotify</a>}
-                   {book.buyLink && <a href={book.buyLink} target="_blank" rel="noreferrer" className="btn btn-secondary" style={{ justifyContent: 'flex-start' }}>Buy Physical Book</a>}
-                 </div>
-               </div>
-             )}
+             {renderExternalLinks('desktop-only')}
           </div>
 
           {/* Right Column: Stacked Cards */}
@@ -494,6 +516,8 @@ export default function AudiobookPage() {
                   <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Favorite</span>
                 </button>
               </div>
+
+              {renderExternalLinks('mobile-only')}
             </div>
 
             {/* CARD 2: Tabs (Chapters, Bookmarks, etc) */}
