@@ -368,9 +368,11 @@ export default function AudiobookPage() {
                       {book.authorName}
                     </Link>
                   </p>
-                  {authorRecord?.dates && (
-                    <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: '2px 0 0 0' }}>{authorRecord.dates}</p>
-                  )}
+                  <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', margin: '2px 0 0 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {book.originalYear && <span>Published {book.originalYear}</span>}
+                    {book.originalYear && authorRecord?.dates && <span>•</span>}
+                    {authorRecord?.dates && <span>{authorRecord.dates}</span>}
+                  </div>
                 </div>
               </div>
 
@@ -902,7 +904,6 @@ export default function AudiobookPage() {
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
                 {book.categories.map(c => <Link key={c} href={`/categories/${encodeURIComponent(c)}`} className="pill">{c}</Link>)}
                 {book.topics.map(t => <Link key={t} href={`/topics/${encodeURIComponent(t)}`} className="pill">#{t}</Link>)}
-                {book.originalYear && <span className="pill" style={{ background: 'transparent', border: 'none' }}>Published {book.originalYear}</span>}
               </div>
               
               <div 
