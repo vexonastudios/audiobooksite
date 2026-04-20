@@ -399,11 +399,37 @@ export default function AudiobookPage() {
                 </div>
               )}
 
-              {book.chapters[currentChapterIdx] ? (
-                <div style={{ textAlign: 'center', marginBottom: 16, fontWeight: 600, fontSize: '1.25rem' }}>
-                  {book.chapters[currentChapterIdx].title}
-                </div>
-              ) : null}
+              {book.chapters[currentChapterIdx] ? (() => {
+                const rawTitle = book.chapters[currentChapterIdx].title;
+                let topPart = null;
+                let bottomPart = rawTitle;
+                
+                // Parse formats like "6 - Exhorting and First Preaching" or "Part 1 - Introduction"
+                if (rawTitle.includes(' - ')) {
+                  const parts = rawTitle.split(' - ');
+                  if (parts[0].length < 25) { // Ensure the first part is reasonably short like an identifier
+                    topPart = parts[0].trim();
+                    // If it's just a number, prefix it with "Chapter "
+                    if (/^\d+$/.test(topPart)) {
+                      topPart = `Chapter ${topPart}`;
+                    }
+                    bottomPart = parts.slice(1).join(' - ').trim();
+                  }
+                }
+                
+                return (
+                  <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                    {topPart && (
+                      <div style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--color-brand)', marginBottom: 6 }}>
+                        {topPart}
+                      </div>
+                    )}
+                    <div style={{ fontWeight: 700, fontSize: '1.3rem', lineHeight: 1.3, color: 'var(--color-text-primary)' }}>
+                      {bottomPart}
+                    </div>
+                  </div>
+                );
+              })() : null}
 
               {/* Scrubber Area */}
               {(() => {
