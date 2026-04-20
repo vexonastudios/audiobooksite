@@ -168,7 +168,7 @@ export async function getAnalyticsSummary(days: number = 30) {
     sql`
       SELECT
         DATE(recorded_at AT TIME ZONE 'UTC') AS day,
-        ROUND(SUM(listened_secs) / 60.0, 1) AS listen_minutes
+        ROUND((SUM(listened_secs) / 60.0)::numeric, 1) AS listen_minutes
       FROM listen_time
       WHERE recorded_at >= NOW() - ${days + ' days'}::interval
       GROUP BY day
@@ -185,11 +185,11 @@ export async function getAnalyticsSummary(days: number = 30) {
         a.thumbnail_url,
         a.author_name,
         a.duration_secs,
-        ROUND(SUM(lt.listened_secs) / 3600.0, 2) AS listen_hours,
+        ROUND((SUM(lt.listened_secs) / 3600.0)::numeric, 2) AS listen_hours,
         COUNT(DISTINCT pe.id) AS total_plays,
         COUNT(DISTINCT lt.session_id) AS unique_listeners,
         CASE WHEN a.duration_secs > 0
-          THEN ROUND(AVG(lt.position / a.duration_secs) * 100)
+          THEN ROUND((AVG(lt.position::numeric / NULLIF(a.duration_secs, 0)) * 100)::numeric)
           ELSE 0
         END AS avg_completion_pct
       FROM listen_time lt
@@ -233,7 +233,7 @@ export async function getAnalyticsSummary(days: number = 30) {
 
   // Total listen hours in period
   const listenHoursRow = await sql`
-    SELECT COALESCE(ROUND(SUM(listened_secs) / 3600.0, 1), 0) AS hours
+    SELECT COALESCE(ROUND((SUM(listened_secs) / 3600.0)::numeric, 1), 0) AS hours
     FROM listen_time
     WHERE recorded_at >= NOW() - ${days + ' days'}::interval
   `;
