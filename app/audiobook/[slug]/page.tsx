@@ -9,7 +9,8 @@ interface Props {
 // ── Server-side metadata for SEO ───────────────────────────────────────────────
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const book = await getAudiobookBySlug(slug);
+  let book = null;
+  try { book = await getAudiobookBySlug(slug); } catch {}
 
   if (!book) {
     return { title: 'Audiobook Not Found' };
@@ -82,7 +83,8 @@ function durationToISO(totalDuration: string): string {
 // ── Server Component: renders JSON-LD + mounts client UI ───────────────────────
 export default async function AudiobookPage({ params }: Props) {
   const { slug } = await params;
-  const book = await getAudiobookBySlug(slug);
+  let book = null;
+  try { book = await getAudiobookBySlug(slug); } catch {}
 
   // JSON-LD structured data (only when book exists)
   const jsonLd = book

@@ -9,11 +9,17 @@ interface Props { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const author = await getAuthorBySlug(slug);
-  if (!author) return { title: 'Author Not Found' };
+  let author = null;
+  let bookCount = 0;
+  try {
+    author = await getAuthorBySlug(slug);
+    if (author) {
+      const allBooks = await getAllAudiobooks();
+      bookCount = allBooks.filter(b => b.authorName.toLowerCase() === author!.name.toLowerCase()).length;
+    }
+  } catch {}
 
-  const allBooks = await getAllAudiobooks();
-  const bookCount = allBooks.filter(b => b.authorName.toLowerCase() === author.name.toLowerCase()).length;
+  if (!author) return { title: 'Author Not Found' };
 
   const title = `${author.name} Audiobooks — Listen Free`;
   const description = author.description?.slice(0, 150)
@@ -49,10 +55,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function AuthorDetailPage({ params }: Props) {
   const { slug } = await params;
-  const [author, allBooks] = await Promise.all([
-    getAuthorBySlug(slug),
-    getAllAudiobooks(),
-  ]);
+  let author = null;
+  let allBooks: Awaited<ReturnType<typeof getAllAudiobooks>> = [];
+  try {
+    [author, allBooks] = await Promise.all([
+      getAuthorBySlug(slug),
+      getAllAudiobooks(),
+    ]);
+  } catch {}
 
   if (!author) notFound();
 
