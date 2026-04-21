@@ -83,6 +83,11 @@ export default function AuthorsClient({ authors }: { authors: AuthorData[] }) {
     }
   };
 
+  const handleSortChange = (newSort: SortOption) => {
+    setSortBy(newSort);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="page" style={{ paddingBottom: 64 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
@@ -136,21 +141,21 @@ export default function AuthorsClient({ authors }: { authors: AuthorData[] }) {
           </div>
           <button 
             className={`btn ${sortBy === 'name_asc' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setSortBy('name_asc')}
+            onClick={() => handleSortChange('name_asc')}
             style={{ padding: '6px 12px', fontSize: '0.85rem', borderRadius: 20, flexShrink: 0 }}
           >
             Name (A-Z)
           </button>
           <button 
             className={`btn ${sortBy === 'books_desc' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setSortBy('books_desc')}
+            onClick={() => handleSortChange('books_desc')}
             style={{ padding: '6px 12px', fontSize: '0.85rem', borderRadius: 20, flexShrink: 0 }}
           >
             Most Books
           </button>
           <button 
             className={`btn ${sortBy === 'plays_desc' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setSortBy('plays_desc')}
+            onClick={() => handleSortChange('plays_desc')}
             style={{ padding: '6px 12px', fontSize: '0.85rem', borderRadius: 20, flexShrink: 0 }}
           >
             Most Listened
