@@ -151,6 +151,18 @@ function AudiobooksPageContent() {
         </div>
       )}
 
+      {/* ── Category & Topic Quick-Filter Strips ── */}
+      {!searchQuery && activeFilterCount === 0 && (
+        <QuickFilterStrips
+          categories={categories}
+          topics={topics}
+          selectedCategory={selectedCategory}
+          selectedTopic={selectedTopic}
+          onSelectCategory={(c) => { setSelectedCategory(c); setSelectedTopic(null); }}
+          onSelectTopic={(t) => { setSelectedTopic(t); setSelectedCategory(null); }}
+        />
+      )}
+
       {/* Search + Controls Bar */}
       <div style={{
         display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center',
@@ -524,6 +536,110 @@ function AudiobooksPageContent() {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+
+// ── Quick-Filter Strips Component ──────────────────────────────────────────
+
+const PILL_LIMIT = 8;
+
+function QuickFilterStrips({
+  categories,
+  topics,
+  selectedCategory,
+  selectedTopic,
+  onSelectCategory,
+  onSelectTopic,
+}: {
+  categories: string[];
+  topics: string[];
+  selectedCategory: string | null;
+  selectedTopic: string | null;
+  onSelectCategory: (c: string) => void;
+  onSelectTopic: (t: string) => void;
+}) {
+  const [showAllCats, setShowAllCats] = useState(false);
+  const [showAllTopics, setShowAllTopics] = useState(false);
+
+  const visibleCats = showAllCats ? categories : categories.slice(0, PILL_LIMIT);
+  const visibleTopics = showAllTopics ? topics : topics.slice(0, PILL_LIMIT);
+
+  const sectionStyle: React.CSSProperties = { marginBottom: 28 };
+  const headerStyle: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    marginBottom: 10,
+  };
+  const labelStyle: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', gap: 6,
+    fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-text-secondary)',
+    textTransform: 'uppercase', letterSpacing: '0.06em',
+  };
+  const toggleStyle: React.CSSProperties = {
+    fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-brand)',
+    background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px',
+    borderRadius: 6, transition: 'background 0.15s',
+  };
+  const rowStyle: React.CSSProperties = {
+    display: 'flex', flexWrap: 'wrap', gap: 8,
+  };
+
+  return (
+    <div style={{ marginBottom: 12 }}>
+      {/* Categories */}
+      <div style={sectionStyle}>
+        <div style={headerStyle}>
+          <span style={labelStyle}>
+            <Tag size={13} />
+            Browse by Category
+          </span>
+          {categories.length > PILL_LIMIT && (
+            <button style={toggleStyle} onClick={() => setShowAllCats(v => !v)}>
+              {showAllCats ? 'Show less ↑' : `+${categories.length - PILL_LIMIT} more`}
+            </button>
+          )}
+        </div>
+        <div style={rowStyle}>
+          {visibleCats.map(cat => (
+            <button
+              key={cat}
+              className={`pill ${selectedCategory === cat ? 'active' : ''}`}
+              onClick={() => onSelectCategory(cat)}
+              style={{ fontSize: '0.8125rem' }}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Topics */}
+      <div style={sectionStyle}>
+        <div style={headerStyle}>
+          <span style={labelStyle}>
+            <Hash size={13} />
+            Browse by Topic
+          </span>
+          {topics.length > PILL_LIMIT && (
+            <button style={toggleStyle} onClick={() => setShowAllTopics(v => !v)}>
+              {showAllTopics ? 'Show less ↑' : `+${topics.length - PILL_LIMIT} more`}
+            </button>
+          )}
+        </div>
+        <div style={rowStyle}>
+          {visibleTopics.map(topic => (
+            <button
+              key={topic}
+              className={`pill ${selectedTopic === topic ? 'active' : ''}`}
+              onClick={() => onSelectTopic(topic)}
+              style={{ fontSize: '0.8125rem', background: selectedTopic === topic ? undefined : 'rgba(46,106,167,0.04)' }}
+            >
+              #{topic}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
