@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash, Bell, Trophy, BookMarked, ChevronUp, Heart, Mail, Settings2 } from 'lucide-react';
+import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash, Bell, Trophy, BookMarked, ChevronUp, Heart, Mail, Settings2, Radio } from 'lucide-react';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useEffect } from 'react';
 
@@ -26,6 +26,7 @@ const youGroup = [
 ];
 
 const moreGroup = [
+  { href: '/connect',        label: 'Connect',         icon: Radio  },
   { href: '/announcements',  label: 'Announcements',  icon: Bell   },
   { href: '/contact',        label: 'Contact Us',      icon: Mail   },
 ];
