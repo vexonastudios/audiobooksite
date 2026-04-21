@@ -4,8 +4,9 @@ import { useRef } from 'react';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { useUserStore } from '@/lib/store/userStore';
 import type { Audiobook, Article } from '@/lib/types';
+import type { CommunityQuote } from '@/lib/db/quotes';
 import Link from 'next/link';
-import { Headphones, ChevronRight, ChevronLeft, BookOpen } from 'lucide-react';
+import { Headphones, ChevronRight, ChevronLeft, BookOpen, Quote, ArrowUp, Heart } from 'lucide-react';
 import { NotificationBanner } from '@/components/ui/NotificationBanner';
 import { BookCard } from '@/components/ui/BookCard';
 import { ScrollRow } from '@/components/ui/ScrollRow';
@@ -131,6 +132,212 @@ function ArticleScrollRow({ articles, audiobooks }: { articles: Article[]; audio
   );
 }
 
+// ── Format seconds as "Xh Ym" or "Xm" ────────────────────────────────────────
+function formatListenTime(totalSeconds: number): string {
+  const hrs = Math.floor(totalSeconds / 3600);
+  const mins = Math.floor((totalSeconds % 3600) / 60);
+  if (hrs > 0) return `${hrs}h ${mins}m`;
+  if (mins > 0) return `${mins}m`;
+  return '< 1m';
+}
+
+// ── Hero subtitle: personalized for signed-in users ───────────────────────────
+function HeroSubtitle({ audiobookCount }: { audiobookCount: number }) {
+  const isSignedIn = useUserStore(s => s.isSignedIn);
+  const history = useUserStore(s => s.history);
+  const quotes = useUserStore(s => s.quotes);
+
+  const totalListenSecs = history.reduce((sum, h) => sum + (h.position || 0), 0);
+  const booksStarted = history.length;
+
+  if (isSignedIn && booksStarted > 0) {
+    return (
+      <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginTop: 4 }}>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          fontSize: '0.925rem', color: 'var(--color-text-secondary)',
+        }}>
+          <Headphones size={15} style={{ color: 'var(--color-brand)', flexShrink: 0 }} />
+          <strong style={{ color: 'var(--color-text-primary)' }}>{formatListenTime(totalListenSecs)}</strong>
+          &nbsp;listened all-time
+        </span>
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          fontSize: '0.925rem', color: 'var(--color-text-secondary)',
+        }}>
+          <BookOpen size={15} style={{ color: 'var(--color-brand)', flexShrink: 0 }} />
+          <strong style={{ color: 'var(--color-text-primary)' }}>{booksStarted}</strong>
+          &nbsp;{booksStarted === 1 ? 'book' : 'books'} started
+        </span>
+        {quotes.length > 0 && (
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            fontSize: '0.925rem', color: 'var(--color-text-secondary)',
+          }}>
+            <Quote size={15} style={{ color: 'var(--color-brand)', flexShrink: 0 }} />
+            <strong style={{ color: 'var(--color-text-primary)' }}>{quotes.length}</strong>
+            &nbsp;{quotes.length === 1 ? 'quote' : 'quotes'} saved
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', margin: 0 }}>
+      {audiobookCount} audiobooks from classic authors — always free.
+    </p>
+  );
+}
+
+// ── Compact community quote card for home page preview ────────────────────────
+function HomeCommunityQuoteCard({ q }: { q: CommunityQuote }) {
+  return (
+    <Link
+      href={`/audiobook/${q.bookSlug}?t=${Math.floor(q.time)}`}
+      style={{ textDecoration: 'none', flexShrink: 0, width: 280 }}
+    >
+      <div
+        style={{
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-border)',
+          borderRadius: 14,
+          padding: '16px 18px',
+          height: 160,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          transition: 'transform 0.2s, box-shadow 0.2s',
+          cursor: 'pointer',
+          boxSizing: 'border-box',
+        }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)';
+          (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-lg)';
+          (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brand)';
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLElement).style.transform = '';
+          (e.currentTarget as HTMLElement).style.boxShadow = '';
+          (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border)';
+        }}
+      >
+        {/* Quote text */}
+        <p style={{
+          margin: 0,
+          fontSize: '0.85rem',
+          lineHeight: 1.55,
+          fontStyle: 'italic',
+          color: 'var(--color-text-primary)',
+          display: '-webkit-box',
+          WebkitLineClamp: 4,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          paddingLeft: 10,
+          borderLeft: '3px solid var(--color-brand)',
+        }}>
+          {q.text}
+        </p>
+
+        {/* Footer: author + upvotes */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, minWidth: 0 }}>
+            {q.bookCover && (
+              <img
+                src={q.bookCover}
+                alt=""
+                style={{ width: 22, height: 22, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }}
+              />
+            )}
+            <span style={{
+              fontSize: '0.72rem',
+              color: 'var(--color-text-muted)',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}>
+              {q.bookAuthor}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
+            {q.upvotesCount > 0 && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 3,
+                fontSize: '0.7rem', fontWeight: 700,
+                color: 'var(--color-brand)',
+                background: 'rgba(46,106,167,0.1)',
+                borderRadius: 20, padding: '2px 7px',
+              }}>
+                <ArrowUp size={10} /> {q.upvotesCount}
+              </span>
+            )}
+            {q.savesCount > 1 && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 3,
+                fontSize: '0.7rem', fontWeight: 700,
+                color: 'var(--color-text-muted)',
+                background: 'var(--color-surface-2)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 20, padding: '2px 7px',
+              }}>
+                <Heart size={10} /> {q.savesCount}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+// ── Community Quotes scroll row ───────────────────────────────────────────────
+function CommunityQuotesScrollRow({ quotes }: { quotes: CommunityQuote[] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = () => {
+    if (ref.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = ref.current;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth - 5);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [quotes]);
+
+  return (
+    <div className="scroll-row-wrapper" onMouseEnter={checkScroll}>
+      <div className="scroll-row" ref={ref} onScroll={checkScroll}>
+        {quotes.map(q => (
+          <HomeCommunityQuoteCard key={q.id} q={q} />
+        ))}
+      </div>
+      {canScrollLeft && (
+        <>
+          <div className="scroll-fade left" />
+          <button className="scroll-arrow left" onClick={() => ref.current?.scrollBy({ left: -(280 + 14) * 3, behavior: 'smooth' })} aria-label="Scroll left">
+            <ChevronLeft size={18} />
+          </button>
+        </>
+      )}
+      {canScrollRight && (
+        <>
+          <div className="scroll-fade right" />
+          <button className="scroll-arrow right" onClick={() => ref.current?.scrollBy({ left: (280 + 14) * 3, behavior: 'smooth' })} aria-label="Scroll right">
+            <ChevronRight size={18} />
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── Home Page ─────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const { audiobooks, articles, isLoaded, getByCategory, getRecent } = useLibraryStore();
@@ -142,6 +349,22 @@ export default function HomePage() {
   const topics = useLibraryStore((s) => s.getAllTopics());
   const recentBooks = getRecent(20);
   const recentArticles = articles.slice(0, 20);
+
+  // Community quotes for home page preview
+  const [communityQuotes, setCommunityQuotes] = useState<CommunityQuote[]>([]);
+  const [communityLoaded, setCommunityLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!communityLoaded) {
+      fetch('/api/quotes/community?limit=12&sort=popular')
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data?.quotes?.length) setCommunityQuotes(data.quotes);
+        })
+        .catch(() => {})
+        .finally(() => setCommunityLoaded(true));
+    }
+  }, [communityLoaded]);
 
   useEffect(() => {
     // Merge categories and topics, remove duplicates
@@ -188,10 +411,8 @@ export default function HomePage() {
       <NotificationBanner />
       {/* Hero greeting */}
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ marginBottom: 6 }}>Free Christian Audiobooks</h1>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem' }}>
-          {audiobooks.length} audiobooks from classic authors — always free.
-        </p>
+        <h1 style={{ marginBottom: 8 }}>Free Christian Audiobooks</h1>
+        <HeroSubtitle audiobookCount={audiobooks.length} />
       </div>
 
       {/* Continue Listening — compact, no title/author/length */}
@@ -222,6 +443,17 @@ export default function HomePage() {
             <Link href="/articles" className="see-all-link">Browse all</Link>
           </div>
           <ArticleScrollRow articles={recentArticles} audiobooks={audiobooks} />
+        </section>
+      )}
+
+      {/* Community Quotes */}
+      {communityQuotes.length > 0 && (
+        <section style={{ marginBottom: 40 }}>
+          <div className="section-header">
+            <h2 className="section-title">Community Quotes</h2>
+            <Link href="/quotes" className="see-all-link">View all quotes</Link>
+          </div>
+          <CommunityQuotesScrollRow quotes={communityQuotes} />
         </section>
       )}
 
