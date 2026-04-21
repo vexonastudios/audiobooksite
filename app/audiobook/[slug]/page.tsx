@@ -465,7 +465,7 @@ export default function AudiobookPage() {
                       className="scrubber"
                       style={{ 
                         flex: 1, 
-                        background: `linear-gradient(to right, var(--color-brand) ${pPct}%, var(--color-surface-2) ${pPct}%)`,
+                        background: `linear-gradient(to right, var(--color-brand) ${pPct}%, rgba(46, 106, 167, 0.25) ${pPct}%)`,
                         height: 6
                       }}
                     />

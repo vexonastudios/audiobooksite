@@ -174,7 +174,7 @@ export function GlobalAudioPlayer() {
               className="scrubber"
               style={{
                 flex: 1,
-                background: `linear-gradient(to right, var(--color-brand) ${progress}%, var(--color-surface-2) ${progress}%)`
+                background: `linear-gradient(to right, var(--color-brand) ${progress}%, rgba(46, 106, 167, 0.25) ${progress}%)`
               }}
             />
             <span style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)', minWidth: 38, fontVariantNumeric: 'tabular-nums' }}>
