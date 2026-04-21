@@ -10,26 +10,27 @@ import { TabBar } from '@/components/layout/TabBar';
 
 export const metadata: Metadata = {
   title: {
-    default: 'ScrollReader — Free Christian Audiobooks',
-    template: '%s | ScrollReader',
+    default: 'Scroll Reader - Free Christian Audiobooks',
+    template: '%s | Scroll Reader',
   },
   description:
-    'Listen to hundreds of free Christian audiobooks from classic authors like C.H. Spurgeon, Hudson Taylor, George Müller, Amy Carmichael, and more.',
+    "Scroll Reader offers free Christian audiobooks to revive your soul with the truth of God's Word. Listen to missionary biographies and other older books.",
   keywords: ['christian audiobooks', 'free audiobooks', 'missionary biographies', 'puritan audiobooks', 'reformed audiobooks'],
   metadataBase: new URL('https://scrollreader.com'),
   openGraph: {
     type: 'website',
-    siteName: 'ScrollReader',
-    title: 'ScrollReader — Free Christian Audiobooks',
-    description: 'Hundreds of free classic Christian audiobooks.',
+    siteName: 'Scroll Reader',
+    title: 'Scroll Reader - Free Christian Audiobooks',
+    description: "Scroll Reader offers free Christian audiobooks to revive your soul with the truth of God's Word. Listen to missionary biographies and other older books.",
     url: 'https://scrollreader.com',
     locale: 'en_US',
     images: [
       {
-        url: '/logo.png',
-        width: 512,
-        height: 512,
-        alt: 'ScrollReader — Free Christian Audiobooks',
+        url: 'https://scrollreader.com/wp-content/uploads/scroll-reader-banner.webp',
+        width: 2048,
+        height: 1152,
+        alt: 'Scroll Reader - Free Christian Audiobooks',
+        type: 'image/webp',
       },
     ],
   },
@@ -60,56 +61,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body>
-        {/* Site-wide JSON-LD: Organization + WebSite + SearchAction */}
+        {/* Site-wide JSON-LD: Mirroring WordPress Yoast SEO perfectly to maintain rankings */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@graph': [
-                {
-                  '@type': 'Organization',
-                  '@id': 'https://scrollreader.com/#organization',
-                  name: 'Scroll Reader',
-                  alternateName: 'ScrollReader — Free Christian Audiobooks',
-                  url: 'https://scrollreader.com',
-                  logo: {
-                    '@type': 'ImageObject',
-                    url: 'https://scrollreader.com/logo.png',
-                    width: 512,
-                    height: 512,
-                  },
-                  sameAs: [
-                    'https://www.facebook.com/scrollreaderaudio',
-                    'https://x.com/scroll_reader',
-                    'https://www.youtube.com/@scrollreaderaudio',
-                    'https://www.instagram.com/scrollreader/',
-                    'https://podcasters.spotify.com/pod/show/scrollreader',
-                  ],
-                },
-                {
-                  '@type': 'WebSite',
-                  '@id': 'https://scrollreader.com/#website',
-                  url: 'https://scrollreader.com',
-                  name: 'ScrollReader — Free Christian Audiobooks',
-                  description: 'Listen to hundreds of free Christian audiobooks from classic authors.',
-                  publisher: { '@id': 'https://scrollreader.com/#organization' },
-                  potentialAction: {
-                    '@type': 'SearchAction',
-                    target: {
-                      '@type': 'EntryPoint',
-                      urlTemplate: 'https://scrollreader.com/search?q={search_term_string}',
-                    },
-                    'query-input': {
-                      '@type': 'PropertyValueSpecification',
-                      valueRequired: true,
-                      valueName: 'search_term_string',
-                    },
-                  },
-                  inLanguage: 'en-US',
-                },
-              ],
-            }),
+            __html: `{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://scrollreader.com/","url":"https://scrollreader.com/","name":"Scroll Reader - Free Christian Audiobooks","isPartOf":{"@id":"https://scrollreader.com/#website"},"about":{"@id":"https://scrollreader.com/#organization"},"datePublished":"2024-09-24T19:18:43+00:00","dateModified":"2024-09-30T21:54:06+00:00","description":"Scroll Reader offers free Christian audiobooks to revive your soul with the truth of God's Word. Listen to missionary biographies and other older books.","breadcrumb":{"@id":"https://scrollreader.com/#breadcrumb"},"inLanguage":"en-US","potentialAction":[{"@type":"ReadAction","target":["https://scrollreader.com/"]}]},{"@type":"BreadcrumbList","@id":"https://scrollreader.com/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home"}]},{"@type":"WebSite","@id":"https://scrollreader.com/#website","url":"https://scrollreader.com/","name":"Scroll Reader - Free Christian Audiobooks","description":"Free Christian Audiobooks","publisher":{"@id":"https://scrollreader.com/#organization"},"potentialAction":[{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://scrollreader.com/?s={search_term_string}"},"query-input":{"@type":"PropertyValueSpecification","valueRequired":true,"valueName":"search_term_string"}}],"inLanguage":"en-US"},{"@type":"Organization","@id":"https://scrollreader.com/#organization","name":"Scroll Reader - Free Christian Audiobooks","url":"https://scrollreader.com/","logo":{"@type":"ImageObject","inLanguage":"en-US","@id":"https://scrollreader.com/#/schema/logo/image/","url":"https://scrollreader.com/wp-content/uploads/cropped-cropped-cropped-1080x1080-logo-270x270-1.jpg","contentUrl":"https://scrollreader.com/wp-content/uploads/cropped-cropped-cropped-1080x1080-logo-270x270-1.jpg","width":512,"height":512,"caption":"Scroll Reader - Free Christian Audiobooks"},"image":{"@id":"https://scrollreader.com/#/schema/logo/image/"},"sameAs":["https://www.facebook.com/scrollreaderaudio","https://x.com/scroll_reader","https://www.youtube.com/@scrollreaderaudio","https://www.instagram.com/scrollreader/","https://podcasters.spotify.com/pod/show/scrollreader"]}]}`,
           }}
         />
         <ClerkProvider>
