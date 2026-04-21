@@ -142,51 +142,85 @@ function formatListenTime(totalSeconds: number): string {
 }
 
 // ── Hero subtitle: personalized for signed-in users ───────────────────────────
+interface PersonalStats {
+  totalListenSecs: number;
+  booksStarted: number;
+  quotesSaved: number;
+}
+
 function HeroSubtitle({ audiobookCount }: { audiobookCount: number }) {
   const isSignedIn = useUserStore(s => s.isSignedIn);
-  const history = useUserStore(s => s.history);
-  const quotes = useUserStore(s => s.quotes);
+  const [stats, setStats] = useState<PersonalStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
-  const totalListenSecs = history.reduce((sum, h) => sum + (h.position || 0), 0);
-  const booksStarted = history.length;
+  // Fetch fresh personal stats from the DB on every home page mount
+  useEffect(() => {
+    if (!isSignedIn) return;
+    setStatsLoading(true);
+    fetch('/api/user/stats')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setStats(data); })
+      .catch(() => {})
+      .finally(() => setStatsLoading(false));
+  }, [isSignedIn]);
 
-  if (isSignedIn && booksStarted > 0) {
+  if (!isSignedIn) {
+    return (
+      <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', margin: 0 }}>
+        {audiobookCount} audiobooks from classic authors — always free.
+      </p>
+    );
+  }
+
+  // Loading skeleton while fetching
+  if (statsLoading && !stats) {
     return (
       <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginTop: 4 }}>
-        <span style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          fontSize: '0.925rem', color: 'var(--color-text-secondary)',
-        }}>
-          <Headphones size={15} style={{ color: 'var(--color-brand)', flexShrink: 0 }} />
-          <strong style={{ color: 'var(--color-text-primary)' }}>{formatListenTime(totalListenSecs)}</strong>
-          &nbsp;listened all-time
-        </span>
-        <span style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          fontSize: '0.925rem', color: 'var(--color-text-secondary)',
-        }}>
-          <BookOpen size={15} style={{ color: 'var(--color-brand)', flexShrink: 0 }} />
-          <strong style={{ color: 'var(--color-text-primary)' }}>{booksStarted}</strong>
-          &nbsp;{booksStarted === 1 ? 'book' : 'books'} started
-        </span>
-        {quotes.length > 0 && (
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            fontSize: '0.925rem', color: 'var(--color-text-secondary)',
-          }}>
-            <Quote size={15} style={{ color: 'var(--color-brand)', flexShrink: 0 }} />
-            <strong style={{ color: 'var(--color-text-primary)' }}>{quotes.length}</strong>
-            &nbsp;{quotes.length === 1 ? 'quote' : 'quotes'} saved
-          </span>
-        )}
+        {[88, 70, 72].map((w, i) => (
+          <span key={i} className="skeleton" style={{ height: 18, width: w, borderRadius: 6, display: 'inline-block' }} />
+        ))}
       </div>
     );
   }
 
+  // No listening history yet — fall back to generic subtitle
+  if (!stats || stats.booksStarted === 0) {
+    return (
+      <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', margin: 0 }}>
+        {audiobookCount} audiobooks from classic authors — always free.
+      </p>
+    );
+  }
+
   return (
-    <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', margin: 0 }}>
-      {audiobookCount} audiobooks from classic authors — always free.
-    </p>
+    <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginTop: 4 }}>
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        fontSize: '0.925rem', color: 'var(--color-text-secondary)',
+      }}>
+        <Headphones size={15} style={{ color: 'var(--color-brand)', flexShrink: 0 }} />
+        <strong style={{ color: 'var(--color-text-primary)' }}>{formatListenTime(stats.totalListenSecs)}</strong>
+        &nbsp;listened all-time
+      </span>
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        fontSize: '0.925rem', color: 'var(--color-text-secondary)',
+      }}>
+        <BookOpen size={15} style={{ color: 'var(--color-brand)', flexShrink: 0 }} />
+        <strong style={{ color: 'var(--color-text-primary)' }}>{stats.booksStarted}</strong>
+        &nbsp;{stats.booksStarted === 1 ? 'book' : 'books'} started
+      </span>
+      {stats.quotesSaved > 0 && (
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          fontSize: '0.925rem', color: 'var(--color-text-secondary)',
+        }}>
+          <Quote size={15} style={{ color: 'var(--color-brand)', flexShrink: 0 }} />
+          <strong style={{ color: 'var(--color-text-primary)' }}>{stats.quotesSaved}</strong>
+          &nbsp;{stats.quotesSaved === 1 ? 'quote' : 'quotes'} saved
+        </span>
+      )}
+    </div>
   );
 }
 
