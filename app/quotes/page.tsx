@@ -13,6 +13,7 @@ import type { SavedQuote } from '@/lib/types';
 import type { CommunityQuote } from '@/lib/db/quotes';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
+import { useClerk } from '@clerk/nextjs';
 
 // ─── My Quote Card ─────────────────────────────────────────────────────────────
 function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
@@ -153,6 +154,8 @@ function CommunityCard({ q, onUpvoteChange }: { q: CommunityQuote; onUpvoteChang
   const saveQuote = useUserStore(s => s.saveQuote);
   const toggleUpvote = useUserStore(s => s.toggleUpvote);
   const isUpvoted = useUserStore(s => s.isUpvoted);
+  const isSignedIn = useUserStore(s => s.isSignedIn);
+  const clerk = useClerk();
   const alreadySaved = quotes.some(local => local.id === q.id);
   const upvoted = isUpvoted(q.text, q.bookId);
   // Local optimistic upvote count
@@ -188,12 +191,16 @@ function CommunityCard({ q, onUpvoteChange }: { q: CommunityQuote; onUpvoteChang
       time: q.time,
     });
     // Auto-upvote when saving if not already upvoted
-    if (!upvoted) {
+    if (!upvoted && isSignedIn) {
       handleUpvote();
     }
   }
 
   function handleUpvote() {
+    if (!isSignedIn) {
+      clerk.openSignUp({ fallbackRedirectUrl: window.location.href });
+      return;
+    }
     const wasUpvoted = upvoted;
     const delta = wasUpvoted ? -1 : 1;
     setLocalUpvotes(prev => prev + delta);
