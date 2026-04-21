@@ -60,6 +60,58 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body>
+        {/* Site-wide JSON-LD: Organization + WebSite + SearchAction */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@graph': [
+                {
+                  '@type': 'Organization',
+                  '@id': 'https://scrollreader.com/#organization',
+                  name: 'Scroll Reader',
+                  alternateName: 'ScrollReader — Free Christian Audiobooks',
+                  url: 'https://scrollreader.com',
+                  logo: {
+                    '@type': 'ImageObject',
+                    url: 'https://scrollreader.com/logo.png',
+                    width: 512,
+                    height: 512,
+                  },
+                  sameAs: [
+                    'https://www.facebook.com/scrollreaderaudio',
+                    'https://x.com/scroll_reader',
+                    'https://www.youtube.com/@scrollreaderaudio',
+                    'https://www.instagram.com/scrollreader/',
+                    'https://podcasters.spotify.com/pod/show/scrollreader',
+                  ],
+                },
+                {
+                  '@type': 'WebSite',
+                  '@id': 'https://scrollreader.com/#website',
+                  url: 'https://scrollreader.com',
+                  name: 'ScrollReader — Free Christian Audiobooks',
+                  description: 'Listen to hundreds of free Christian audiobooks from classic authors.',
+                  publisher: { '@id': 'https://scrollreader.com/#organization' },
+                  potentialAction: {
+                    '@type': 'SearchAction',
+                    target: {
+                      '@type': 'EntryPoint',
+                      urlTemplate: 'https://scrollreader.com/search?q={search_term_string}',
+                    },
+                    'query-input': {
+                      '@type': 'PropertyValueSpecification',
+                      valueRequired: true,
+                      valueName: 'search_term_string',
+                    },
+                  },
+                  inLanguage: 'en-US',
+                },
+              ],
+            }),
+          }}
+        />
         <ClerkProvider>
           <LibraryProvider>
             {/* Global audio event bridge */}

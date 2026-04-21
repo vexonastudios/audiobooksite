@@ -11,9 +11,39 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const author = await getAuthorBySlug(slug);
   if (!author) return { title: 'Author Not Found' };
+
+  const allBooks = await getAllAudiobooks();
+  const bookCount = allBooks.filter(b => b.authorName.toLowerCase() === author.name.toLowerCase()).length;
+
+  const title = `${author.name} Audiobooks — Listen Free`;
+  const description = author.description?.slice(0, 150)
+    ? `${author.description.slice(0, 150)}… Listen to all ${bookCount} audiobook${bookCount !== 1 ? 's' : ''} by ${author.name} for free on ScrollReader.`
+    : `Listen to all ${bookCount} free audiobook${bookCount !== 1 ? 's' : ''} by ${author.name}. Stream classic Christian literature on ScrollReader.`;
+  const url = `https://scrollreader.com/author/${slug}`;
+  const image = author.imageUrl || 'https://scrollreader.com/logo.png';
+
   return {
-    title: `${author.name} — ScrollReader Audiobooks`,
-    description: author.description?.slice(0, 160) ?? `Free Christian audiobooks by ${author.name}.`,
+    title,
+    description,
+    authors: [{ name: author.name }],
+    keywords: [author.name, `${author.name} audiobooks`, 'free christian audiobooks', 'christian author'],
+    alternates: { canonical: url },
+    openGraph: {
+      title: `${title} | ScrollReader`,
+      description,
+      url,
+      siteName: 'ScrollReader',
+      type: 'profile',
+      images: [{ url: image, width: 400, height: 500, alt: author.name }],
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+      images: [image],
+      site: '@scroll_reader',
+    },
+    robots: { index: true, follow: true, 'max-image-preview': 'large' as const, 'max-snippet': -1 },
   };
 }
 
@@ -36,8 +66,40 @@ export default async function AuthorDetailPage({ params }: Props) {
       : `b. ${author.birthYear}`
     : null;
 
+  const url = `https://scrollreader.com/author/${slug}`;
+
+  // JSON-LD: Person + BreadcrumbList
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Person',
+        name: author.name,
+        url,
+        ...(author.imageUrl ? { image: author.imageUrl } : {}),
+        ...(author.description ? { description: author.description } : {}),
+        ...(author.birthYear ? { birthDate: String(author.birthYear) } : {}),
+        ...(author.deathYear ? { deathDate: String(author.deathYear) } : {}),
+        mainEntityOfPage: { '@type': 'ProfilePage', '@id': url },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://scrollreader.com' },
+          { '@type': 'ListItem', position: 2, name: 'Authors', item: 'https://scrollreader.com/authors' },
+          { '@type': 'ListItem', position: 3, name: author.name, item: url },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="page">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <Link href="/authors" style={{
         display: 'inline-flex', alignItems: 'center', gap: 6,
         fontSize: 14, fontWeight: 600, color: 'var(--color-brand)',
