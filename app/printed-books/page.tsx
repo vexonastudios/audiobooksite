@@ -103,13 +103,14 @@ export default function PrintedBooksPage() {
 
       {/* Search + Category Filter */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', marginBottom: 28 }}>
-        <div style={{ position: 'relative', flex: '1 1 260px', maxWidth: 380 }}>
-          <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
+        <div className="search-input-wrap" style={{ flex: '1 1 260px', maxWidth: 380, margin: 0 }}>
+          <Search size={16} className="search-icon" />
           <input
+            type="search"
+            className="search-input"
             placeholder="Search by title or author…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ paddingLeft: 36, width: '100%' }}
           />
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
