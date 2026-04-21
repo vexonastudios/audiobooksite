@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useLibraryStore } from '@/lib/store/libraryStore';
+import { useLibraryStore, slugify } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
 import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon, Heart, ExternalLink, RotateCcw, RotateCw, Youtube, Book } from 'lucide-react';
@@ -898,12 +898,11 @@ export default function AudiobookPage() {
               </div>
             </div>
 
-            {/* CARD 3: Categories & Topics */}
             {(book.categories.length > 0 || book.topics.length > 0) && (
               <div className="card" style={{ padding: '20px 24px' }}>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {book.categories.map(c => <Link key={c} href={`/categories/${encodeURIComponent(c)}`} className="pill">{c}</Link>)}
-                  {book.topics.map(t => <Link key={t} href={`/topics/${encodeURIComponent(t)}`} className="pill" style={{ background: 'rgba(46,106,167,0.06)' }}>#{t}</Link>)}
+                  {book.categories.map(c => <Link key={c} href={`/categories/${slugify(c)}`} className="pill">{c}</Link>)}
+                  {book.topics.map(t => <Link key={t} href={`/topics/${slugify(t)}`} className="pill" style={{ background: 'rgba(46,106,167,0.06)' }}>#{t}</Link>)}
                 </div>
               </div>
             )}
