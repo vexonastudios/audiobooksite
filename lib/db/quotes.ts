@@ -45,7 +45,7 @@ export async function deleteUserQuote(userId: string, id: string): Promise<void>
 
 // ─── Community Feed ───────────────────────────────────────────────────────────
 
-export type CommunityQuote = SavedQuote & { savesCount: number };
+export type CommunityQuote = SavedQuote & { savesCount: number; upvotesCount: number };
 
 export async function getCommunityQuotes(
   page = 1,
@@ -62,48 +62,56 @@ export async function getCommunityQuotes(
   const rows = sortBy === 'popular'
     ? await sql`
         SELECT
-          MIN(id)            AS id,
-          text,
-          book_id,
-          MAX(book_title)    AS book_title,
-          MAX(book_slug)     AS book_slug,
-          MAX(book_author)   AS book_author,
-          MAX(book_cover)    AS book_cover,
-          MAX(chapter_title) AS chapter_title,
-          MIN(time_secs)     AS time_secs,
-          MAX(created_at)    AS created_at,
-          COUNT(*)           AS saves_count
-        FROM user_quotes
+          MIN(uq.id)            AS id,
+          uq.text,
+          uq.book_id,
+          MAX(uq.book_title)    AS book_title,
+          MAX(uq.book_slug)     AS book_slug,
+          MAX(uq.book_author)   AS book_author,
+          MAX(uq.book_cover)    AS book_cover,
+          MAX(uq.chapter_title) AS chapter_title,
+          MIN(uq.time_secs)     AS time_secs,
+          MAX(uq.created_at)    AS created_at,
+          COUNT(*)              AS saves_count,
+          COALESCE((
+            SELECT COUNT(*) FROM quote_upvotes qu
+            WHERE qu.quote_text = uq.text AND qu.book_id = uq.book_id
+          ), 0)                 AS upvotes_count
+        FROM user_quotes uq
         WHERE (${searchLike}::text IS NULL
-               OR lower(text) LIKE ${searchLike}
-               OR lower(book_title) LIKE ${searchLike}
-               OR lower(book_author) LIKE ${searchLike})
-          AND (${bookId ?? null}::text IS NULL OR book_id = ${bookId ?? null})
-        GROUP BY text, book_id
-        ORDER BY COUNT(*) DESC, MAX(created_at) DESC
+               OR lower(uq.text) LIKE ${searchLike}
+               OR lower(uq.book_title) LIKE ${searchLike}
+               OR lower(uq.book_author) LIKE ${searchLike})
+          AND (${bookId ?? null}::text IS NULL OR uq.book_id = ${bookId ?? null})
+        GROUP BY uq.text, uq.book_id
+        ORDER BY upvotes_count DESC, MAX(uq.created_at) DESC
         LIMIT ${limit} OFFSET ${offset}
       `
     : await sql`
         SELECT
-          MIN(id)            AS id,
-          text,
-          book_id,
-          MAX(book_title)    AS book_title,
-          MAX(book_slug)     AS book_slug,
-          MAX(book_author)   AS book_author,
-          MAX(book_cover)    AS book_cover,
-          MAX(chapter_title) AS chapter_title,
-          MIN(time_secs)     AS time_secs,
-          MAX(created_at)    AS created_at,
-          COUNT(*)           AS saves_count
-        FROM user_quotes
+          MIN(uq.id)            AS id,
+          uq.text,
+          uq.book_id,
+          MAX(uq.book_title)    AS book_title,
+          MAX(uq.book_slug)     AS book_slug,
+          MAX(uq.book_author)   AS book_author,
+          MAX(uq.book_cover)    AS book_cover,
+          MAX(uq.chapter_title) AS chapter_title,
+          MIN(uq.time_secs)     AS time_secs,
+          MAX(uq.created_at)    AS created_at,
+          COUNT(*)              AS saves_count,
+          COALESCE((
+            SELECT COUNT(*) FROM quote_upvotes qu
+            WHERE qu.quote_text = uq.text AND qu.book_id = uq.book_id
+          ), 0)                 AS upvotes_count
+        FROM user_quotes uq
         WHERE (${searchLike}::text IS NULL
-               OR lower(text) LIKE ${searchLike}
-               OR lower(book_title) LIKE ${searchLike}
-               OR lower(book_author) LIKE ${searchLike})
-          AND (${bookId ?? null}::text IS NULL OR book_id = ${bookId ?? null})
-        GROUP BY text, book_id
-        ORDER BY MAX(created_at) DESC
+               OR lower(uq.text) LIKE ${searchLike}
+               OR lower(uq.book_title) LIKE ${searchLike}
+               OR lower(uq.book_author) LIKE ${searchLike})
+          AND (${bookId ?? null}::text IS NULL OR uq.book_id = ${bookId ?? null})
+        GROUP BY uq.text, uq.book_id
+        ORDER BY MAX(uq.created_at) DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
 
@@ -133,9 +141,53 @@ export async function getCommunityQuotes(
     time: Number(r.time_secs),
     createdAt: new Date(r.created_at).getTime(),
     savesCount: Number(r.saves_count),
+    upvotesCount: Number(r.upvotes_count),
   }));
 
   return { quotes, total: Number((countRows[0] as any).total) };
+}
+
+// ─── Upvotes ──────────────────────────────────────────────────────────────────
+
+/** Get all quote upvotes for a user as { quoteText, bookId }[] */
+export async function getUserUpvotes(userId: string): Promise<{ quoteText: string; bookId: string }[]> {
+  const rows = await sql`
+    SELECT quote_text, book_id FROM quote_upvotes
+    WHERE user_id = ${userId}
+  `;
+  return rows.map((r: any) => ({ quoteText: r.quote_text, bookId: r.book_id }));
+}
+
+/**
+ * Toggle an upvote for a user on a specific (quoteText, bookId) pair.
+ * Returns the new voted state: true = upvoted, false = un-upvoted.
+ */
+export async function toggleQuoteUpvote(
+  userId: string,
+  quoteText: string,
+  bookId: string,
+): Promise<boolean> {
+  // Check if already upvoted
+  const existing = await sql`
+    SELECT 1 FROM quote_upvotes
+    WHERE user_id = ${userId} AND quote_text = ${quoteText} AND book_id = ${bookId}
+  `;
+  if (existing.length > 0) {
+    // Remove upvote
+    await sql`
+      DELETE FROM quote_upvotes
+      WHERE user_id = ${userId} AND quote_text = ${quoteText} AND book_id = ${bookId}
+    `;
+    return false;
+  } else {
+    // Add upvote
+    await sql`
+      INSERT INTO quote_upvotes (user_id, quote_text, book_id)
+      VALUES (${userId}, ${quoteText}, ${bookId})
+      ON CONFLICT DO NOTHING
+    `;
+    return true;
+  }
 }
 
 // ─── Favorites ────────────────────────────────────────────────────────────────

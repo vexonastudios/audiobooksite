@@ -41,7 +41,7 @@ export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText
           width: 'calc(100% + 200px)',
           height: 'calc(100% + 200px)',
           objectFit: 'cover',
-          filter: 'blur(30px) brightness(0.25)',
+          filter: 'blur(30px) brightness(0.4)',
           zIndex: 0,
           pointerEvents: 'none',
         }}

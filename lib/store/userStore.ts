@@ -15,6 +15,7 @@ interface UserState {
   bookmarks: Bookmark[];
   quotes: SavedQuote[];
   favorites: Favorite[];
+  upvotedQuotes: { quoteText: string; bookId: string }[];
   skipInterval: number;
   // Whether a Clerk user is currently signed in (set by SyncUserData)
   isSignedIn: boolean;
@@ -49,6 +50,11 @@ interface UserState {
   removeQuote: (id: string) => void;
   mergeQuotesFromDB: (dbQuotes: SavedQuote[]) => void;
 
+  // Upvotes
+  toggleUpvote: (quoteText: string, bookId: string) => void;
+  isUpvoted: (quoteText: string, bookId: string) => boolean;
+  mergeUpvotesFromDB: (upvotes: { quoteText: string; bookId: string }[]) => void;
+
   // Favorites
   addFavorite: (item: Omit<Favorite, 'id' | 'createdAt'>) => void;
   removeFavorite: (itemId: string) => void;
@@ -81,6 +87,7 @@ export const useUserStore = create<UserState>()(
       bookmarks: [],
       quotes: [],
       favorites: [],
+      upvotedQuotes: [],
       skipInterval: 15,
       isSignedIn: false,
       setSignedIn: (v) => set({ isSignedIn: v }),
@@ -225,6 +232,32 @@ export const useUserStore = create<UserState>()(
           const newOnes = dbQuotes.filter(q => !existingIds.has(q.id));
           return { quotes: [...newOnes, ...state.quotes].slice(0, 500) };
         });
+      },
+
+      toggleUpvote: (quoteText, bookId) => {
+        const isCurrentlyUpvoted = get().upvotedQuotes.some(
+          u => u.quoteText === quoteText && u.bookId === bookId
+        );
+        // Optimistic update
+        set((state) => ({
+          upvotedQuotes: isCurrentlyUpvoted
+            ? state.upvotedQuotes.filter(u => !(u.quoteText === quoteText && u.bookId === bookId))
+            : [...state.upvotedQuotes, { quoteText, bookId }],
+        }));
+        // Fire and forget to server
+        fetch('/api/user/upvotes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quoteText, bookId }),
+        }).catch(() => {});
+      },
+
+      isUpvoted: (quoteText, bookId) => {
+        return get().upvotedQuotes.some(u => u.quoteText === quoteText && u.bookId === bookId);
+      },
+
+      mergeUpvotesFromDB: (upvotes) => {
+        set({ upvotedQuotes: upvotes });
       },
 
       addFavorite: (item) => {

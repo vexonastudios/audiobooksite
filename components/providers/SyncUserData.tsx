@@ -17,6 +17,7 @@ export function SyncUserData() {
     mergeFavoritesFromDB,
     mergeHistoryFromDB,
     mergeBookmarksFromDB,
+    mergeUpvotesFromDB,
     setSignedIn,
   } = useUserStore();
   const hasSynced = useRef(false);
@@ -36,12 +37,14 @@ export function SyncUserData() {
       fetch('/api/user/favorites').then(r => r.ok ? r.json() : null),
       fetch('/api/user/history').then(r => r.ok ? r.json() : null),
       fetch('/api/user/bookmarks').then(r => r.ok ? r.json() : null),
-    ]).then(([qData, fData, hData, bData]) => {
+      fetch('/api/user/upvotes').then(r => r.ok ? r.json() : null),
+    ]).then(([qData, fData, hData, bData, uvData]) => {
       // 1. Pull down from DB and merge into local via Zustand
       if (qData?.quotes) mergeQuotesFromDB(qData.quotes);
       if (fData?.favorites) mergeFavoritesFromDB(fData.favorites);
       if (hData?.history) mergeHistoryFromDB(hData.history);
       if (bData?.bookmarks) mergeBookmarksFromDB(bData.bookmarks);
+      if (uvData?.upvotes) mergeUpvotesFromDB(uvData.upvotes);
 
       // 2. Push up any local items that the DB didn't already have.
       // This seamlessly migrates data for users who were browsing anonymously 
@@ -71,7 +74,7 @@ export function SyncUserData() {
       }, 500);
 
     }).catch(() => { /* network failure — local state is fine */ });
-  }, [isLoaded, isSignedIn, mergeQuotesFromDB, mergeFavoritesFromDB, mergeHistoryFromDB, mergeBookmarksFromDB]);
+  }, [isLoaded, isSignedIn, mergeQuotesFromDB, mergeFavoritesFromDB, mergeHistoryFromDB, mergeBookmarksFromDB, mergeUpvotesFromDB]);
 
   return null; // renders nothing
 }

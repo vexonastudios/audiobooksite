@@ -6,7 +6,7 @@ import { useUserStore } from '@/lib/store/userStore';
 import {
   Quote, X, Search, Share2, Copy, Check, BookOpen, ExternalLink, Play,
   CheckSquare, Square, ChevronDown, ChevronRight, Settings, Image as ImageIcon,
-  Globe, Heart, Bookmark, Loader2, Users, TrendingUp, Clock,
+  Globe, Heart, Bookmark, Loader2, Users, TrendingUp, Clock, ArrowUp,
 } from 'lucide-react';
 import { generateQuoteImage } from '@/lib/generateQuoteImage';
 import type { SavedQuote } from '@/lib/types';
@@ -146,12 +146,17 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
   );
 }
 
-// ─── Community Card ─────────────────────────────────────────────────────────────
-function CommunityCard({ q }: { q: CommunityQuote }) {
+// ─── Community Card ──────────────────────────────────────────────────────────────────
+function CommunityCard({ q, onUpvoteChange }: { q: CommunityQuote; onUpvoteChange: (delta: number) => void }) {
   const [copied, setCopied] = useState(false);
   const quotes = useUserStore(s => s.quotes);
   const saveQuote = useUserStore(s => s.saveQuote);
+  const toggleUpvote = useUserStore(s => s.toggleUpvote);
+  const isUpvoted = useUserStore(s => s.isUpvoted);
   const alreadySaved = quotes.some(local => local.id === q.id);
+  const upvoted = isUpvoted(q.text, q.bookId);
+  // Local optimistic upvote count
+  const [localUpvotes, setLocalUpvotes] = useState(q.upvotesCount);
 
   function handleCopy() {
     const text = `"${q.text}" — ${q.bookAuthor}${q.chapterTitle ? `, ${q.chapterTitle}` : ''}`;
@@ -182,6 +187,18 @@ function CommunityCard({ q }: { q: CommunityQuote }) {
       chapterTitle: q.chapterTitle,
       time: q.time,
     });
+    // Auto-upvote when saving if not already upvoted
+    if (!upvoted) {
+      handleUpvote();
+    }
+  }
+
+  function handleUpvote() {
+    const wasUpvoted = upvoted;
+    const delta = wasUpvoted ? -1 : 1;
+    setLocalUpvotes(prev => prev + delta);
+    onUpvoteChange(delta);
+    toggleUpvote(q.text, q.bookId);
   }
 
   return (
@@ -196,20 +213,35 @@ function CommunityCard({ q }: { q: CommunityQuote }) {
           <div style={{ fontWeight: 600, fontSize: '0.82rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{q.bookTitle}</div>
           <div className="text-xs text-muted">{q.bookAuthor}</div>
         </div>
-        {/* Saves badge */}
-        {q.savesCount > 1 && (
-          <span style={{
-            display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0,
-            fontSize: '0.72rem', fontWeight: 700,
-            color: q.savesCount >= 5 ? '#ef4444' : 'var(--color-text-muted)',
-            background: q.savesCount >= 5 ? 'rgba(239,68,68,0.1)' : 'var(--color-surface)',
-            border: `1px solid ${q.savesCount >= 5 ? 'rgba(239,68,68,0.25)' : 'var(--color-border)'}`,
-            borderRadius: 20, padding: '2px 8px',
-          }}>
-            <Heart size={10} fill={q.savesCount >= 5 ? '#ef4444' : 'none'} />
-            {q.savesCount}
-          </span>
-        )}
+        {/* Badges: Saves + Upvotes */}
+        <div style={{ display: 'flex', gap: 6, flexShrink: 0, alignItems: 'center' }}>
+          {q.savesCount > 1 && (
+            <span style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              fontSize: '0.72rem', fontWeight: 700,
+              color: q.savesCount >= 5 ? '#ef4444' : 'var(--color-text-muted)',
+              background: q.savesCount >= 5 ? 'rgba(239,68,68,0.1)' : 'var(--color-surface)',
+              border: `1px solid ${q.savesCount >= 5 ? 'rgba(239,68,68,0.25)' : 'var(--color-border)'}`,
+              borderRadius: 20, padding: '2px 8px',
+            }}>
+              <Heart size={10} fill={q.savesCount >= 5 ? '#ef4444' : 'none'} />
+              {q.savesCount}
+            </span>
+          )}
+          {localUpvotes > 0 && (
+            <span style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              fontSize: '0.72rem', fontWeight: 700,
+              color: upvoted ? 'var(--color-brand)' : 'var(--color-text-muted)',
+              background: upvoted ? 'rgba(46,106,167,0.12)' : 'var(--color-surface)',
+              border: `1px solid ${upvoted ? 'rgba(46,106,167,0.3)' : 'var(--color-border)'}`,
+              borderRadius: 20, padding: '2px 8px',
+            }}>
+              <ArrowUp size={10} />
+              {localUpvotes}
+            </span>
+          )}
+        </div>
         <Link href={`/audiobook/${q.bookSlug}?t=${Math.floor(q.time)}`} title="Open book at this moment" style={{ color: 'var(--color-text-muted)', display: 'flex', flexShrink: 0 }}>
           <ExternalLink size={14} />
         </Link>
@@ -231,6 +263,23 @@ function CommunityCard({ q }: { q: CommunityQuote }) {
 
       {/* Actions */}
       <div style={{ padding: '10px 14px', borderTop: '1px solid var(--color-border)', display: 'flex', gap: 8 }}>
+        {/* Upvote button */}
+        <button
+          onClick={handleUpvote}
+          className="btn btn-secondary"
+          style={{
+            flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+            padding: '7px 0', fontSize: '0.78rem',
+            background: upvoted ? 'rgba(46,106,167,0.12)' : undefined,
+            color: upvoted ? 'var(--color-brand)' : undefined,
+            borderColor: upvoted ? 'rgba(46,106,167,0.35)' : undefined,
+            fontWeight: upvoted ? 700 : undefined,
+          }}
+          title={upvoted ? 'Remove upvote' : 'Upvote this quote'}
+        >
+          <ArrowUp size={13} />
+          {upvoted ? 'Upvoted' : 'Upvote'}
+        </button>
         <button onClick={handleCopy} className="btn btn-secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '7px 0', fontSize: '0.78rem' }}>
           {copied ? <Check size={13} /> : <Copy size={13} />}
           {copied ? 'Copied' : 'Copy'}
@@ -540,7 +589,7 @@ export default function QuotesPage() {
                   color: communitySort === 'popular' ? 'white' : 'var(--color-text-muted)',
                 }}
               >
-                <TrendingUp size={13} /> Highest Ranked
+                <TrendingUp size={13} /> Most Upvoted
               </button>
             </div>
             {/* Search */}
@@ -575,7 +624,15 @@ export default function QuotesPage() {
             <>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
                 {communityQuotes.map(q => (
-                  <CommunityCard key={q.id} q={q} />
+                  <CommunityCard
+                    key={q.id}
+                    q={q}
+                    onUpvoteChange={(delta) => {
+                      setCommunityQuotes(prev =>
+                        prev.map(x => x.id === q.id ? { ...x, upvotesCount: x.upvotesCount + delta } : x)
+                      );
+                    }}
+                  />
                 ))}
               </div>
 

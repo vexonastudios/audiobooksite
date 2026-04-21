@@ -166,7 +166,7 @@ function renderCanvas(opts: RenderOpts): string {
 
   if (coverImg) {
     ctx.save();
-    ctx.filter = 'blur(50px) brightness(0.18) saturate(1.4)';
+    ctx.filter = 'blur(50px) brightness(0.35) saturate(1.4)';
     const overflow = 150;
     const scale = Math.max(
       (SIZE + overflow * 2) / coverImg.width,
