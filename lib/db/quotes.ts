@@ -45,40 +45,60 @@ export async function deleteUserQuote(userId: string, id: string): Promise<void>
 
 // ─── Community Feed ───────────────────────────────────────────────────────────
 
+export type CommunityQuote = SavedQuote & { savesCount: number };
+
 export async function getCommunityQuotes(
   page = 1,
   limit = 24,
   search?: string,
   bookId?: string,
-): Promise<{ quotes: SavedQuote[]; total: number }> {
+  sortBy: 'recent' | 'popular' = 'recent',
+): Promise<{ quotes: CommunityQuote[]; total: number }> {
   const offset = (page - 1) * limit;
-
-  // Build where conditions
   const searchLike = search ? `%${search.toLowerCase()}%` : null;
 
+  // GROUP BY trimmed text + book_id to deduplicate identical quotes.
+  // COUNT(*) = number of users who saved this quote = "upvote" count.
+  // We pick the most recent submitter's metadata (book cover, chapter) via MAX(id).
   const rows = await sql`
-    SELECT id, text, book_id, book_title, book_slug, book_author,
-           book_cover, chapter_title, time_secs, created_at
+    SELECT
+      MIN(id)            AS id,
+      text,
+      book_id,
+      MAX(book_title)    AS book_title,
+      MAX(book_slug)     AS book_slug,
+      MAX(book_author)   AS book_author,
+      MAX(book_cover)    AS book_cover,
+      MAX(chapter_title) AS chapter_title,
+      MIN(time_secs)     AS time_secs,
+      MAX(created_at)    AS created_at,
+      COUNT(*)           AS saves_count
     FROM user_quotes
     WHERE (${searchLike}::text IS NULL
            OR lower(text) LIKE ${searchLike}
            OR lower(book_title) LIKE ${searchLike}
            OR lower(book_author) LIKE ${searchLike})
       AND (${bookId ?? null}::text IS NULL OR book_id = ${bookId ?? null})
-    ORDER BY created_at DESC
+    GROUP BY trim(text), book_id
+    ORDER BY ${sortBy === 'popular' ? sql`COUNT(*) DESC, MAX(created_at) DESC` : sql`MAX(created_at) DESC`}
     LIMIT ${limit} OFFSET ${offset}
   `;
 
+  // Count of distinct (text, book_id) groups for pagination
   const countRows = await sql`
-    SELECT COUNT(*) AS total FROM user_quotes
-    WHERE (${searchLike}::text IS NULL
-           OR lower(text) LIKE ${searchLike}
-           OR lower(book_title) LIKE ${searchLike}
-           OR lower(book_author) LIKE ${searchLike})
-      AND (${bookId ?? null}::text IS NULL OR book_id = ${bookId ?? null})
+    SELECT COUNT(*) AS total FROM (
+      SELECT 1
+      FROM user_quotes
+      WHERE (${searchLike}::text IS NULL
+             OR lower(text) LIKE ${searchLike}
+             OR lower(book_title) LIKE ${searchLike}
+             OR lower(book_author) LIKE ${searchLike})
+        AND (${bookId ?? null}::text IS NULL OR book_id = ${bookId ?? null})
+      GROUP BY trim(text), book_id
+    ) AS deduped
   `;
 
-  const quotes: SavedQuote[] = rows.map((r: any) => ({
+  const quotes: CommunityQuote[] = rows.map((r: any) => ({
     id: r.id,
     text: r.text,
     bookId: r.book_id,
@@ -89,6 +109,7 @@ export async function getCommunityQuotes(
     chapterTitle: r.chapter_title || undefined,
     time: Number(r.time_secs),
     createdAt: new Date(r.created_at).getTime(),
+    savesCount: Number(r.saves_count),
   }));
 
   return { quotes, total: Number((countRows[0] as any).total) };

@@ -6,10 +6,11 @@ import { useUserStore } from '@/lib/store/userStore';
 import {
   Quote, X, Search, Share2, Copy, Check, BookOpen, ExternalLink, Play,
   CheckSquare, Square, ChevronDown, ChevronRight, Settings, Image as ImageIcon,
-  Globe, Heart, Bookmark, Loader2, Users,
+  Globe, Heart, Bookmark, Loader2, Users, TrendingUp, Clock,
 } from 'lucide-react';
 import { generateQuoteImage } from '@/lib/generateQuoteImage';
 import type { SavedQuote } from '@/lib/types';
+import type { CommunityQuote } from '@/lib/db/quotes';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 
@@ -137,7 +138,7 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
 }
 
 // ─── Community Card ─────────────────────────────────────────────────────────────
-function CommunityCard({ q }: { q: SavedQuote }) {
+function CommunityCard({ q }: { q: CommunityQuote }) {
   const [copied, setCopied] = useState(false);
   const quotes = useUserStore(s => s.quotes);
   const saveQuote = useUserStore(s => s.saveQuote);
@@ -186,6 +187,20 @@ function CommunityCard({ q }: { q: SavedQuote }) {
           <div style={{ fontWeight: 600, fontSize: '0.82rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{q.bookTitle}</div>
           <div className="text-xs text-muted">{q.bookAuthor}</div>
         </div>
+        {/* Saves badge */}
+        {q.savesCount > 1 && (
+          <span style={{
+            display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0,
+            fontSize: '0.72rem', fontWeight: 700,
+            color: q.savesCount >= 5 ? '#ef4444' : 'var(--color-text-muted)',
+            background: q.savesCount >= 5 ? 'rgba(239,68,68,0.1)' : 'var(--color-surface)',
+            border: `1px solid ${q.savesCount >= 5 ? 'rgba(239,68,68,0.25)' : 'var(--color-border)'}`,
+            borderRadius: 20, padding: '2px 8px',
+          }}>
+            <Heart size={10} fill={q.savesCount >= 5 ? '#ef4444' : 'none'} />
+            {q.savesCount}
+          </span>
+        )}
         <Link href={`/audiobook/${q.bookSlug}?t=${Math.floor(q.time)}`} title="Open book at this moment" style={{ color: 'var(--color-text-muted)', display: 'flex', flexShrink: 0 }}>
           <ExternalLink size={14} />
         </Link>
@@ -230,6 +245,7 @@ function CommunityCard({ q }: { q: SavedQuote }) {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 type ActiveTab = 'mine' | 'community';
+type SortBy = 'recent' | 'popular';
 
 export default function QuotesPage() {
   const quotes = useUserStore(s => s.quotes);
@@ -242,19 +258,20 @@ export default function QuotesPage() {
   const [settingsExpanded, setSettingsExpanded] = useState(false);
 
   // Community state
-  const [communityQuotes, setCommunityQuotes] = useState<SavedQuote[]>([]);
+  const [communityQuotes, setCommunityQuotes] = useState<CommunityQuote[]>([]);
   const [communityTotal, setCommunityTotal] = useState(0);
   const [communityPage, setCommunityPage] = useState(1);
   const [communitySearch, setCommunitySearch] = useState('');
+  const [communitySort, setCommunitySort] = useState<SortBy>('recent');
   const [communityLoading, setCommunityLoading] = useState(false);
   const [communityError, setCommunityError] = useState(false);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const loadCommunity = useCallback(async (page: number, search: string, append = false) => {
+  const loadCommunity = useCallback(async (page: number, search: string, sort: SortBy, append = false) => {
     setCommunityLoading(true);
     setCommunityError(false);
     try {
-      const params = new URLSearchParams({ page: String(page), limit: '24' });
+      const params = new URLSearchParams({ page: String(page), limit: '24', sort });
       if (search) params.set('search', search);
       const r = await fetch(`/api/quotes/community?${params}`);
       if (!r.ok) throw new Error('fetch failed');
@@ -271,9 +288,9 @@ export default function QuotesPage() {
   // Load community on tab open
   useEffect(() => {
     if (activeTab === 'community' && communityQuotes.length === 0) {
-      loadCommunity(1, '');
+      loadCommunity(1, '', communitySort);
     }
-  }, [activeTab, communityQuotes.length, loadCommunity]);
+  }, [activeTab, communityQuotes.length, loadCommunity, communitySort]);
 
   // Debounced search in community tab
   function handleCommunitySearch(val: string) {
@@ -281,14 +298,21 @@ export default function QuotesPage() {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
     searchTimerRef.current = setTimeout(() => {
       setCommunityPage(1);
-      loadCommunity(1, val, false);
+      loadCommunity(1, val, communitySort, false);
     }, 400);
+  }
+
+  function handleSortChange(sort: SortBy) {
+    setCommunitySort(sort);
+    setCommunityPage(1);
+    setCommunityQuotes([]);
+    loadCommunity(1, communitySearch, sort, false);
   }
 
   function loadMoreCommunity() {
     const next = communityPage + 1;
     setCommunityPage(next);
-    loadCommunity(next, communitySearch, true);
+    loadCommunity(next, communitySearch, communitySort, true);
   }
 
   // My Quotes filter
@@ -451,13 +475,40 @@ export default function QuotesPage() {
       {/* ── COMMUNITY TAB ── */}
       {activeTab === 'community' && (
         <>
-          {/* Community search */}
-          <div style={{ marginBottom: 24 }}>
-            <div className="search-input-wrap">
+          {/* Sort + Search bar */}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 24, flexWrap: 'wrap' }}>
+            {/* Sort toggle */}
+            <div style={{ display: 'flex', borderRadius: 8, border: '1px solid var(--color-border)', overflow: 'hidden', flexShrink: 0 }}>
+              <button
+                onClick={() => handleSortChange('recent')}
+                style={{
+                  padding: '7px 14px', fontSize: '0.8rem', fontWeight: 600, border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  background: communitySort === 'recent' ? 'var(--color-brand)' : 'var(--color-surface)',
+                  color: communitySort === 'recent' ? 'white' : 'var(--color-text-muted)',
+                }}
+              >
+                <Clock size={13} /> Newest
+              </button>
+              <button
+                onClick={() => handleSortChange('popular')}
+                style={{
+                  padding: '7px 14px', fontSize: '0.8rem', fontWeight: 600, border: 'none', cursor: 'pointer',
+                  borderLeft: '1px solid var(--color-border)',
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  background: communitySort === 'popular' ? 'var(--color-brand)' : 'var(--color-surface)',
+                  color: communitySort === 'popular' ? 'white' : 'var(--color-text-muted)',
+                }}
+              >
+                <TrendingUp size={13} /> Highest Ranked
+              </button>
+            </div>
+            {/* Search */}
+            <div className="search-input-wrap" style={{ flex: 1, minWidth: 200 }}>
               <Search size={16} className="search-icon" />
               <input
                 type="search"
-                placeholder="Search community quotes, books, authors..."
+                placeholder="Search quotes, books, authors..."
                 value={communitySearch}
                 onChange={e => handleCommunitySearch(e.target.value)}
                 className="search-input"
@@ -468,7 +519,7 @@ export default function QuotesPage() {
           {communityError ? (
             <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--color-text-muted)' }}>
               <p>Could not load community quotes. Please try again.</p>
-              <button className="btn btn-secondary" onClick={() => loadCommunity(1, communitySearch)} style={{ marginTop: 12 }}>Retry</button>
+              <button className="btn btn-secondary" onClick={() => loadCommunity(1, communitySearch, communitySort)} style={{ marginTop: 12 }}>Retry</button>
             </div>
           ) : communityLoading && communityQuotes.length === 0 ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
