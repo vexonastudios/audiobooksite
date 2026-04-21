@@ -308,12 +308,13 @@ export default function QuotesPage() {
     }
   }, []);
 
-  // Load community on tab open
+  // Load community in the background immediately on mount to populate the total badge
   useEffect(() => {
-    if (activeTab === 'community' && communityQuotes.length === 0) {
+    if (communityQuotes.length === 0 && !communityLoading && !communityError) {
       loadCommunity(1, '', communitySort);
     }
-  }, [activeTab, communityQuotes.length, loadCommunity, communitySort]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadCommunity]); // Run once on mount (communitySort is 'recent' initially)
 
   // Debounced search in community tab
   function handleCommunitySearch(val: string) {
