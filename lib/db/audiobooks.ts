@@ -127,6 +127,13 @@ export async function getAudiobookById(id: string): Promise<(Audiobook & { mp3Ur
   return { ...rowToAudiobook(books[0], chapters), published: books[0].published };
 }
 
+export async function getAudiobookBySlug(slug: string): Promise<(Audiobook & { mp3UrlLow?: string }) | null> {
+  const books = await sql`SELECT * FROM audiobooks WHERE slug = ${slug} AND published = true` as AudiobookRow[];
+  if (!books[0]) return null;
+  const chapters = await sql`SELECT * FROM chapters WHERE audiobook_id = ${books[0].id} ORDER BY sort_order ASC` as ChapterRow[];
+  return rowToAudiobook(books[0], chapters);
+}
+
 export async function createAudiobook(data: AudiobookInput): Promise<string> {
   const id = data.id || generateId();
   await sql`

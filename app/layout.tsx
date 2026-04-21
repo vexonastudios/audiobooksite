@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   },
   description:
     'Listen to hundreds of free Christian audiobooks from classic authors like C.H. Spurgeon, Hudson Taylor, George Müller, Amy Carmichael, and more.',
-  keywords: ['christian audiobooks', 'free audiobooks', 'missionary biographies', 'puritan audiobooks'],
+  keywords: ['christian audiobooks', 'free audiobooks', 'missionary biographies', 'puritan audiobooks', 'reformed audiobooks'],
   metadataBase: new URL('https://scrollreader.com'),
   openGraph: {
     type: 'website',
@@ -23,6 +23,26 @@ export const metadata: Metadata = {
     title: 'ScrollReader — Free Christian Audiobooks',
     description: 'Hundreds of free classic Christian audiobooks.',
     url: 'https://scrollreader.com',
+    locale: 'en_US',
+    images: [
+      {
+        url: '/logo.png',
+        width: 512,
+        height: 512,
+        alt: 'ScrollReader — Free Christian Audiobooks',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@scroll_reader',
+    creator: '@scroll_reader',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    'max-image-preview': 'large' as const,
+    'max-snippet': -1,
   },
   manifest: '/manifest.json',
 };
