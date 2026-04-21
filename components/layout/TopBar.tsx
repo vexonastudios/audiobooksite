@@ -25,23 +25,25 @@ interface NowPlayingData {
 
 // ─── Build a synthetic Audiobook from live radio data ─────────────────────────
 async function buildRadioBook(data: NowPlayingData): Promise<Audiobook> {
-  // Try to load chapters from manifest
+  // Try to load chapters from manifest — gracefully skip if 404 or network error
   let chapters: Audiobook['chapters'] = [];
   if (data.manifestUrl) {
     try {
-      const res = await fetch(data.manifestUrl);
+      const res = await fetch(data.manifestUrl, { signal: AbortSignal.timeout(5000) });
       if (res.ok) {
         const manifest = await res.json();
-        // Manifest format: { chapters: [{ title, startTime, duration }] }
         if (Array.isArray(manifest.chapters)) {
-          chapters = manifest.chapters.map((c: { title?: string; start_time?: number; startTime?: number; duration?: number }) => ({
+          chapters = manifest.chapters.map((c: {
+            title?: string; start_time?: number; startTime?: number; duration?: number;
+          }) => ({
             title: c.title ?? 'Chapter',
             startTime: c.start_time ?? c.startTime ?? 0,
             duration: c.duration ?? null,
           }));
         }
       }
-    } catch { /* ignore — no chapters */ }
+      // If manifest returns 404 or any error, we just play without chapters — that's fine
+    } catch { /* manifest not available — play raw MP3 */ }
   }
 
   return {
