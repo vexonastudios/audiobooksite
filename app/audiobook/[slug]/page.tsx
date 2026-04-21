@@ -118,7 +118,7 @@ export default async function AudiobookPage({ params }: Props) {
             image: book.coverImage || book.thumbnailUrl,
             description: (book.excerpt || book.description || '').replace(/<[^>]*>/g, '').slice(0, 300),
             genre: book.categories[0] || 'Christian Literature',
-            datePublished: book.pubDate ? book.pubDate.split('T')[0] : undefined,
+            datePublished: book.pubDate ? String(book.pubDate).split('T')[0] : undefined,
             inLanguage: 'en-US',
             duration: durationToISO(book.totalDuration),
             offers: {

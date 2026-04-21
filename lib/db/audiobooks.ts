@@ -48,7 +48,7 @@ function rowToAudiobook(row: AudiobookRow, chapters: ChapterRow[] = []): Audiobo
     title: row.title,
     excerpt: row.excerpt,
     description: row.description,
-    pubDate: row.pub_date,
+    pubDate: row.pub_date ? String(row.pub_date) : '',
     authorName: row.author_name,
     coverImage: row.cover_image,
     thumbnailUrl: row.thumbnail_url,
