@@ -18,6 +18,7 @@ import { useLibraryStore } from '@/lib/store/libraryStore';
 function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
   const [copied, setCopied] = useState(false);
   const [isRenderingImage, setIsRenderingImage] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const loadBook = usePlayerStore(s => s.loadBook);
   const { currentBook } = usePlayerStore();
   const getBook = () => useLibraryStore.getState().audiobooks.find(b => b.id === q.bookId);
@@ -113,9 +114,17 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
           <div className="text-xs text-muted" style={{ fontWeight: 500 }}>
             {new Date(q.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
-          <button onClick={onDelete} className="btn btn-icon" style={{ width: 28, height: 28, color: 'var(--color-error)' }} title="Delete quote">
-            <X size={16} />
-          </button>
+          {showConfirmDelete ? (
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>Delete?</span>
+              <button onClick={onDelete} className="btn btn-primary" style={{ padding: '2px 8px', fontSize: '0.75rem', background: 'var(--color-error)' }}>Yes</button>
+              <button onClick={() => setShowConfirmDelete(false)} className="btn btn-secondary" style={{ padding: '2px 8px', fontSize: '0.75rem' }}>No</button>
+            </div>
+          ) : (
+            <button onClick={() => setShowConfirmDelete(true)} className="btn btn-icon" style={{ width: 28, height: 28, color: 'var(--color-error)' }} title="Delete quote">
+              <X size={16} />
+            </button>
+          )}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(70px, 1fr))', gap: 8 }}>
           <button onClick={handlePlay} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '8px 0', fontSize: '0.8rem' }}>
@@ -256,6 +265,20 @@ export default function QuotesPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('mine');
   const [searchQuery, setSearchQuery] = useState('');
   const [settingsExpanded, setSettingsExpanded] = useState(false);
+
+  const [showImageBanner, setShowImageBanner] = useState(false);
+
+  useEffect(() => {
+    // Show image generation feature banner to first-time users if they have quotes saved
+    if (typeof localStorage !== 'undefined' && !localStorage.getItem('saw_quote_image_banner')) {
+      setShowImageBanner(true);
+    }
+  }, []);
+
+  function closeImageBanner() {
+    setShowImageBanner(false);
+    if (typeof localStorage !== 'undefined') localStorage.setItem('saw_quote_image_banner', 'true');
+  }
 
   // Community state
   const [communityQuotes, setCommunityQuotes] = useState<CommunityQuote[]>([]);
@@ -438,6 +461,22 @@ export default function QuotesPage() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Feature Banner: Image Generation */}
+          {showImageBanner && quotes.length > 0 && (
+            <div style={{ marginBottom: 24, padding: '16px 20px', background: 'var(--color-brand)', color: 'white', borderRadius: 'var(--radius-md)', display: 'flex', gap: 16, alignItems: 'flex-start', position: 'relative' }}>
+              <ImageIcon size={24} style={{ opacity: 0.9, marginTop: 2, flexShrink: 0 }} />
+              <div>
+                <h4 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 700 }}>Export Beautiful Images</h4>
+                <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.9, lineHeight: 1.5 }}>
+                  Did you know you can turn your favorites into stylized quote images to share on social media? Try tapping the <strong>Image</strong> button on any quote below!
+                </p>
+              </div>
+              <button onClick={closeImageBanner} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', color: 'white', opacity: 0.7, cursor: 'pointer', padding: 4 }} title="Dismiss">
+                <X size={16} />
+              </button>
             </div>
           )}
 
