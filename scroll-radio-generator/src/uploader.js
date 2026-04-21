@@ -13,6 +13,7 @@ function getClient() {
   return new S3Client({
     region: 'auto',
     endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    forcePathStyle: true, // Required for Cloudflare R2
     credentials: {
       accessKeyId: process.env.R2_ACCESS_KEY_ID ?? '',
       secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? '',
@@ -33,17 +34,21 @@ async function uploadFile(localPath, r2Key, contentType) {
   const bucket = process.env.R2_BUCKET_NAME;
   if (!bucket) throw new Error('R2_BUCKET_NAME is not set in .env');
 
-  const fileStream = fs.createReadStream(localPath);
-  const fileSizeBytes = fs.statSync(localPath).size;
+  // Read as Buffer — more reliable than ReadStream with Cloudflare R2.
+  // R2 rejects streaming uploads that include AWS SDK v3 checksum headers.
+  const fileBuffer = fs.readFileSync(localPath);
+  const fileSizeBytes = fileBuffer.length;
 
   console.log(`   ↑ Uploading ${path.basename(localPath)} (${(fileSizeBytes / 1024 / 1024).toFixed(1)} MB) → r2://${bucket}/${r2Key}`);
 
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: r2Key,
-    Body: fileStream,
+    Body: fileBuffer,
     ContentType: contentType,
     ContentLength: fileSizeBytes,
+    // Disable checksum — Cloudflare R2 does not support AWS SDK v3 checksum headers
+    ChecksumAlgorithm: undefined,
     // Cache for 7 days — safe since block IDs are unique
     CacheControl: 'public, max-age=604800, immutable',
     Metadata: {
@@ -53,7 +58,7 @@ async function uploadFile(localPath, r2Key, contentType) {
 
   await client.send(command);
 
-  // Return the public URL — adjust the domain to your R2 custom domain if you have one
+  // Return the public URL via the custom domain
   const domain = process.env.R2_PUBLIC_DOMAIN ?? `https://${process.env.R2_BUCKET_NAME}.${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
   return `${domain}/${r2Key}`;
 }

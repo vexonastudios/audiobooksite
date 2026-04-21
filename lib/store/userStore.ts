@@ -16,6 +16,9 @@ interface UserState {
   quotes: SavedQuote[];
   favorites: Favorite[];
   skipInterval: number;
+  // Whether a Clerk user is currently signed in (set by SyncUserData)
+  isSignedIn: boolean;
+  setSignedIn: (v: boolean) => void;
 
   // Notifications
   notificationsEnabled: boolean;
@@ -42,12 +45,14 @@ interface UserState {
   // Quotes
   saveQuote: (quote: Omit<SavedQuote, 'id' | 'createdAt'>) => void;
   removeQuote: (id: string) => void;
+  mergeQuotesFromDB: (dbQuotes: SavedQuote[]) => void;
 
   // Favorites
   addFavorite: (item: Omit<Favorite, 'id' | 'createdAt'>) => void;
   removeFavorite: (itemId: string) => void;
   isFavorited: (itemId: string) => boolean;
   toggleFavorite: (item: Omit<Favorite, 'id' | 'createdAt'>) => void;
+  mergeFavoritesFromDB: (dbFavs: Favorite[]) => void;
 
   // Settings
   quoteSettings: QuoteSettings;
@@ -75,6 +80,8 @@ export const useUserStore = create<UserState>()(
       quotes: [],
       favorites: [],
       skipInterval: 15,
+      isSignedIn: false,
+      setSignedIn: (v) => set({ isSignedIn: v }),
       quoteSettings: { includeLink: true, includeBook: true, useQuotes: true },
       notificationsEnabled: true,
       heardNotificationIds: [],
@@ -142,25 +149,58 @@ export const useUserStore = create<UserState>()(
 
       saveQuote: (quote) => {
         const id = `q_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-        set((state) => ({
-          quotes: [{ id, createdAt: Date.now(), ...quote }, ...state.quotes].slice(0, 200),
-        }));
+        const full = { id, createdAt: Date.now(), ...quote };
+        set((state) => ({ quotes: [full, ...state.quotes].slice(0, 200) }));
+        // Write-through to DB for signed-in users (fire and forget)
+        if (get().isSignedIn) {
+          fetch('/api/user/quotes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(full),
+          }).catch(() => {});
+        }
       },
 
       removeQuote: (id) => {
         set((state) => ({ quotes: state.quotes.filter(q => q.id !== id) }));
+        // Write-through delete
+        if (get().isSignedIn) {
+          fetch(`/api/user/quotes?id=${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
+        }
+      },
+
+      mergeQuotesFromDB: (dbQuotes) => {
+        set((state) => {
+          const existingIds = new Set(state.quotes.map(q => q.id));
+          const newOnes = dbQuotes.filter(q => !existingIds.has(q.id));
+          return { quotes: [...newOnes, ...state.quotes].slice(0, 500) };
+        });
       },
 
       addFavorite: (item) => {
         const id = `fav_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        let full: Favorite | null = null;
         set((state) => {
           if (state.favorites.some(f => f.itemId === item.itemId)) return state;
-          return { favorites: [{ id, createdAt: Date.now(), ...item }, ...state.favorites] };
+          full = { id, createdAt: Date.now(), ...item };
+          return { favorites: [full, ...state.favorites] };
         });
+        // Write-through to DB
+        if (full && get().isSignedIn) {
+          fetch('/api/user/favorites', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(full),
+          }).catch(() => {});
+        }
       },
 
       removeFavorite: (itemId) => {
+        const fav = get().favorites.find(f => f.itemId === itemId);
         set((state) => ({ favorites: state.favorites.filter(f => f.itemId !== itemId) }));
+        if (fav && get().isSignedIn) {
+          fetch(`/api/user/favorites?id=${encodeURIComponent(fav.id)}`, { method: 'DELETE' }).catch(() => {});
+        }
       },
 
       isFavorited: (itemId) => {
@@ -174,6 +214,14 @@ export const useUserStore = create<UserState>()(
         } else {
           get().addFavorite(item);
         }
+      },
+
+      mergeFavoritesFromDB: (dbFavs) => {
+        set((state) => {
+          const existingIds = new Set(state.favorites.map(f => f.id));
+          const newOnes = dbFavs.filter(f => !existingIds.has(f.id));
+          return { favorites: [...newOnes, ...state.favorites] };
+        });
       },
     }),
     {

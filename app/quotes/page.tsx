@@ -1,22 +1,25 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useUserStore } from '@/lib/store/userStore';
-import { Quote, X, Search, Share2, Copy, Check, BookOpen, ExternalLink, Play, CheckSquare, Square, ChevronDown, ChevronRight, Settings, Image as ImageIcon } from 'lucide-react';
+import {
+  Quote, X, Search, Share2, Copy, Check, BookOpen, ExternalLink, Play,
+  CheckSquare, Square, ChevronDown, ChevronRight, Settings, Image as ImageIcon,
+  Globe, Heart, Bookmark, Loader2, Users,
+} from 'lucide-react';
 import { generateQuoteImage } from '@/lib/generateQuoteImage';
 import type { SavedQuote } from '@/lib/types';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 
+// ─── My Quote Card ─────────────────────────────────────────────────────────────
 function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
   const [copied, setCopied] = useState(false);
   const [isRenderingImage, setIsRenderingImage] = useState(false);
-  const imageRef = useRef<HTMLDivElement>(null);
   const loadBook = usePlayerStore(s => s.loadBook);
   const { currentBook } = usePlayerStore();
   const getBook = () => useLibraryStore.getState().audiobooks.find(b => b.id === q.bookId);
-
   const quoteSettings = useUserStore(s => s.quoteSettings);
 
   let formattedText = quoteSettings.useQuotes ? `"${q.text}"` : q.text;
@@ -28,6 +31,7 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
   if (quoteSettings.includeLink) {
     formattedText += ` Listen at: https://scrollreader.com/audiobook/${q.bookSlug}?t=${Math.floor(q.time)}`;
   }
+
   function handleCopy() {
     navigator.clipboard.writeText(formattedText).then(() => {
       setCopied(true);
@@ -47,8 +51,8 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
     const book = getBook();
     if (!book) return;
     if (currentBook?.id === book.id) {
-      const { getAudioElement } = require('@/lib/store/playerStore');
-      getAudioElement().currentTime = q.time;
+      const audio = document.querySelector('audio');
+      if (audio) audio.currentTime = q.time;
     } else {
       loadBook(book, q.time);
     }
@@ -80,7 +84,6 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
 
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-      {/* Book strip */}
       <div style={{ padding: '10px 16px', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: 12 }}>
         {q.bookCover && <img src={q.bookCover} alt="" style={{ width: 36, height: 36, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />}
         <div style={{ minWidth: 0, flex: 1 }}>
@@ -94,27 +97,16 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
         )}
       </div>
 
-      {/* Quote body */}
       <div style={{ padding: '20px 22px 16px' }}>
-        <blockquote style={{
-          margin: 0,
-          padding: '0 0 0 18px',
-          borderLeft: '3px solid var(--color-brand)',
-          fontSize: '1rem',
-          lineHeight: 1.75,
-          fontStyle: 'italic',
-          color: 'var(--color-text-primary)',
-        }}>
+        <blockquote style={{ margin: 0, padding: '0 0 0 18px', borderLeft: '3px solid var(--color-brand)', fontSize: '1rem', lineHeight: 1.75, fontStyle: 'italic', color: 'var(--color-text-primary)' }}>
           <Quote size={16} style={{ color: 'var(--color-brand)', marginBottom: 8, opacity: 0.5 }} />
           <span>{q.text}</span>
         </blockquote>
-
         <div style={{ marginTop: 14, fontSize: '0.82rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>
           — {q.bookAuthor}{q.chapterTitle && `, ${q.chapterTitle}`}
         </div>
       </div>
 
-      {/* Actions */}
       <div style={{ padding: '12px 16px', borderTop: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div className="text-xs text-muted" style={{ fontWeight: 500 }}>
@@ -140,19 +132,166 @@ function QuoteCard({ q, onDelete }: { q: SavedQuote; onDelete: () => void }) {
           </button>
         </div>
       </div>
-
     </div>
   );
 }
+
+// ─── Community Card ─────────────────────────────────────────────────────────────
+function CommunityCard({ q }: { q: SavedQuote }) {
+  const [copied, setCopied] = useState(false);
+  const quotes = useUserStore(s => s.quotes);
+  const saveQuote = useUserStore(s => s.saveQuote);
+  const alreadySaved = quotes.some(local => local.id === q.id);
+
+  function handleCopy() {
+    const text = `"${q.text}" — ${q.bookAuthor}${q.chapterTitle ? `, ${q.chapterTitle}` : ''}`;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  }
+
+  function handleShare() {
+    const text = `"${q.text}" — ${q.bookAuthor} | Listen free at scrollreader.com/audiobook/${q.bookSlug}`;
+    if (navigator.share) {
+      navigator.share({ title: q.bookTitle, text }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(text);
+    }
+  }
+
+  function handleSave() {
+    if (alreadySaved) return;
+    saveQuote({
+      text: q.text,
+      bookId: q.bookId,
+      bookTitle: q.bookTitle,
+      bookSlug: q.bookSlug,
+      bookAuthor: q.bookAuthor,
+      bookCover: q.bookCover,
+      chapterTitle: q.chapterTitle,
+      time: q.time,
+    });
+  }
+
+  return (
+    <div className="card" style={{ padding: 0, overflow: 'hidden', transition: 'transform 0.2s, box-shadow 0.2s' }}
+      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-lg)'; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
+    >
+      {/* Book strip */}
+      <div style={{ padding: '10px 14px', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: 10 }}>
+        {q.bookCover && <img src={q.bookCover} alt="" style={{ width: 32, height: 32, borderRadius: 5, objectFit: 'cover', flexShrink: 0 }} />}
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontWeight: 600, fontSize: '0.82rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{q.bookTitle}</div>
+          <div className="text-xs text-muted">{q.bookAuthor}</div>
+        </div>
+        <Link href={`/audiobook/${q.bookSlug}?t=${Math.floor(q.time)}`} title="Open book at this moment" style={{ color: 'var(--color-text-muted)', display: 'flex', flexShrink: 0 }}>
+          <ExternalLink size={14} />
+        </Link>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '16px 20px 14px' }}>
+        <blockquote style={{ margin: 0, padding: '0 0 0 14px', borderLeft: '3px solid var(--color-brand)', fontSize: '0.93rem', lineHeight: 1.7, fontStyle: 'italic', color: 'var(--color-text-primary)' }}>
+          <Quote size={13} style={{ color: 'var(--color-brand)', marginBottom: 6, opacity: 0.4 }} />
+          <span>{q.text}</span>
+        </blockquote>
+        {q.chapterTitle && (
+          <div style={{ marginTop: 10, fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+            <BookOpen size={11} style={{ display: 'inline', verticalAlign: '-1px', marginRight: 4 }} />
+            {q.chapterTitle}
+          </div>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div style={{ padding: '10px 14px', borderTop: '1px solid var(--color-border)', display: 'flex', gap: 8 }}>
+        <button onClick={handleCopy} className="btn btn-secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '7px 0', fontSize: '0.78rem' }}>
+          {copied ? <Check size={13} /> : <Copy size={13} />}
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+        <button onClick={handleShare} className="btn btn-secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '7px 0', fontSize: '0.78rem' }}>
+          <Share2 size={13} /> Share
+        </button>
+        <button
+          onClick={handleSave}
+          className={alreadySaved ? 'btn btn-secondary' : 'btn btn-primary'}
+          disabled={alreadySaved}
+          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '7px 0', fontSize: '0.78rem', opacity: alreadySaved ? 0.7 : 1 }}
+        >
+          {alreadySaved ? <Check size={13} /> : <Bookmark size={13} />}
+          {alreadySaved ? 'Saved' : 'Save'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Page ─────────────────────────────────────────────────────────────────
+type ActiveTab = 'mine' | 'community';
 
 export default function QuotesPage() {
   const quotes = useUserStore(s => s.quotes);
   const removeQuote = useUserStore(s => s.removeQuote);
   const quoteSettings = useUserStore(s => s.quoteSettings);
   const updateQuoteSettings = useUserStore(s => s.updateQuoteSettings);
+
+  const [activeTab, setActiveTab] = useState<ActiveTab>('mine');
   const [searchQuery, setSearchQuery] = useState('');
   const [settingsExpanded, setSettingsExpanded] = useState(false);
 
+  // Community state
+  const [communityQuotes, setCommunityQuotes] = useState<SavedQuote[]>([]);
+  const [communityTotal, setCommunityTotal] = useState(0);
+  const [communityPage, setCommunityPage] = useState(1);
+  const [communitySearch, setCommunitySearch] = useState('');
+  const [communityLoading, setCommunityLoading] = useState(false);
+  const [communityError, setCommunityError] = useState(false);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const loadCommunity = useCallback(async (page: number, search: string, append = false) => {
+    setCommunityLoading(true);
+    setCommunityError(false);
+    try {
+      const params = new URLSearchParams({ page: String(page), limit: '24' });
+      if (search) params.set('search', search);
+      const r = await fetch(`/api/quotes/community?${params}`);
+      if (!r.ok) throw new Error('fetch failed');
+      const data = await r.json();
+      setCommunityQuotes(prev => append ? [...prev, ...data.quotes] : data.quotes);
+      setCommunityTotal(data.total);
+    } catch {
+      setCommunityError(true);
+    } finally {
+      setCommunityLoading(false);
+    }
+  }, []);
+
+  // Load community on tab open
+  useEffect(() => {
+    if (activeTab === 'community' && communityQuotes.length === 0) {
+      loadCommunity(1, '');
+    }
+  }, [activeTab, communityQuotes.length, loadCommunity]);
+
+  // Debounced search in community tab
+  function handleCommunitySearch(val: string) {
+    setCommunitySearch(val);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setCommunityPage(1);
+      loadCommunity(1, val, false);
+    }, 400);
+  }
+
+  function loadMoreCommunity() {
+    const next = communityPage + 1;
+    setCommunityPage(next);
+    loadCommunity(next, communitySearch, true);
+  }
+
+  // My Quotes filter
   const filtered = quotes.filter(q => {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
@@ -164,99 +303,213 @@ export default function QuotesPage() {
     );
   });
 
-  return (
-    <div className="page" style={{ maxWidth: 860 }}>
-      {/* Header */}
-      <div style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h1>Your Saved Quotes</h1>
-          <p className="text-secondary" style={{ marginTop: 6 }}>
-            {quotes.length} quote{quotes.length !== 1 ? 's' : ''} saved · share them with friends
-          </p>
-        </div>
+  const tabStyle = (tab: ActiveTab) => ({
+    padding: '10px 20px',
+    background: 'none',
+    border: 'none',
+    borderBottom: activeTab === tab ? '2px solid var(--color-brand)' : '2px solid transparent',
+    color: activeTab === tab ? 'var(--color-brand)' : 'var(--color-text-muted)',
+    fontWeight: activeTab === tab ? 700 : 500,
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    transition: 'color 0.15s, border-color 0.15s',
+    flexShrink: 0,
+  } as React.CSSProperties);
 
-        {quotes.length > 0 && (
-          <div className="search-input-wrap" style={{ width: 280 }}>
-            <Search size={16} className="search-icon" />
-            <input
-              type="search"
-              placeholder="Search quotes, books, authors..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="search-input"
-            />
-          </div>
-        )}
+  const badgeStyle = (active: boolean) => ({
+    background: active ? 'var(--color-brand)' : 'var(--color-surface-2)',
+    color: active ? 'white' : 'var(--color-text-muted)',
+    borderRadius: 20,
+    padding: '1px 8px',
+    fontSize: '0.7rem',
+    fontWeight: 700,
+  } as React.CSSProperties);
+
+  return (
+    <div className="page" style={{ maxWidth: 920 }}>
+      {/* Header */}
+      <div style={{ marginBottom: 24 }}>
+        <h1>Quotes</h1>
+        <p className="text-secondary" style={{ marginTop: 6 }}>
+          Save memorable passages from any audiobook. Share them with friends.
+        </p>
       </div>
 
-      {/* Settings Row */}
-      {quotes.length > 0 && (
-        <div style={{ marginBottom: 32, background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
-          {/* Header Toggle */}
-          <div 
-            onClick={() => setSettingsExpanded(!settingsExpanded)}
-            style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', background: settingsExpanded ? 'var(--color-surface-2)' : 'transparent' }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
-              <Settings size={16} /> Copy Format Settings
-            </div>
-            {settingsExpanded ? <ChevronDown size={16} color="var(--color-text-muted)" /> : <ChevronRight size={16} color="var(--color-text-muted)" />}
-          </div>
+      {/* Tab bar */}
+      <div style={{
+        display: 'flex',
+        borderBottom: '1px solid var(--color-border)',
+        marginBottom: 28,
+        gap: 4,
+      }}>
+        <button style={tabStyle('mine')} onClick={() => setActiveTab('mine')}>
+          <Bookmark size={15} />
+          My Quotes
+          {quotes.length > 0 && <span style={badgeStyle(activeTab === 'mine')}>{quotes.length}</span>}
+        </button>
+        <button style={tabStyle('community')} onClick={() => setActiveTab('community')}>
+          <Users size={15} />
+          Community
+          {communityTotal > 0 && <span style={badgeStyle(activeTab === 'community')}>{communityTotal}</span>}
+        </button>
+      </div>
 
-          {/* Expanded Content */}
-          {settingsExpanded && (
-            <div style={{ padding: '16px', borderTop: '1px solid var(--color-border)' }}>
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
-                <div onClick={() => updateQuoteSettings({ useQuotes: !quoteSettings.useQuotes })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
-                  {quoteSettings.useQuotes ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
-                  Show "Quotes"
-                </div>
-                <div onClick={() => updateQuoteSettings({ includeBook: !quoteSettings.includeBook })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
-                  {quoteSettings.includeBook ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
-                  Include Book Title
-                </div>
-                <div onClick={() => updateQuoteSettings({ includeLink: !quoteSettings.includeLink })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
-                  {quoteSettings.includeLink ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
-                  Include Link
-                </div>
-              </div>
-
-              {/* Real-time Preview */}
-              <div style={{ padding: '14px 16px', background: 'var(--color-background)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Example output</div>
-                <div style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)', lineHeight: 1.6, fontFamily: 'monospace' }}>
-                  {quoteSettings.useQuotes ? '"For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life."' : 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.'}
-                  {quoteSettings.includeBook ? ' — Apostle John, The Bible (John Chapter 3)' : ' — Apostle John'}
-                  {quoteSettings.includeLink && ' Listen at: https://scrollreader.com/audiobook/the-bible'}
-                </div>
+      {/* ── MY QUOTES TAB ── */}
+      {activeTab === 'mine' && (
+        <>
+          {/* Search + settings */}
+          {quotes.length > 0 && (
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 24, flexWrap: 'wrap' }}>
+              <div className="search-input-wrap" style={{ flex: 1, minWidth: 220 }}>
+                <Search size={16} className="search-icon" />
+                <input
+                  type="search"
+                  placeholder="Search quotes, books, authors..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="search-input"
+                />
               </div>
             </div>
           )}
-        </div>
+
+          {/* Copy format settings */}
+          {quotes.length > 0 && (
+            <div style={{ marginBottom: 28, background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
+              <div
+                onClick={() => setSettingsExpanded(!settingsExpanded)}
+                style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', background: settingsExpanded ? 'var(--color-surface-2)' : 'transparent' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
+                  <Settings size={16} /> Copy Format Settings
+                </div>
+                {settingsExpanded ? <ChevronDown size={16} color="var(--color-text-muted)" /> : <ChevronRight size={16} color="var(--color-text-muted)" />}
+              </div>
+              {settingsExpanded && (
+                <div style={{ padding: '16px', borderTop: '1px solid var(--color-border)' }}>
+                  <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
+                    <div onClick={() => updateQuoteSettings({ useQuotes: !quoteSettings.useQuotes })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
+                      {quoteSettings.useQuotes ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
+                      Show &quot;Quotes&quot;
+                    </div>
+                    <div onClick={() => updateQuoteSettings({ includeBook: !quoteSettings.includeBook })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
+                      {quoteSettings.includeBook ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
+                      Include Book Title
+                    </div>
+                    <div onClick={() => updateQuoteSettings({ includeLink: !quoteSettings.includeLink })} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.875rem', cursor: 'pointer' }}>
+                      {quoteSettings.includeLink ? <CheckSquare size={16} color="var(--color-brand)" /> : <Square size={16} color="var(--color-border)" />}
+                      Include Link
+                    </div>
+                  </div>
+                  <div style={{ padding: '14px 16px', background: 'var(--color-background)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)' }}>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Example output</div>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)', lineHeight: 1.6, fontFamily: 'monospace' }}>
+                      {quoteSettings.useQuotes ? '"For God so loved the world…"' : 'For God so loved the world…'}
+                      {quoteSettings.includeBook ? ' — Apostle John, The Bible (John Chapter 3)' : ' — Apostle John'}
+                      {quoteSettings.includeLink && ' Listen at: https://scrollreader.com/audiobook/the-bible'}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Quote cards or empty state */}
+          {quotes.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 0 40px', color: 'var(--color-text-muted)' }}>
+              <Quote size={52} style={{ margin: '0 auto 20px', opacity: 0.12 }} />
+              <h3 style={{ marginBottom: 8, opacity: 0.7 }}>No quotes saved yet</h3>
+              <p style={{ fontSize: '0.925rem', marginBottom: 28 }}>
+                Open any audiobook and hit <strong>Share Quote</strong> to select and save a passage.
+              </p>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Link href="/" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  Browse Audiobooks
+                </Link>
+                <button className="btn btn-secondary" onClick={() => setActiveTab('community')} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  <Globe size={15} /> See Community Quotes
+                </button>
+              </div>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--color-text-muted)' }}>
+              <p>No quotes match &quot;{searchQuery}&quot;</p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
+              {filtered.map(q => (
+                <QuoteCard key={q.id} q={q} onDelete={() => removeQuote(q.id)} />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
-      {quotes.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--color-text-muted)' }}>
-          <Quote size={52} style={{ margin: '0 auto 20px', opacity: 0.12 }} />
-          <h3 style={{ marginBottom: 8, opacity: 0.7 }}>No quotes saved yet</h3>
-          <p style={{ fontSize: '0.925rem', marginBottom: 24 }}>
-            Open any audiobook and hit <strong>Share Quote</strong> to select and save a passage.
-          </p>
-          <Link href="/" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-            Browse Audiobooks
-          </Link>
-        </div>
-      ) : filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--color-text-muted)' }}>
-          <p>No quotes match "{searchQuery}"</p>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
-          {filtered.map(q => (
-            <QuoteCard key={q.id} q={q} onDelete={() => removeQuote(q.id)} />
-          ))}
-        </div>
+      {/* ── COMMUNITY TAB ── */}
+      {activeTab === 'community' && (
+        <>
+          {/* Community search */}
+          <div style={{ marginBottom: 24 }}>
+            <div className="search-input-wrap">
+              <Search size={16} className="search-icon" />
+              <input
+                type="search"
+                placeholder="Search community quotes, books, authors..."
+                value={communitySearch}
+                onChange={e => handleCommunitySearch(e.target.value)}
+                className="search-input"
+              />
+            </div>
+          </div>
+
+          {communityError ? (
+            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--color-text-muted)' }}>
+              <p>Could not load community quotes. Please try again.</p>
+              <button className="btn btn-secondary" onClick={() => loadCommunity(1, communitySearch)} style={{ marginTop: 12 }}>Retry</button>
+            </div>
+          ) : communityLoading && communityQuotes.length === 0 ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+              <Loader2 size={32} style={{ animation: 'spin 1s linear infinite', color: 'var(--color-brand)' }} />
+            </div>
+          ) : communityQuotes.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--color-text-muted)' }}>
+              <Users size={52} style={{ margin: '0 auto 20px', opacity: 0.12 }} />
+              <h3 style={{ marginBottom: 8, opacity: 0.7 }}>No community quotes yet</h3>
+              <p style={{ fontSize: '0.925rem' }}>Be the first! Save a quote from any audiobook and it will appear here.</p>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
+                {communityQuotes.map(q => (
+                  <CommunityCard key={q.id} q={q} />
+                ))}
+              </div>
+
+              {/* Load more */}
+              {communityQuotes.length < communityTotal && (
+                <div style={{ textAlign: 'center', marginTop: 36 }}>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={loadMoreCommunity}
+                    disabled={communityLoading}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 28px' }}
+                  >
+                    {communityLoading ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : null}
+                    Load More ({communityTotal - communityQuotes.length} remaining)
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
+
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      `}</style>
     </div>
   );
 }

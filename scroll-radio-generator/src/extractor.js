@@ -17,15 +17,18 @@ const execFileAsync = promisify(execFile);
  * @param {string} outputPath - Local path to write the extracted clip
  */
 export async function extractChapter(inputUrl, startTime, duration, outputPath) {
-  // Input seeking (-ss before -i) is fast — ffmpeg seeks with HTTP range requests.
-  // -c copy avoids re-encoding (instant, lossless).
-  // -avoid_negative_ts make_zero fixes timestamps on the extracted clip.
+  // We MUST standardize all audio to identical sample rate and channels (44.1kHz, mono, 64kbps)
+  // otherwise the browser's HTML5 audio player glitches and stops playback when chapters switch
+  // from the ElevenLabs bumper format to the audiobook's format.
   const args = [
     '-y',                          // overwrite output without asking
     '-ss', String(startTime),      // seek BEFORE input (fast/efficient)
     '-i', inputUrl,                // remote MP3 source
     '-t', String(duration),        // how long to capture
-    '-c', 'copy',                  // copy codec — no re-encode
+    '-c:a', 'libmp3lame',          // re-encode audio to standard format
+    '-b:a', '64k',                 // 64kbps (good for voice)
+    '-ar', '44100',                // 44.1kHz sample rate
+    '-ac', '1',                    // Mono
     '-avoid_negative_ts', 'make_zero',
     outputPath,
   ];

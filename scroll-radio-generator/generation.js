@@ -182,7 +182,7 @@ async function main() {
   console.log('═══════════════════════════════════════════════════════');
   console.log('  ✅  Block generated successfully!');
   console.log(`  ID:       ${id}`);
-  console.log(`  Duration: ${formatDuration(manifest.totalDuration)}`);
+  console.log(`  Duration: ${formatDuration(manifest.totalDuration)} (${Math.round(manifest.totalDuration)} seconds)`);
   console.log(`  Chapters: ${selected.length}`);
   console.log(`  MP3:      ${mp3Url}`);
   console.log(`  Manifest: ${manifestUrl}`);

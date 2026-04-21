@@ -9,6 +9,32 @@ import fs from 'fs';
 
 const API_BASE = 'https://api.elevenlabs.io/v1';
 
+/**
+ * Ensures a chapter title is speakable.
+ * - Handles C7P1 shorthand -> Chapter 7, Part 1
+ * - Excludes Day, Section, Part from getting a "Chapter " prefix
+ * - If it starts with a bare number (e.g. "128 - What He Will Do") → prefix with "Chapter"
+ */
+function formatChapterTitle(title) {
+  if (!title) return 'this chapter';
+  let t = title.trim();
+
+  // Handle shorthand like "C7P1" -> "Chapter 7, Part 1"
+  t = t.replace(/^C(\d+)P(\d+)/i, 'Chapter $1, Part $2');
+
+  // If it already starts with words like Chapter, Day, Part, Section
+  if (/^(chapter|day|part|section|session|book|appendix|preface|introduction)\b/i.test(t)) {
+    return t;
+  }
+
+  // Starts with a bare number (e.g. "128 - What He Will Do")
+  if (/^\d+[\s\-–—.:]/.test(t) || /^\d+$/.test(t)) {
+    return 'Chapter ' + t;
+  }
+
+  return t;
+}
+
 /** Build bumper text for different positions in the block. */
 export function buildBumperText(type, opts = {}) {
   const { chapter, book, nextChapter, nextBook } = opts;
@@ -17,20 +43,20 @@ export function buildBumperText(type, opts = {}) {
     case 'opening':
       return (
         `Welcome to Now Playing on Scroll Reader — free classic Christian audiobooks, ` +
-        `curated for your listening. We begin today with "${nextChapter.title}" ` +
+        `curated for your listening. We begin today with "${formatChapterTitle(nextChapter.title)}" ` +
         `from "${nextBook.title}" by ${nextBook.authorName}.`
       );
 
     case 'between': {
       const justFinished =
         book.id === nextBook.id
-          ? `That was "${chapter.title}" from "${book.title}".`
-          : `That was "${chapter.title}" from "${book.title}" by ${book.authorName}.`;
+          ? `That was "${formatChapterTitle(chapter.title)}" from "${book.title}".`
+          : `That was "${formatChapterTitle(chapter.title)}" from "${book.title}" by ${book.authorName}.`;
 
       const comingUp =
         nextBook.id === book.id
-          ? `Continuing now with "${nextChapter.title}".`
-          : `Coming up next — "${nextChapter.title}" from "${nextBook.title}" ` +
+          ? `Continuing now with "${formatChapterTitle(nextChapter.title)}".`
+          : `Coming up next — "${formatChapterTitle(nextChapter.title)}" from "${nextBook.title}" ` +
             `by ${nextBook.authorName}.`;
 
       return `${justFinished} ${comingUp} You're listening to Now Playing on Scroll Reader.`;
@@ -38,7 +64,7 @@ export function buildBumperText(type, opts = {}) {
 
     case 'closing':
       return (
-        `That was "${chapter.title}" from "${book.title}" by ${book.authorName}. ` +
+        `That was "${formatChapterTitle(chapter.title)}" from "${book.title}" by ${book.authorName}. ` +
         `Thank you for listening to Now Playing on Scroll Reader. ` +
         `Visit scrollreader.com to explore our full library of free Christian audiobooks. ` +
         `We'll be right back at the beginning. God bless you.`
@@ -58,7 +84,9 @@ export async function generateBumper(text, outputPath) {
   if (!apiKey) throw new Error('ELEVENLABS_API_KEY is not set in .env');
   if (!voiceId) throw new Error('ELEVENLABS_VOICE_ID is not set in .env');
 
-  const url = `${API_BASE}/text-to-speech/${voiceId}`;
+  // Request the exact same format we use for the extracted chapters: 44.1kHz, 64kbps, Mono
+  // This ensures the browser can play the stitched MP3 seamlessly without failing on format changes.
+  const url = `${API_BASE}/text-to-speech/${voiceId}?output_format=mp3_44100_64`;
 
   const response = await fetch(url, {
     method: 'POST',

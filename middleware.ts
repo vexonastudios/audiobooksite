@@ -18,9 +18,11 @@ const isPublicRoute = createRouteMatcher([
   '/api/notifications(.*)',
   '/api/image-proxy(.*)',
   '/api/analytics(.*)',  // analytics: anonymous events allowed
+  '/api/quotes/community(.*)', // public community feed — no auth
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/stats(.*)',          // user stats page: handled by auth() inside
+  // Note: /api/user/* requires auth but is handled inside the route, not here
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
