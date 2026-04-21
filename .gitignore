@@ -1,8 +1,11 @@
 node_modules/
 .next/
 out/
-.env.local
+# Environment variable files — NEVER commit these
+.env
+.env.*
 .env*.local
+
 *.log
 .DS_Store
 Thumbs.db
