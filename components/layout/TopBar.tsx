@@ -8,7 +8,7 @@ import { useUIStore } from '@/lib/store/uiStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { useUserStore } from '@/lib/store/userStore';
 import { usePlayerStore, getAudioElement } from '@/lib/store/playerStore';
-import { UserButton, SignInButton, useUser, ClerkLoading, ClerkLoaded, SignedIn, SignedOut } from '@clerk/nextjs';
+import { UserButton, SignInButton, useUser } from '@clerk/nextjs';
 import type { Audiobook } from '@/lib/types';
 import Link from 'next/link';
 
@@ -185,6 +185,7 @@ export function TopBar() {
   const { toggleSidebar } = useUIStore();
   const router = useRouter();
   const currentPath = usePathname();
+  const { isLoaded, isSignedIn } = useUser();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Audiobook[]>([]);
   const [open, setOpen] = useState(false);
@@ -196,7 +197,7 @@ export function TopBar() {
   const updateQuoteSettings = useUserStore((s) => s.updateQuoteSettings);
   const readAlongFontSize = useUserStore((s) => s.readAlongFontSize);
   const setReadAlongFontSize = useUserStore((s) => s.setReadAlongFontSize);
-  const { isSignedIn } = useUser();
+
   const inputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
 
@@ -354,23 +355,17 @@ export function TopBar() {
             <Settings size={20} />
           </Link>
 
-          <ClerkLoading>
-            {/* Tiny grey circle as a placeholder skeleton while auth resolves */}
+          {!isLoaded ? (
             <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--color-surface-2)', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
-          </ClerkLoading>
-
-          <ClerkLoaded>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.875rem' }}>
-                  Sign In
-                </button>
-              </SignInButton>
-            </SignedOut>
-          </ClerkLoaded>
+          ) : isSignedIn ? (
+            <UserButton />
+          ) : (
+            <SignInButton mode="modal">
+              <button className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.875rem' }}>
+                Sign In
+              </button>
+            </SignInButton>
+          )}
         </div>
       </header>
 
