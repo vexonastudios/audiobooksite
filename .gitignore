@@ -10,3 +10,9 @@ android/
 ios/
 
 .vercel
+
+# ── Scroll Radio Generator (local tool — keep out of site repo) ───────────────
+scroll-radio-generator/node_modules/
+scroll-radio-generator/temp/
+scroll-radio-generator/output/
+scroll-radio-generator/.env

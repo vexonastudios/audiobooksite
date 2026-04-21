@@ -1,0 +1,21 @@
+{
+  "name": "scroll-radio-generator",
+  "version": "1.0.0",
+  "description": "Scroll Radio — Now Playing block generator for ScrollReader",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "generate": "node generation.js",
+    "generate:dry": "node generation.js --dry-run"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.600.0",
+    "@neondatabase/serverless": "^0.9.4",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7"
+  }
+}

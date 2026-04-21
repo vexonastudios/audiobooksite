@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import Link from 'next/link';
-import { LayoutDashboard, BookOpen, PlusCircle, FileText, User, ArrowLeftToLine, Mic, BarChart2, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, BookOpen, PlusCircle, FileText, User, ArrowLeftToLine, Mic, BarChart2, MessageSquare, Radio } from 'lucide-react';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
@@ -40,6 +40,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           { href: '/admin/notifications/new', label: 'New Announcement', icon: <PlusCircle size={16} /> },
           { href: '/admin/analytics', label: 'Analytics', icon: <BarChart2 size={16} /> },
           { href: '/admin/messages',  label: 'Messages',  icon: <MessageSquare size={16} /> },
+          { href: '/admin/radio',     label: 'Scroll Radio', icon: <Radio size={16} /> },
+          { href: '/admin/radio/new', label: 'Register Block', icon: <PlusCircle size={16} /> },
         ].map(({ href, label, icon }) => (
           <Link key={href} href={href} style={{
             display: 'flex', alignItems: 'center', gap: 10,
