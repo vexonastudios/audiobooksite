@@ -330,6 +330,7 @@ export default function TopicsIndex() {
             />
             <input
               type="search"
+              className="topics-filter-input"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Filter topics…"
@@ -401,6 +402,9 @@ export default function TopicsIndex() {
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(18px); }
           to   { opacity: 1; transform: translateY(0); }
+        }
+        .topics-filter-input::placeholder {
+          color: rgba(255, 255, 255, 0.6) !important;
         }
         .category-card {
           transition: box-shadow 0.22s, transform 0.22s;
