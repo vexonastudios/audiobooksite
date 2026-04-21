@@ -356,6 +356,11 @@ button {
     background: var(--color-bg) !important;
     overflow-y: hidden !important; /* Scrolling handled internally */
   }
+  .tabs-card-desktop.mobile-modal-active .tab-content-scroll {
+    flex: 1;
+    max-height: none;
+    min-height: 0;
+  }
   .mobile-player-options {
     display: flex !important;
   }
@@ -798,6 +803,12 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
   margin-bottom: -2px;
   transition: all var(--transition-fast);
   cursor: pointer;
+}
+
+.tab-content-scroll {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 .tab.active {

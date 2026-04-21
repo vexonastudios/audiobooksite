@@ -667,7 +667,7 @@ export default function AudiobookPage() {
                 </button>
               </div>
 
-              <div style={{ maxHeight: 400, overflowY: 'auto', paddingRight: 8 }}>
+              <div className="tab-content-scroll">
                 {/* CHAPTERS TAB */}
                 {activeTab === 'chapters' && (
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
