@@ -27,6 +27,7 @@ interface UserState {
   // History
   addToHistory: (bookId: string, position: number) => void;
   clearHistory: () => void;
+  mergeHistoryFromDB: (dbHistory: HistoryEntry[]) => void;
 
   // Bookmarks
   addBookmark: (bookId: string, time: number, meta: {
@@ -41,6 +42,7 @@ interface UserState {
   removeBookmark: (id: string) => void;
   updateBookmark: (id: string, partial: Partial<Bookmark>) => void;
   getBookmarksByBook: (bookId: string) => Bookmark[];
+  mergeBookmarksFromDB: (dbBookmarks: Bookmark[]) => void;
 
   // Quotes
   saveQuote: (quote: Omit<SavedQuote, 'id' | 'createdAt'>) => void;
@@ -90,43 +92,91 @@ export const useUserStore = create<UserState>()(
       mobileNavActions: ['home', 'browse', 'favorites', 'quotes'],
 
       addToHistory: (bookId, position) => {
+        const entry: HistoryEntry = { bookId, position, lastListened: Date.now() };
         set((state) => {
           const filtered = state.history.filter((h) => h.bookId !== bookId);
           return {
-            history: [
-              { bookId, position, lastListened: Date.now() },
-              ...filtered,
-            ].slice(0, 50), // keep last 50
+            history: [entry, ...filtered].slice(0, 50),
           };
+        });
+        // Write-through: update position in DB for signed-in users (throttled by caller)
+        if (get().isSignedIn) {
+          fetch('/api/user/history', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(entry),
+          }).catch(() => {});
+        }
+      },
+
+      clearHistory: () => {
+        set({ history: [] });
+        if (get().isSignedIn) {
+          fetch('/api/user/history', { method: 'DELETE' }).catch(() => {});
+        }
+      },
+
+      mergeHistoryFromDB: (dbHistory) => {
+        set((state) => {
+          // For history, DB wins for each bookId (most accurate cross-device position)
+          const localByBook = new Map(state.history.map(h => [h.bookId, h]));
+          dbHistory.forEach(h => localByBook.set(h.bookId, h));
+          const merged = Array.from(localByBook.values())
+            .sort((a, b) => b.lastListened - a.lastListened)
+            .slice(0, 50);
+          return { history: merged };
         });
       },
 
-      clearHistory: () => set({ history: [] }),
-
       addBookmark: (bookId, time, meta) => {
         const id = `bm_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const full: Bookmark = { id, bookId, time, note: meta.note || '', createdAt: Date.now(), ...meta };
         set((state) => ({
-          bookmarks: [
-            { id, bookId, time, note: meta.note || '', createdAt: Date.now(), ...meta },
-            ...state.bookmarks,
-          ],
+          bookmarks: [full, ...state.bookmarks],
         }));
+        if (get().isSignedIn) {
+          fetch('/api/user/bookmarks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(full),
+          }).catch(() => {});
+        }
       },
 
       removeBookmark: (id) => {
         set((state) => ({
           bookmarks: state.bookmarks.filter((b) => b.id !== id),
         }));
+        if (get().isSignedIn) {
+          fetch(`/api/user/bookmarks?id=${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
+        }
       },
 
       updateBookmark: (id, partial) => {
         set((state) => ({
           bookmarks: state.bookmarks.map((b) => (b.id === id ? { ...b, ...partial } : b)),
         }));
+        // Sync the updated bookmark to DB
+        const updated = get().bookmarks.find(b => b.id === id);
+        if (updated && get().isSignedIn) {
+          fetch('/api/user/bookmarks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updated),
+          }).catch(() => {});
+        }
       },
 
       getBookmarksByBook: (bookId) => {
         return get().bookmarks.filter((b) => b.bookId === bookId);
+      },
+
+      mergeBookmarksFromDB: (dbBookmarks) => {
+        set((state) => {
+          const existingIds = new Set(state.bookmarks.map(b => b.id));
+          const newOnes = dbBookmarks.filter(b => !existingIds.has(b.id));
+          return { bookmarks: [...newOnes, ...state.bookmarks] };
+        });
       },
 
       setSkipInterval: (val) => set({ skipInterval: val }),
