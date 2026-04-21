@@ -57,32 +57,55 @@ export async function getCommunityQuotes(
   const offset = (page - 1) * limit;
   const searchLike = search ? `%${search.toLowerCase()}%` : null;
 
-  // GROUP BY trimmed text + book_id to deduplicate identical quotes.
-  // COUNT(*) = number of users who saved this quote = "upvote" count.
-  // We pick the most recent submitter's metadata (book cover, chapter) via MAX(id).
-  const rows = await sql`
-    SELECT
-      MIN(id)            AS id,
-      text,
-      book_id,
-      MAX(book_title)    AS book_title,
-      MAX(book_slug)     AS book_slug,
-      MAX(book_author)   AS book_author,
-      MAX(book_cover)    AS book_cover,
-      MAX(chapter_title) AS chapter_title,
-      MIN(time_secs)     AS time_secs,
-      MAX(created_at)    AS created_at,
-      COUNT(*)           AS saves_count
-    FROM user_quotes
-    WHERE (${searchLike}::text IS NULL
-           OR lower(text) LIKE ${searchLike}
-           OR lower(book_title) LIKE ${searchLike}
-           OR lower(book_author) LIKE ${searchLike})
-      AND (${bookId ?? null}::text IS NULL OR book_id = ${bookId ?? null})
-    GROUP BY trim(text), book_id
-    ORDER BY ${sortBy === 'popular' ? sql`COUNT(*) DESC, MAX(created_at) DESC` : sql`MAX(created_at) DESC`}
-    LIMIT ${limit} OFFSET ${offset}
-  `;
+  // We run two separate typed queries to avoid nested sql`` template literals
+  // which @neondatabase/serverless does not support.
+  const rows = sortBy === 'popular'
+    ? await sql`
+        SELECT
+          MIN(id)            AS id,
+          text,
+          book_id,
+          MAX(book_title)    AS book_title,
+          MAX(book_slug)     AS book_slug,
+          MAX(book_author)   AS book_author,
+          MAX(book_cover)    AS book_cover,
+          MAX(chapter_title) AS chapter_title,
+          MIN(time_secs)     AS time_secs,
+          MAX(created_at)    AS created_at,
+          COUNT(*)           AS saves_count
+        FROM user_quotes
+        WHERE (${searchLike}::text IS NULL
+               OR lower(text) LIKE ${searchLike}
+               OR lower(book_title) LIKE ${searchLike}
+               OR lower(book_author) LIKE ${searchLike})
+          AND (${bookId ?? null}::text IS NULL OR book_id = ${bookId ?? null})
+        GROUP BY text, book_id
+        ORDER BY COUNT(*) DESC, MAX(created_at) DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+    : await sql`
+        SELECT
+          MIN(id)            AS id,
+          text,
+          book_id,
+          MAX(book_title)    AS book_title,
+          MAX(book_slug)     AS book_slug,
+          MAX(book_author)   AS book_author,
+          MAX(book_cover)    AS book_cover,
+          MAX(chapter_title) AS chapter_title,
+          MIN(time_secs)     AS time_secs,
+          MAX(created_at)    AS created_at,
+          COUNT(*)           AS saves_count
+        FROM user_quotes
+        WHERE (${searchLike}::text IS NULL
+               OR lower(text) LIKE ${searchLike}
+               OR lower(book_title) LIKE ${searchLike}
+               OR lower(book_author) LIKE ${searchLike})
+          AND (${bookId ?? null}::text IS NULL OR book_id = ${bookId ?? null})
+        GROUP BY text, book_id
+        ORDER BY MAX(created_at) DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
 
   // Count of distinct (text, book_id) groups for pagination
   const countRows = await sql`
