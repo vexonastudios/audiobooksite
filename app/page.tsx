@@ -6,7 +6,7 @@ import { useUserStore } from '@/lib/store/userStore';
 import type { Audiobook, Article } from '@/lib/types';
 import type { CommunityQuote } from '@/lib/db/quotes';
 import Link from 'next/link';
-import { Headphones, ChevronRight, ChevronLeft, BookOpen, Quote, ArrowUp, Heart } from 'lucide-react';
+import { Headphones, ChevronRight, ChevronLeft, BookOpen, Quote, ArrowUp, Heart, TrendingUp } from 'lucide-react';
 import { NotificationBanner } from '@/components/ui/NotificationBanner';
 import { BookCard } from '@/components/ui/BookCard';
 import { ScrollRow } from '@/components/ui/ScrollRow';
@@ -378,6 +378,7 @@ export default function HomePage() {
   const history = useUserStore((s) => s.history);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [dailyTags, setDailyTags] = useState<string[]>([]);
+  const [dailyExplore, setDailyExplore] = useState<Audiobook[]>([]);
 
   const categories = useLibraryStore((s) => s.getAllCategories());
   const topics = useLibraryStore((s) => s.getAllTopics());
@@ -387,6 +388,10 @@ export default function HomePage() {
   // Community quotes for home page preview
   const [communityQuotes, setCommunityQuotes] = useState<CommunityQuote[]>([]);
   const [communityLoaded, setCommunityLoaded] = useState(false);
+
+  // Trending this week
+  const [trendingBooks, setTrendingBooks] = useState<Audiobook[]>([]);
+  const [trendingLoaded, setTrendingLoaded] = useState(false);
 
   useEffect(() => {
     if (!communityLoaded) {
@@ -399,6 +404,18 @@ export default function HomePage() {
         .finally(() => setCommunityLoaded(true));
     }
   }, [communityLoaded]);
+
+  useEffect(() => {
+    if (!trendingLoaded) {
+      fetch('/api/analytics/trending')
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data?.books?.length) setTrendingBooks(data.books);
+        })
+        .catch(() => {})
+        .finally(() => setTrendingLoaded(true));
+    }
+  }, [trendingLoaded]);
 
   useEffect(() => {
     // Merge categories and topics, remove duplicates
@@ -416,16 +433,31 @@ export default function HomePage() {
     }
   }, [categories, topics]);
 
+  // Build the daily-shuffled Explore pool when books load (excludes recent 20)
+  useEffect(() => {
+    if (audiobooks.length === 0) return;
+    const recentIds = new Set(getRecent(20).map(b => b.id));
+    const pool = audiobooks.filter(b => !recentIds.has(b.id));
+    // Deterministic daily shuffle via seeded sort
+    const seed = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+    const shuffled = [...pool].sort((a, b) => {
+      const hashA = (a.id.charCodeAt(0) * 31 + seed) % 997;
+      const hashB = (b.id.charCodeAt(0) * 31 + seed) % 997;
+      return hashA - hashB;
+    });
+    setDailyExplore(shuffled.slice(0, 20));
+  }, [audiobooks]);
+
   // "Continue Listening" — map history bookId → audiobook
   const continueListening = history
     .slice(0, 10)
     .map((h) => audiobooks.find((b) => b.id === h.bookId))
     .filter(Boolean) as Audiobook[];
 
-  // "Explore" row — filtered by selected tag, checking both category and topic arrays
+  // "Explore" row — tag-filtered from the daily shuffle, or the shuffle itself
   const exploreBooks = activeTag
     ? audiobooks.filter(b => b.categories?.includes(activeTag) || b.topics?.includes(activeTag)).slice(0, 20)
-    : audiobooks.slice(0, 20);
+    : dailyExplore;
 
   if (!isLoaded) {
     return (
@@ -495,6 +527,7 @@ export default function HomePage() {
       <section style={{ marginBottom: 40 }}>
         <div className="section-header">
           <h2 className="section-title">Explore</h2>
+          <Link href="/audiobooks" className="see-all-link">Browse all</Link>
         </div>
 
         {/* Category pill filter row */}
@@ -518,6 +551,19 @@ export default function HomePage() {
 
         <ScrollRow books={exploreBooks} />
       </section>
+
+      {/* Trending This Week */}
+      {trendingBooks.length > 0 && (
+        <section style={{ marginBottom: 40 }}>
+          <div className="section-header">
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <TrendingUp size={20} style={{ color: 'var(--color-brand)' }} />
+              Trending This Week
+            </h2>
+          </div>
+          <ScrollRow books={trendingBooks} />
+        </section>
+      )}
 
       {/* Stats banner */}
       <div style={{

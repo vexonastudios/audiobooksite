@@ -262,3 +262,73 @@ export async function getAnalyticsSummary(days: number = 30) {
     anonymousPlays: Number(anon.anonymous),
   };
 }
+
+// ─── Public: Top books by play sessions this week ─────────────────────────────
+
+export async function getTopBooksThisWeek(limit = 20) {
+  const rows = await sql`
+    SELECT
+      pe.audiobook_id,
+      COUNT(DISTINCT pe.session_id) AS session_count,
+      a.id,
+      a.slug,
+      a.title,
+      a.author_name,
+      a.cover_image,
+      a.thumbnail_url,
+      a.length_str,
+      a.duration_secs,
+      a.categories,
+      a.topics,
+      a.plays,
+      a.excerpt,
+      a.description,
+      a.pub_date,
+      a.mp3_url,
+      a.total_duration,
+      a.original_year,
+      a.youtube_link,
+      a.spotify_link,
+      a.buy_link,
+      a.vtt_url,
+      a.generated_colors
+    FROM play_events pe
+    JOIN audiobooks a ON a.id = pe.audiobook_id AND a.published = true
+    WHERE pe.started_at >= NOW() - INTERVAL '7 days'
+    GROUP BY pe.audiobook_id, a.id, a.slug, a.title, a.author_name,
+             a.cover_image, a.thumbnail_url, a.length_str, a.duration_secs,
+             a.categories, a.topics, a.plays, a.excerpt, a.description,
+             a.pub_date, a.mp3_url, a.total_duration, a.original_year,
+             a.youtube_link, a.spotify_link, a.buy_link, a.vtt_url, a.generated_colors
+    ORDER BY session_count DESC
+    LIMIT ${limit}
+  `;
+
+  return rows.map((r: any) => ({
+    id: r.id,
+    slug: r.slug,
+    title: r.title,
+    authorName: r.author_name,
+    coverImage: r.cover_image,
+    thumbnailUrl: r.thumbnail_url,
+    length: r.length_str,
+    durationSecs: Number(r.duration_secs),
+    categories: r.categories ?? [],
+    topics: r.topics ?? [],
+    plays: Number(r.plays),
+    sessionCount: Number(r.session_count),
+    excerpt: r.excerpt,
+    description: r.description,
+    pubDate: r.pub_date ? String(r.pub_date) : '',
+    mp3Url: r.mp3_url,
+    totalDuration: r.total_duration,
+    originalYear: String(r.original_year ?? ''),
+    youtubeLink: r.youtube_link,
+    spotifyLink: r.spotify_link,
+    buyLink: r.buy_link,
+    vttUrl: r.vtt_url,
+    generatedColors: r.generated_colors,
+    chapters: [],
+  }));
+}
+
