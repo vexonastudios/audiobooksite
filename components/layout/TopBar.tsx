@@ -3,10 +3,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, Settings, X, Menu, ArrowLeft, Radio, Loader2 } from 'lucide-react';
+import { Search, Settings, X, Menu, ArrowLeft, Radio } from 'lucide-react';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { useUserStore } from '@/lib/store/userStore';
+import { usePlayerStore, getAudioElement } from '@/lib/store/playerStore';
 import { UserButton, SignInButton, useUser } from '@clerk/nextjs';
 import type { Audiobook } from '@/lib/types';
 import Link from 'next/link';
@@ -22,174 +23,61 @@ interface NowPlayingData {
   positionSecs?: number;
 }
 
-// ─── Radio Modal ──────────────────────────────────────────────────────────────
-function RadioModal({
-  data,
-  onClose,
-}: {
-  data: NowPlayingData;
-  onClose: () => void;
-}) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !data.mp3Url) return;
-
-    // Seek to live position
-    const seek = () => {
-      if (data.positionSecs && isFinite(data.positionSecs)) {
-        audio.currentTime = data.positionSecs;
-      }
-      setLoading(false);
-      audio.play().then(() => setIsPlaying(true)).catch(() => {});
-    };
-
-    audio.addEventListener('canplay', seek, { once: true });
-    audio.load();
-    return () => audio.removeEventListener('canplay', seek);
-  }, [data.mp3Url, data.positionSecs]);
-
-  const toggle = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (isPlaying) { audio.pause(); setIsPlaying(false); }
-    else { audio.play().then(() => setIsPlaying(true)).catch(() => {}); }
-  };
-
-  return createPortal(
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0,
-        background: 'rgba(0,0,0,0.55)',
-        backdropFilter: 'blur(6px)',
-        zIndex: 300,
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        paddingTop: 72,
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: 'var(--color-surface)',
-          borderRadius: 'var(--radius-xl)',
-          padding: '28px 28px 24px',
-          width: 340,
-          maxWidth: 'calc(100vw - 32px)',
-          boxShadow: 'var(--shadow-xl)',
-          border: '1px solid var(--color-border)',
-          position: 'relative',
-          animation: 'radioModalIn 0.22s cubic-bezier(0.34,1.56,0.64,1) both',
-        }}
-      >
-        {/* Close */}
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          style={{
-            position: 'absolute', top: 14, right: 14,
-            width: 32, height: 32, borderRadius: '50%',
-            background: 'var(--color-surface-2)',
-            border: '1px solid var(--color-border)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'var(--color-text-muted)', cursor: 'pointer',
-          }}
-        >
-          <X size={16} />
-        </button>
-
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-          <div style={{
-            width: 44, height: 44, borderRadius: '50%',
-            background: 'linear-gradient(135deg, #e53e3e, #c53030)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-            boxShadow: '0 4px 16px rgba(229,62,62,0.4)',
-          }}>
-            <Radio size={20} color="white" />
-          </div>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '1.05rem', lineHeight: 1.2 }}>
-              Scroll Radio
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-              <span style={{
-                width: 8, height: 8, borderRadius: '50%',
-                background: '#e53e3e',
-                display: 'inline-block',
-                animation: 'radioPulse 1.4s ease-in-out infinite',
-              }} />
-              <span style={{ fontSize: '0.8rem', color: '#e53e3e', fontWeight: 600 }}>
-                LIVE
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: 20, lineHeight: 1.5 }}>
-          Streaming curated Christian audiobooks — live, synchronized broadcasting for our entire community.
-        </p>
-
-        {/* Play / Pause */}
-        <button
-          onClick={toggle}
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '13px 0',
-            borderRadius: 'var(--radius-md)',
-            background: loading ? 'var(--color-surface-2)' : 'linear-gradient(135deg, #e53e3e, #c53030)',
-            color: loading ? 'var(--color-text-muted)' : 'white',
-            fontWeight: 700,
-            fontSize: '0.9375rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            cursor: loading ? 'default' : 'pointer',
-            border: 'none',
-            transition: 'all 0.2s',
-            boxShadow: loading ? 'none' : '0 4px 16px rgba(229,62,62,0.35)',
-          }}
-        >
-          {loading ? (
-            <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Tuning in…</>
-          ) : isPlaying ? (
-            <>⏸ Pause</>
-          ) : (
-            <>▶ Listen Live</>
-          )}
-        </button>
-
-        {/* hidden audio */}
-        {data.mp3Url && (
-          <audio ref={audioRef} src={data.mp3Url} preload="auto" style={{ display: 'none' }} />
-        )}
-      </div>
-
-      <style>{`
-        @keyframes radioModalIn {
-          from { opacity: 0; transform: scale(0.88) translateY(-12px); }
-          to   { opacity: 1; transform: scale(1)    translateY(0);     }
+// ─── Build a synthetic Audiobook from live radio data ─────────────────────────
+async function buildRadioBook(data: NowPlayingData): Promise<Audiobook> {
+  // Try to load chapters from manifest
+  let chapters: Audiobook['chapters'] = [];
+  if (data.manifestUrl) {
+    try {
+      const res = await fetch(data.manifestUrl);
+      if (res.ok) {
+        const manifest = await res.json();
+        // Manifest format: { chapters: [{ title, startTime, duration }] }
+        if (Array.isArray(manifest.chapters)) {
+          chapters = manifest.chapters.map((c: { title?: string; start_time?: number; startTime?: number; duration?: number }) => ({
+            title: c.title ?? 'Chapter',
+            startTime: c.start_time ?? c.startTime ?? 0,
+            duration: c.duration ?? null,
+          }));
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
-    </div>,
-    document.body
-  );
+      }
+    } catch { /* ignore — no chapters */ }
+  }
+
+  return {
+    id: data.blockId ?? 'scroll-radio-live',
+    slug: 'scroll-radio-live',
+    title: 'Scroll Radio — Live',
+    excerpt: 'Live synchronized Christian audiobook stream',
+    description: 'Scroll Radio is a live, synchronized broadcast of curated Christian audiobooks.',
+    pubDate: new Date().toISOString(),
+    authorName: 'Scroll Radio',
+    coverImage: '/logo.png',
+    thumbnailUrl: '/logo.png',
+    categories: [],
+    topics: [],
+    mp3Url: data.mp3Url ?? '',
+    totalDuration: String(data.totalDuration ?? 0),
+    length: '',
+    originalYear: '',
+    youtubeLink: null,
+    spotifyLink: null,
+    buyLink: null,
+    generatedColors: null,
+    plays: 0,
+    chapters,
+  };
 }
 
 // ─── Now Playing Button ───────────────────────────────────────────────────────
 function NowPlayingButton() {
   const [data, setData] = useState<NowPlayingData | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const loadBook = usePlayerStore((s) => s.loadBook);
+  const currentBook = usePlayerStore((s) => s.currentBook);
+  const isPlaying = usePlayerStore((s) => s.isPlaying);
+  const setPlaying = usePlayerStore((s) => s.setPlaying);
 
   useEffect(() => setMounted(true), []);
 
@@ -208,49 +96,76 @@ function NowPlayingButton() {
 
   if (!mounted || !data?.active) return null;
 
+  const isRadioLoaded = currentBook?.id === (data.blockId ?? 'scroll-radio-live');
+
+  async function handleClick() {
+    if (isRadioLoaded) {
+      // Toggle play/pause if already loaded
+      setPlaying(!isPlaying);
+      return;
+    }
+    setLoading(true);
+    try {
+      const book = await buildRadioBook(data!);
+      // Sync to live position (modulo total duration for looping)
+      const pos = data!.positionSecs ?? 0;
+      loadBook(book, pos);
+    } catch { /* ignore */ }
+    finally { setLoading(false); }
+  }
+
+  const isActive = isRadioLoaded && isPlaying;
+
   return (
-    <>
-      <button
-        onClick={() => setModalOpen(true)}
-        aria-label="Scroll Radio — Now Playing"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 7,
-          padding: '7px 13px',
-          borderRadius: 'var(--radius-full)',
-          background: 'linear-gradient(135deg, #e53e3e, #c53030)',
-          color: 'white',
-          border: 'none',
-          fontWeight: 700,
-          fontSize: '0.8rem',
-          letterSpacing: '0.01em',
-          cursor: 'pointer',
-          boxShadow: '0 3px 12px rgba(229,62,62,0.4)',
-          transition: 'all 0.2s',
-          whiteSpace: 'nowrap',
-        }}
-        onMouseEnter={(e) => {
+    <button
+      onClick={handleClick}
+      disabled={loading}
+      aria-label="Scroll Radio — Now Playing"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 7,
+        padding: '7px 13px',
+        borderRadius: 'var(--radius-full)',
+        background: loading ? 'var(--color-surface-2)' : 'linear-gradient(135deg, #e53e3e, #c53030)',
+        color: loading ? 'var(--color-text-muted)' : 'white',
+        border: 'none',
+        fontWeight: 700,
+        fontSize: '0.8rem',
+        letterSpacing: '0.01em',
+        cursor: loading ? 'default' : 'pointer',
+        boxShadow: loading ? 'none' : '0 3px 12px rgba(229,62,62,0.4)',
+        transition: 'all 0.2s',
+        whiteSpace: 'nowrap',
+      }}
+      onMouseEnter={(e) => {
+        if (!loading) {
           (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
           (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 5px 18px rgba(229,62,62,0.55)';
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.transform = '';
-          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 3px 12px rgba(229,62,62,0.4)';
-        }}
-      >
-        <span style={{
-          width: 8, height: 8, borderRadius: '50%',
-          background: 'white',
-          display: 'inline-block',
-          animation: 'radioPulse 1.4s ease-in-out infinite',
-          flexShrink: 0,
-        }} />
-        Now Playing
-      </button>
-
-      {modalOpen && (
-        <RadioModal data={data} onClose={() => setModalOpen(false)} />
+        }
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.transform = '';
+        (e.currentTarget as HTMLButtonElement).style.boxShadow = loading ? 'none' : '0 3px 12px rgba(229,62,62,0.4)';
+      }}
+    >
+      {loading ? (
+        <>
+          <Radio size={13} style={{ opacity: 0.5 }} />
+          Tuning in…
+        </>
+      ) : (
+        <>
+          <span style={{
+            width: 8, height: 8, borderRadius: '50%',
+            background: 'white',
+            display: 'inline-block',
+            animation: isActive ? 'none' : 'radioPulse 1.4s ease-in-out infinite',
+            flexShrink: 0,
+            opacity: isActive ? 1 : undefined,
+          }} />
+          {isActive ? '⏸ Live' : 'Now Playing'}
+        </>
       )}
 
       <style>{`
@@ -259,7 +174,7 @@ function NowPlayingButton() {
           50%       { opacity: 0.5; transform: scale(0.7); }
         }
       `}</style>
-    </>
+    </button>
   );
 }
 
@@ -496,8 +411,6 @@ export function TopBar() {
         </div>,
         document.body
       )}
-
-
     </>
   );
 }
