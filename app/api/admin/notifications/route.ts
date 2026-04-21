@@ -1,8 +1,7 @@
+import { sql } from '@/lib/db';
 import { NextResponse } from 'next/server';
-import { neon } from '@neondatabase/serverless';
 import { requireAdmin, adminForbidden } from '@/lib/admin-auth';
 
-const sql = neon(process.env.DATABASE_URL!);
 
 // GET /api/admin/notifications — list all (admin)
 export async function GET() {

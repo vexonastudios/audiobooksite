@@ -1,8 +1,7 @@
 import { notFound } from 'next/navigation';
-import { neon } from '@neondatabase/serverless';
+import { sql } from '@/lib/db';
 import ArticleForm from '../../ArticleForm';
 
-const sql = neon(process.env.DATABASE_URL!);
 
 export default async function EditArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;

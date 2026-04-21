@@ -1,7 +1,23 @@
-import { neon } from '@neondatabase/serverless';
+import { neon, type NeonQueryFunction } from '@neondatabase/serverless';
 
-// DATABASE_URL must be set in Vercel environment variables.
-// We intentionally do NOT throw at module import time because Next.js
-// static analysis imports this module during build, where the env var
-// may not be available. The error surfaces naturally at request time.
-export const sql = neon(process.env.DATABASE_URL || '');
+// We cannot call neon() at module level because Next.js evaluates server modules
+// during the build's "collect page data" phase, before runtime env vars are available.
+// Instead, we lazily initialize the client on the first DB call.
+
+let _client: NeonQueryFunction<false, false> | null = null;
+
+function getClient(): NeonQueryFunction<false, false> {
+  if (_client) return _client;
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error('DATABASE_URL environment variable is not set.');
+  _client = neon(url);
+  return _client;
+}
+
+// sql is a function identical in signature to neon()'s return value.
+// Tagged template usage: await sql`SELECT ...`
+// The type cast ensures call-sites see the exact same type as before.
+export const sql: NeonQueryFunction<false, false> = (
+  (strings: TemplateStringsArray, ...values: unknown[]) =>
+    getClient()(strings, ...values)
+) as unknown as NeonQueryFunction<false, false>;

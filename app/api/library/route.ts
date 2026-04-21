@@ -1,15 +1,14 @@
+import { sql } from '@/lib/db';
 import { NextResponse } from 'next/server';
 import { getAllAudiobooks } from '@/lib/db/audiobooks';
 import { getAllAuthors } from '@/lib/db/authors';
-import { neon } from '@neondatabase/serverless';
 import audiobooksJson from '@/public/data/audiobooks.json';
 import articlesJson from '@/public/data/articles.json';
 
 export const revalidate = 60; // ISR — refresh every 60 seconds
 
 async function getAllArticles() {
-  const sql = neon(process.env.DATABASE_URL!);
-  const rows = await sql`
+    const rows = await sql`
     SELECT id, slug, title, excerpt, content AS description, pub_date AS "pubDate",
            author_name AS "authorName", cover_image AS "coverImage",
            categories, topics, published,

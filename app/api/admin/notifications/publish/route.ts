@@ -1,12 +1,11 @@
+import { sql } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { neon } from '@neondatabase/serverless';
 import { requireAdmin, adminForbidden } from '@/lib/admin-auth';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const sql = neon(process.env.DATABASE_URL!);
 
 const VOICE_ID = 'fnYMz3F5gMEDGMWcH1ex';
 

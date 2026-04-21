@@ -1,7 +1,6 @@
+import { sql } from '@/lib/db';
 import { NextResponse } from 'next/server';
-import { neon } from '@neondatabase/serverless';
 
-const sql = neon(process.env.DATABASE_URL!);
 
 // GET /api/notifications — public; returns the single most recent active notification
 export async function GET() {

@@ -1,8 +1,7 @@
 import { notFound } from 'next/navigation';
-import { neon } from '@neondatabase/serverless';
+import { sql } from '@/lib/db';
 import NotificationForm from '../../NotificationForm';
 
-const sql = neon(process.env.DATABASE_URL!);
 
 export default async function EditNotificationPage({
   params,

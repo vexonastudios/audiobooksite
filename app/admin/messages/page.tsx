@@ -1,9 +1,8 @@
-import { neon } from '@neondatabase/serverless';
+import { sql } from '@/lib/db';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import AdminMessagesClient from './AdminMessagesClient';
 
-const sql = neon(process.env.DATABASE_URL!);
 
 interface Message {
   id: number;
