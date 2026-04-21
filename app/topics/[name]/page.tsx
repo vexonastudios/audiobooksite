@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       t.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '') === name.toLowerCase())
   );
   const count = topicBooks.length;
-  const topAuthors = [...new Set(topicBooks.map(b => b.authorName))].slice(0, 3).join(', ');
+  const topAuthors = Array.from(new Set(topicBooks.map(b => b.authorName))).slice(0, 3).join(', ');
 
   const title = `Free Audiobooks on ${topicName} — Listen Online`;
   const description = `Listen to ${count} free audiobook${count !== 1 ? 's' : ''} about ${topicName}. Browse titles${topAuthors ? ` from authors like ${topAuthors}` : ''} on ScrollReader — the free Christian audiobook library.`;

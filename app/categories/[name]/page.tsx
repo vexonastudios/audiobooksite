@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     )
   );
   const count = catBooks.length;
-  const topAuthors = [...new Set(catBooks.map(b => b.authorName))].slice(0, 3).join(', ');
+  const topAuthors = Array.from(new Set(catBooks.map(b => b.authorName))).slice(0, 3).join(', ');
 
   const title = `${categoryName} Audiobooks — Free Christian Listening`;
   const description = `Explore ${count} free ${categoryName.toLowerCase()} audiobook${count !== 1 ? 's' : ''}${topAuthors ? ` from authors like ${topAuthors}` : ''}. Listen online at ScrollReader — the free Christian audiobook library.`;
