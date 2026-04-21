@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { getAudiobookBySlug } from '@/lib/db/audiobooks';
 import AudiobookClient from './AudiobookClient';
+
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -175,7 +177,9 @@ export default async function AudiobookPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <AudiobookClient />
+      <Suspense>
+        <AudiobookClient />
+      </Suspense>
     </>
   );
 }
