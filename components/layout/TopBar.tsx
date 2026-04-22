@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, Settings, X, Menu, ArrowLeft, Radio } from 'lucide-react';
+import { Search, Settings, X, Menu, ArrowLeft, Radio, Info } from 'lucide-react';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { useUserStore } from '@/lib/store/userStore';
@@ -119,64 +119,75 @@ function NowPlayingButton() {
   const isActive = isRadioLoaded && isPlaying;
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={loading}
-      aria-label="Scroll Radio — Now Playing"
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 7,
-        padding: '7px 13px',
-        borderRadius: 'var(--radius-full)',
-        background: loading ? 'var(--color-surface-2)' : 'linear-gradient(135deg, #e53e3e, #c53030)',
-        color: loading ? 'var(--color-text-muted)' : 'white',
-        border: 'none',
-        fontWeight: 700,
-        fontSize: '0.8rem',
-        letterSpacing: '0.01em',
-        cursor: loading ? 'default' : 'pointer',
-        boxShadow: loading ? 'none' : '0 3px 12px rgba(229,62,62,0.4)',
-        transition: 'all 0.2s',
-        whiteSpace: 'nowrap',
-      }}
-      onMouseEnter={(e) => {
-        if (!loading) {
-          (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
-          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 5px 18px rgba(229,62,62,0.55)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.transform = '';
-        (e.currentTarget as HTMLButtonElement).style.boxShadow = loading ? 'none' : '0 3px 12px rgba(229,62,62,0.4)';
-      }}
-    >
-      {loading ? (
-        <>
-          <Radio size={13} style={{ opacity: 0.5 }} />
-          Tuning in…
-        </>
-      ) : (
-        <>
-          <span style={{
-            width: 8, height: 8, borderRadius: '50%',
-            background: 'white',
-            display: 'inline-block',
-            animation: isActive ? 'none' : 'radioPulse 1.4s ease-in-out infinite',
-            flexShrink: 0,
-            opacity: isActive ? 1 : undefined,
-          }} />
-          {isActive ? '⏸ Live' : 'Now Playing'}
-        </>
-      )}
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        aria-label="Scroll Radio — Now Playing"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 7,
+          padding: '7px 13px',
+          borderRadius: 'var(--radius-full)',
+          background: loading ? 'var(--color-surface-2)' : 'linear-gradient(135deg, #e53e3e, #c53030)',
+          color: loading ? 'var(--color-text-muted)' : 'white',
+          border: 'none',
+          fontWeight: 700,
+          fontSize: '0.8rem',
+          letterSpacing: '0.01em',
+          cursor: loading ? 'default' : 'pointer',
+          boxShadow: loading ? 'none' : '0 3px 12px rgba(229,62,62,0.4)',
+          transition: 'all 0.2s',
+          whiteSpace: 'nowrap',
+        }}
+        onMouseEnter={(e) => {
+          if (!loading) {
+            (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
+            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 5px 18px rgba(229,62,62,0.55)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.transform = '';
+          (e.currentTarget as HTMLButtonElement).style.boxShadow = loading ? 'none' : '0 3px 12px rgba(229,62,62,0.4)';
+        }}
+      >
+        {loading ? (
+          <>
+            <Radio size={13} style={{ opacity: 0.5 }} />
+            Tuning in…
+          </>
+        ) : (
+          <>
+            <span style={{
+              width: 8, height: 8, borderRadius: '50%',
+              background: 'white',
+              display: 'inline-block',
+              animation: isActive ? 'none' : 'radioPulse 1.4s ease-in-out infinite',
+              flexShrink: 0,
+              opacity: isActive ? 1 : undefined,
+            }} />
+            {isActive ? '⏸ Live' : 'Now Playing'}
+          </>
+        )}
 
-      <style>{`
-        @keyframes radioPulse {
-          0%, 100% { opacity: 1; transform: scale(1);   }
-          50%       { opacity: 0.5; transform: scale(0.7); }
-        }
-      `}</style>
-    </button>
+        <style>{`
+          @keyframes radioPulse {
+            0%, 100% { opacity: 1; transform: scale(1);   }
+            50%       { opacity: 0.5; transform: scale(0.7); }
+          }
+        `}</style>
+      </button>
+
+      <Link 
+        href="/scroll-radio" 
+        className="btn btn-icon" 
+        aria-label="About Scroll Radio"
+        title="What is Scroll Radio?"
+      >
+        <Info size={18} style={{ color: 'var(--color-text-muted)' }} />
+      </Link>
+    </div>
   );
 }
 
