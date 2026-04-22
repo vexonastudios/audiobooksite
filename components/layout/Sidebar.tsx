@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash, Bell, Trophy, BookMarked, ChevronUp, Heart, Mail, Settings2, Radio, DownloadCloud, Gift } from 'lucide-react';
+import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash, Bell, Trophy, BookMarked, ChevronUp, ChevronDown, Heart, Mail, Settings2, Radio, DownloadCloud, Gift } from 'lucide-react';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useEffect, useState } from 'react';
 
@@ -37,6 +37,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { sidebarOpen, closeSidebar } = useUIStore();
   const [isOnline, setIsOnline] = useState(true);
+  const [moreExpanded, setMoreExpanded] = useState(true);
 
   // Track online status
   useEffect(() => {
@@ -144,10 +145,13 @@ export function Sidebar() {
           {isOnline && (
             <>
               <div style={{ height: 1, background: 'var(--color-border)', margin: '16px 8px' }} />
-              <div style={{ padding: '0 12px', marginBottom: 8, fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center' }}>
-                More <ChevronUp size={16} style={{ strokeWidth: 2.5, marginLeft: 4 }} />
+              <div 
+                onClick={() => setMoreExpanded(!moreExpanded)}
+                style={{ padding: '0 12px', marginBottom: 8, fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
+              >
+                More {moreExpanded ? <ChevronUp size={16} style={{ strokeWidth: 2.5, marginLeft: 4 }} /> : <ChevronDown size={16} style={{ strokeWidth: 2.5, marginLeft: 4 }} />}
               </div>
-              {renderGroup(moreGroup)}
+              {moreExpanded && renderGroup(moreGroup)}
             </>
           )}
         </nav>
