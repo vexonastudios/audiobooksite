@@ -2,18 +2,19 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BookOpen, Heart, Quote, BookmarkPlus, Clock, User } from 'lucide-react';
+import { Home, BookOpen, Heart, Quote, BookmarkPlus, Clock, User, DownloadCloud } from 'lucide-react';
 import { useUserStore } from '@/lib/store/userStore';
 import { useEffect, useState } from 'react';
 
 const allTabs: Record<string, { href: string; label: string; icon: React.ElementType }> = {
-  home: { href: '/', label: 'Home', icon: Home },
-  browse: { href: '/audiobooks', label: 'Browse', icon: BookOpen },
-  favorites: { href: '/favorites', label: 'Favorites', icon: Heart },
-  bookmarks: { href: '/bookmarks', label: 'Bookmarks', icon: BookmarkPlus },
-  quotes: { href: '/quotes', label: 'Quotes', icon: Quote },
-  history: { href: '/history', label: 'History', icon: Clock },
-  status: { href: '/status', label: 'My Status', icon: User },
+  home:      { href: '/',           label: 'Home',      icon: Home          },
+  browse:    { href: '/audiobooks', label: 'Browse',    icon: BookOpen      },
+  favorites: { href: '/favorites',  label: 'Favorites', icon: Heart         },
+  bookmarks: { href: '/bookmarks',  label: 'Bookmarks', icon: BookmarkPlus  },
+  quotes:    { href: '/quotes',     label: 'Quotes',    icon: Quote         },
+  history:   { href: '/history',    label: 'History',   icon: Clock         },
+  downloads: { href: '/downloads',  label: 'Downloads', icon: DownloadCloud },
+  status:    { href: '/status',     label: 'My Status', icon: User          },
 };
 
 const DEFAULT_TABS = ['home', 'browse', 'favorites', 'quotes'];

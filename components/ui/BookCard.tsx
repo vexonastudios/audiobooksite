@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Play } from 'lucide-react';
+import { Play, CheckCircle } from 'lucide-react';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
+import { useOfflineStore } from '@/lib/store/offlineStore';
 import type { Audiobook } from '@/lib/types';
 
 function getDurationSecs(book: Audiobook) {
@@ -25,6 +26,7 @@ interface BookCardProps {
 export function BookCard({ book, width = 168, compact = false }: BookCardProps) {
   const loadBook = usePlayerStore((s) => s.loadBook);
   const historyEntry = useUserStore((s) => s.history.find(h => h.bookId === book.id));
+  const savedOffline = useOfflineStore((s) => !!s.offlineBooks[book.id]);
   const [hovered, setHovered] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
 
@@ -67,6 +69,21 @@ export function BookCard({ book, width = 168, compact = false }: BookCardProps) 
         {progress !== null && (
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 6, background: 'rgba(0,0,0,0.5)', overflow: 'hidden' }}>
              <div style={{ width: `${progress}%`, height: '100%', background: '#22c55e' }} />
+          </div>
+        )}
+
+        {/* Offline saved badge */}
+        {savedOffline && (
+          <div title="Saved for offline listening" style={{
+            position: 'absolute', top: 6, right: 6,
+            background: 'var(--color-brand)',
+            color: 'white',
+            borderRadius: '50%',
+            width: 22, height: 22,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.35)',
+          }}>
+            <CheckCircle size={14} strokeWidth={2.5} />
           </div>
         )}
 
