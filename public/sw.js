@@ -77,18 +77,28 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Cached images (book covers) → Cache-first for offline display
-  const isImage = url.pathname.match(/\.(png|jpg|jpeg|webp|avif|gif)$/i);
+  // 3. Cached images (book covers) — cache-first for offline display
+  // Handle both same-origin (/public/*) and known external image hosts
+  const isImage =
+    url.pathname.match(/\.(png|jpg|jpeg|webp|avif|gif|svg)$/i) &&
+    (url.origin === self.location.origin ||
+     url.hostname === 'scrollreader.com' ||
+     url.hostname === 'audio.scrollreader.com');
+
   if (isImage) {
     event.respondWith(
       caches.open(IMAGE_CACHE).then(async (cache) => {
-        const cached = await cache.match(event.request);
+        const cached = await cache.match(event.request.url);
         if (cached) return cached;
         try {
           const response = await fetch(event.request);
+          if (response.ok) {
+            // Clone before consuming — cache a copy, return the original
+            cache.put(event.request.url, response.clone());
+          }
           return response;
         } catch {
-          // Return nothing if image isn't cached and we're offline
+          // Offline and not cached — return a transparent placeholder
           return new Response('', { status: 404 });
         }
       })

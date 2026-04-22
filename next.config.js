@@ -4,21 +4,28 @@ const nextConfig = {
   // Uncomment BOTH lines below when building for Capacitor:
   // output: 'export',
   // trailingSlash: true,
+
   images: {
-    unoptimized: true,
+    // Keep unoptimized: true ONLY when building for Capacitor (output: 'export').
+    // For web (Vercel), leave this false so Vercel's Image CDN serves WebP + responsive sizes.
+    // unoptimized: true,
     remotePatterns: [
+      // Legacy WordPress origin — can be removed once image migration to R2 is complete
       { protocol: 'https', hostname: 'scrollreader.com' },
+      // R2 audio/image CDN
       { protocol: 'https', hostname: 'audio.scrollreader.com' },
+      // Clerk user avatars
+      { protocol: 'https', hostname: 'img.clerk.com' },
     ],
   },
+
   // Prevent Next.js from bundling packages that ship native binaries.
-  // ffmpeg-static contains a platform binary that must exist as a real file on disk.
   serverExternalPackages: ['fluent-ffmpeg', 'ffmpeg-static'],
-  experimental: {
-    outputFileTracingIncludes: {
-      '/api/admin/generate-64k': ['./node_modules/ffmpeg-static/**/*'],
-      '/api/admin/process-audio': ['./node_modules/ffmpeg-static/**/*'],
-    },
+
+  // Moved from experimental (was deprecated in Next.js 16)
+  outputFileTracingIncludes: {
+    '/api/admin/generate-64k':   ['./node_modules/ffmpeg-static/**/*'],
+    '/api/admin/process-audio':  ['./node_modules/ffmpeg-static/**/*'],
   },
 }
 

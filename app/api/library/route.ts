@@ -31,11 +31,10 @@ export async function GET() {
     ]);
 
     if (audiobooks.length > 0) {
-      return NextResponse.json({
-        audiobooks,
-        articles: articles.length > 0 ? articles : articlesJson,
-        authors,
-      });
+      return NextResponse.json(
+        { audiobooks, articles: articles.length > 0 ? articles : articlesJson, authors },
+        { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } }
+      );
     }
 
     return NextResponse.json({

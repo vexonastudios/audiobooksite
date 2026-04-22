@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Inter, Lora } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { LibraryProvider } from '@/components/providers/LibraryProvider';
@@ -11,6 +12,21 @@ import { GlobalAudioPlayer } from '@/components/player/GlobalAudioPlayer';
 import { TabBar } from '@/components/layout/TabBar';
 import { PWAUpdater } from '@/components/ui/PWAUpdater';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const lora = Lora({
+  subsets: ['latin'],
+  weight: ['400', '600'],
+  style: ['normal', 'italic'],
+  variable: '--font-lora',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -58,7 +74,7 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${lora.variable}`}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <link rel="icon" href="/favicon.ico" />
