@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { requireAdmin, adminForbidden } from '@/lib/admin-auth';
 import { getAudiobookById, updateAudiobook } from '@/lib/db/audiobooks';
 import ffmpegPath from 'ffmpeg-static';
 import ffmpeg from 'fluent-ffmpeg';
-import { Readable } from 'stream';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import * as https from 'https';
+import * as http from 'http';
 
 // Force Node.js runtime — needed for ffmpeg and fs access
 export const runtime = 'nodejs';
@@ -29,9 +30,9 @@ const r2 = new S3Client({
  * Body: { bookId: "123" }
  *
  * Takes an existing audiobook's 128kbps MP3 and generates a 64kbps mono version.
- * Downloads from R2 → transcodes with ffmpeg → uploads back to R2 → updates DB.
+ * Downloads from the public MP3 URL → transcodes with ffmpeg → uploads to R2 → updates DB.
  *
- * Returns: { mp3UrlLow, title }
+ * Returns: { mp3UrlLow, title, key64 }
  */
 export async function POST(req: NextRequest) {
   let tmpDir: string | null = null;
@@ -44,28 +45,17 @@ export async function POST(req: NextRequest) {
     // 1. Fetch the audiobook from DB
     const book = await getAudiobookById(bookId);
     if (!book) return NextResponse.json({ error: 'Book not found' }, { status: 404 });
-    if (!book.mp3Url) return NextResponse.json({ error: 'Book has no 128kbps MP3 URL' }, { status: 400 });
+    if (!book.mp3Url) return NextResponse.json({ error: 'Book has no MP3 URL' }, { status: 400 });
 
-    // 2. Derive the R2 key from the public URL
     const publicUrlBase = process.env.R2_PUBLIC_URL!;
-    if (!book.mp3Url.startsWith(publicUrlBase)) {
-      return NextResponse.json({ error: `MP3 URL does not match R2_PUBLIC_URL. Expected prefix: ${publicUrlBase}` }, { status: 400 });
-    }
-    const existingKey = book.mp3Url.replace(publicUrlBase + '/', '');
 
-    // 3. Create temp dir and download the 128kbps file
+    // 2. Create temp dir
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sr-gen64-'));
     const inputPath = path.join(tmpDir, 'input.mp3');
     const out64Path = path.join(tmpDir, 'out-64.mp3');
 
-    const getCmd = new GetObjectCommand({ Bucket: process.env.R2_BUCKET_NAME!, Key: existingKey });
-    const { Body } = await r2.send(getCmd);
-    if (!Body) throw new Error('Empty R2 response when downloading source MP3');
-
-    await new Promise<void>((resolve, reject) => {
-      const ws = fs.createWriteStream(inputPath);
-      (Body as Readable).pipe(ws).on('finish', resolve).on('error', reject);
-    });
+    // 3. Download the source MP3 directly from its public URL (no R2 key guessing needed)
+    await downloadUrl(book.mp3Url, inputPath);
 
     // 4. Transcode to 64kbps mono
     await new Promise<void>((resolve, reject) => {
@@ -79,37 +69,66 @@ export async function POST(req: NextRequest) {
         .run();
     });
 
-    // 5. Generate the 64k key based on the existing filename
-    //    e.g. "in-quest-of-god-broomhall-128.mp3" → "in-quest-of-god-broomhall-64.mp3"
-    const key64 = existingKey.replace(/-128\.mp3$/, '-64.mp3');
-    if (key64 === existingKey) {
-      // Fallback: if the filename doesn't end with -128.mp3, derive from slug
-      const fallbackKey = `${book.slug}-64.mp3`;
-      await uploadToR2(out64Path, fallbackKey, 'audio/mpeg');
-      const mp3UrlLow = `${publicUrlBase}/${fallbackKey}`;
-      await updateAudiobook(bookId, { mp3UrlLow });
-      return NextResponse.json({ mp3UrlLow, title: book.title });
-    }
+    // 5. Derive the 64k output key from the source URL filename
+    //    Strategy: strip domain, strip query params, derive base name, append -64
+    //
+    //    Examples:
+    //      https://audio.scrollreader.com/book-name.mp3          → book-name-64.mp3
+    //      https://audio.scrollreader.com/book-name-128.mp3      → book-name-64.mp3
+    //      https://audio.scrollreader.com/audio/book-name-128.mp3 → audio/book-name-64.mp3
+    const urlPath = new URL(book.mp3Url).pathname; // e.g. "/book-name-128.mp3"
+    const withoutLeadingSlash = urlPath.replace(/^\//, '');  // "book-name-128.mp3"
+    // Strip any existing quality suffix (-128, -64, -low, -high, etc.) before the extension
+    const key64 = withoutLeadingSlash.replace(/(-128|-64|-low|-high|-standard)?\.mp3$/i, '-64.mp3');
 
-    // 6. Upload to R2
+    // 6. Upload the 64k file to R2
     await uploadToR2(out64Path, key64, 'audio/mpeg');
 
     const mp3UrlLow = `${publicUrlBase}/${key64}`;
 
-    // 7. Update the DB
+    // 7. Update DB
     await updateAudiobook(bookId, { mp3UrlLow });
 
-    return NextResponse.json({ mp3UrlLow, title: book.title });
+    return NextResponse.json({ mp3UrlLow, key64, title: book.title });
   } catch (err: unknown) {
     if (err instanceof Error && err.message === 'Forbidden') return adminForbidden();
     console.error('generate-64k error:', err);
+    // Return the full error string so the admin UI can surface it
     return NextResponse.json({ error: String(err) }, { status: 500 });
   } finally {
     if (tmpDir) fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 }
 
-// ── Helper ────────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/**
+ * Download a URL to a local file path using Node's built-in http/https,
+ * following up to 5 redirects.
+ */
+function downloadUrl(url: string, destPath: string, redirectsLeft = 5): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (redirectsLeft <= 0) return reject(new Error(`Too many redirects downloading: ${url}`));
+    const client = url.startsWith('https') ? https : http;
+    client.get(url, (res) => {
+      // Follow redirects (301, 302, 307, 308)
+      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        res.resume(); // consume + discard body
+        return downloadUrl(res.headers.location, destPath, redirectsLeft - 1)
+          .then(resolve).catch(reject);
+      }
+      if (res.statusCode && res.statusCode >= 400) {
+        res.resume();
+        return reject(new Error(`HTTP ${res.statusCode} downloading MP3 from: ${url}`));
+      }
+      const ws = fs.createWriteStream(destPath);
+      res.pipe(ws);
+      ws.on('finish', resolve);
+      ws.on('error', reject);
+      res.on('error', reject);
+    }).on('error', reject);
+  });
+}
 
 async function uploadToR2(filePath: string, key: string, contentType: string) {
   const body = fs.readFileSync(filePath);
