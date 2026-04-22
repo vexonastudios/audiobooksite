@@ -144,7 +144,7 @@ export function AudioEngine() {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: currentBook.title,
       artist: currentBook.authorName,
-      album: 'ScrollReader',
+      album: 'Scroll Reader',
       artwork: currentBook.coverImage
         ? [{ src: currentBook.coverImage, sizes: '512x512', type: 'image/webp' }]
         : [],

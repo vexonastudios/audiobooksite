@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const plainExcerpt = (article.excerpt || article.description || '')
     .replace(/<[^>]*>/g, '')
     .slice(0, 160);
-  const description = plainExcerpt || `Read "${article.title}" on ScrollReader.`;
+  const description = plainExcerpt || `Read "${article.title}" on Scroll Reader.`;
   const url = `https://scrollreader.com/articles/${slug}`;
   const coverImage = article.coverImage || 'https://scrollreader.com/logo.png';
 
@@ -28,10 +28,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: { canonical: url },
     openGraph: {
       type: 'article',
-      title: `${article.title} | ScrollReader`,
+      title: `${article.title} | Scroll Reader`,
       description,
       url,
-      siteName: 'ScrollReader',
+      siteName: 'Scroll Reader',
       images: [{ url: coverImage, width: 800, height: 600, alt: article.title }],
       ...(article.pubDate ? { publishedTime: new Date(article.pubDate).toISOString() } : {}),
     },

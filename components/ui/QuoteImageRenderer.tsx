@@ -119,7 +119,7 @@ export const QuoteImageRenderer = forwardRef<HTMLDivElement, Props>(({ quoteText
             padding: '12px 24px',
             display: 'inline-block'
           }}>
-            ScrollReader.com
+            scrollreader.com
           </div>
         </div>
 

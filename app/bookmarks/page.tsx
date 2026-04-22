@@ -25,7 +25,7 @@ function BookmarkCard({ bm, onDelete, onPlay, onUpdate }: { bm: BookmarkType; on
 
   function shareQuote() {
     if (!bm.transcriptContext) return;
-    const bookTitle = bm.bookTitle || 'ScrollReader Audiobook';
+    const bookTitle = bm.bookTitle || 'Scroll Reader Audiobook';
     const author = bm.bookAuthor || '';
     const slug = bm.bookSlug || '';
     const text = `"${bm.transcriptContext}"\n\n— ${bookTitle}${author ? ' by ' + author : ''}\nhttps://scrollreader.com/audiobook/${slug}?t=${Math.floor(bm.time)}`;

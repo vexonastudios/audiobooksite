@@ -1,5 +1,5 @@
 /**
- * WordPress XML → JSON Parser for ScrollReader
+ * WordPress XML → JSON Parser for Scroll Reader
  * Run: node scripts/parse-wp-xml.js
  *
  * Reads:  scrollreader.WordPress.2026-04-19.xml (root dir)

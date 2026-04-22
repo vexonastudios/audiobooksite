@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: 'Physical Books — Buy Print Editions',
   description: 'Find physical copies of every audiobook in our library. Links to Amazon, Granted Ministries, and more.',
   openGraph: {
-    title: 'Physical Books | ScrollReader',
+    title: 'Physical Books | Scroll Reader',
     description: 'Buy physical copies of the books in our free Christian audiobook library.',
     url: 'https://scrollreader.com/printed-books',
   },

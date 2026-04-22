@@ -4,8 +4,8 @@ import type { Metadata } from 'next';
 import AuthorsClient, { AuthorData } from './AuthorsClient';
 
 export const metadata: Metadata = {
-  title: 'Authors — ScrollReader',
-  description: 'Browse all Christian authors available as free audiobooks on ScrollReader.',
+  title: 'Authors — Scroll Reader',
+  description: 'Browse all Christian authors available as free audiobooks on Scroll Reader.',
 };
 
 export default async function AuthorsIndexPage() {

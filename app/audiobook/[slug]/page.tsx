@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const description =
     (book.excerpt || book.description || '').replace(/<[^>]*>/g, '').slice(0, 160) ||
-    `Listen to "${book.title}" by ${book.authorName} — a free Christian audiobook on ScrollReader.`;
+    `Listen to "${book.title}" by ${book.authorName} — a free Christian audiobook on Scroll Reader.`;
 
   const url = `https://scrollreader.com/audiobook/${book.slug}`;
   const coverImage = book.coverImage || book.thumbnailUrl || 'https://scrollreader.com/placeholder.png';
@@ -35,10 +35,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     openGraph: {
       type: 'book',
-      title: `${book.title} by ${book.authorName} — Free Audiobook | ScrollReader`,
+      title: `${book.title} by ${book.authorName} — Free Audiobook | Scroll Reader`,
       description,
       url,
-      siteName: 'ScrollReader',
+      siteName: 'Scroll Reader',
       images: [
         {
           url: coverImage,

@@ -30,7 +30,7 @@ export default function ArticlesIndex() {
       {/* Header */}
       <div style={{ marginBottom: 48 }}>
         <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-brand)', marginBottom: 10 }}>
-          The ScrollReader Journal
+          The Scroll Reader Journal
         </div>
         <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.25rem)', fontWeight: 800, lineHeight: 1.1, margin: '0 0 14px', letterSpacing: '-0.03em' }}>
           Articles & Excerpts

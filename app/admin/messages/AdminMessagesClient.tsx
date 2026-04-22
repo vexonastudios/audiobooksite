@@ -88,7 +88,7 @@ export default function AdminMessagesClient({
           )}
         </div>
         <a
-          href={`mailto:?subject=ScrollReader Messages`}
+          href={`mailto:?subject=Scroll Reader Messages`}
           style={{ fontSize: 13, color: '#2e6aa7', textDecoration: 'none', fontWeight: 500 }}
         >
           Open Email ↗

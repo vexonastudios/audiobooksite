@@ -777,7 +777,7 @@ export default function AudiobookClient() {
                   const shareUrl = isCurrent
                     ? `https://scrollreader.com/audiobook/${book.slug}?t=${Math.floor(currentTime)}`
                     : `https://scrollreader.com/audiobook/${book.slug}`;
-                  const shareText = `Listening to "${book.title}" by ${book.authorName} on ScrollReader`;
+                  const shareText = `Listening to "${book.title}" by ${book.authorName} on Scroll Reader`;
 
                   const socials: { label: string; color: string; href: string; icon: React.ReactNode }[] = [
                     {

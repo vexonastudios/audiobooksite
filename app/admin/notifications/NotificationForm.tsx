@@ -280,7 +280,7 @@ export default function NotificationForm({
               <textarea
                 value={bodyText}
                 onChange={e => setBodyText(e.target.value)}
-                placeholder="Hey everyone! We just added a new audiobook by Charles Spurgeon — Morning and Evening — now available to stream for free on ScrollReader."
+                placeholder="Hey everyone! We just added a new audiobook by Charles Spurgeon — Morning and Evening — now available to stream for free on Scroll Reader."
                 rows={5}
                 style={{ fontFamily: 'inherit', lineHeight: 1.65 }}
               />
@@ -416,7 +416,7 @@ export default function NotificationForm({
               <Mic size={13} /> Voice
             </h2>
             <div style={{ fontSize: 13, color: '#4A5568', lineHeight: 1.6 }}>
-              <div style={{ fontWeight: 600, marginBottom: 4 }}>ScrollReader Voice</div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>Scroll Reader Voice</div>
               <div style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'monospace' }}>{VOICE_ID}</div>
               <div style={{ marginTop: 8, color: '#718096', fontSize: 12 }}>Powered by ElevenLabs</div>
             </div>

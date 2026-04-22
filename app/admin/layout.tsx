@@ -24,7 +24,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       }}>
         {/* Brand */}
         <div style={{ padding: '0 20px 20px', borderBottom: '1px solid #E2E8F0', marginBottom: 8 }}>
-          <div style={{ fontSize: 10, letterSpacing: '0.12em', color: '#718096', textTransform: 'uppercase', marginBottom: 4, fontWeight: 600 }}>ScrollReader</div>
+          <div style={{ fontSize: 10, letterSpacing: '0.12em', color: '#718096', textTransform: 'uppercase', marginBottom: 4, fontWeight: 600 }}>Scroll Reader</div>
           <div style={{ fontWeight: 700, fontSize: 17, color: '#2e6aa7', letterSpacing: '-0.02em' }}>Admin CMS</div>
         </div>
 

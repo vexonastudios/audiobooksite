@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Articles & Summaries',
-  description: 'Read curated summaries and articles drawn from classic Christian literature available on ScrollReader.',
+  description: 'Read curated summaries and articles drawn from classic Christian literature available on Scroll Reader.',
   openGraph: {
-    title: 'Articles & Summaries | ScrollReader',
+    title: 'Articles & Summaries | Scroll Reader',
     description: 'Curated summaries and articles drawn from classic Christian literature.',
     url: 'https://scrollreader.com/articles',
   },

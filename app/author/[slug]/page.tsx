@@ -23,8 +23,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = `${author.name} Audiobooks — Listen Free`;
   const description = author.description?.slice(0, 150)
-    ? `${author.description.slice(0, 150)}… Listen to all ${bookCount} audiobook${bookCount !== 1 ? 's' : ''} by ${author.name} for free on ScrollReader.`
-    : `Listen to all ${bookCount} free audiobook${bookCount !== 1 ? 's' : ''} by ${author.name}. Stream classic Christian literature on ScrollReader.`;
+    ? `${author.description.slice(0, 150)}… Listen to all ${bookCount} audiobook${bookCount !== 1 ? 's' : ''} by ${author.name} for free on Scroll Reader.`
+    : `Listen to all ${bookCount} free audiobook${bookCount !== 1 ? 's' : ''} by ${author.name}. Stream classic Christian literature on Scroll Reader.`;
   const url = `https://scrollreader.com/author/${slug}`;
   const image = author.imageUrl || 'https://scrollreader.com/logo.png';
 
@@ -35,10 +35,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: [author.name, `${author.name} audiobooks`, 'free christian audiobooks', 'christian author'],
     alternates: { canonical: url },
     openGraph: {
-      title: `${title} | ScrollReader`,
+      title: `${title} | Scroll Reader`,
       description,
       url,
-      siteName: 'ScrollReader',
+      siteName: 'Scroll Reader',
       type: 'profile',
       images: [{ url: image, width: 400, height: 500, alt: author.name }],
     },

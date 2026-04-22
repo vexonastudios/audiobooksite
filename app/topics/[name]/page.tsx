@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const topAuthors = Array.from(new Set(topicBooks.map(b => b.authorName))).slice(0, 3).join(', ');
 
   const title = `Free Audiobooks on ${topicName} — Listen Online`;
-  const description = `Listen to ${count} free audiobook${count !== 1 ? 's' : ''} about ${topicName}. Browse titles${topAuthors ? ` from authors like ${topAuthors}` : ''} on ScrollReader — the free Christian audiobook library.`;
+  const description = `Listen to ${count} free audiobook${count !== 1 ? 's' : ''} about ${topicName}. Browse titles${topAuthors ? ` from authors like ${topAuthors}` : ''} on Scroll Reader — the free Christian audiobook library.`;
   const url = `https://scrollreader.com/topics/${name}`;
 
   return {
@@ -35,10 +35,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: [topicName, `${topicName} audiobooks`, 'free christian audiobooks', 'listen online'],
     alternates: { canonical: url },
     openGraph: {
-      title: `${title} | ScrollReader`,
+      title: `${title} | Scroll Reader`,
       description,
       url,
-      siteName: 'ScrollReader',
+      siteName: 'Scroll Reader',
       type: 'website',
     },
     twitter: {

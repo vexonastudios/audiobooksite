@@ -4,7 +4,7 @@ import { sql } from '@/lib/db';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Page Not Found | ScrollReader',
+  title: 'Page Not Found | Scroll Reader',
 };
 
 export default async function NotFound() {

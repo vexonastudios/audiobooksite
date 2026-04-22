@@ -187,7 +187,7 @@ async function main() {
   console.log(`  MP3:      ${mp3Url}`);
   console.log(`  Manifest: ${manifestUrl}`);
   console.log('═══════════════════════════════════════════════════════\n');
-  console.log('Next step: Go to the ScrollReader admin → Now Playing,');
+  console.log('Next step: Go to the Scroll Reader admin → Now Playing,');
   console.log('and register this block using the URLs above.\n');
 }
 

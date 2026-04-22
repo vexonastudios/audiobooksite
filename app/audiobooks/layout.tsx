@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: 'Browse Free Christian Audiobooks',
   description: 'Explore our full library of free Christian audiobooks. Filter by category, topic, or author. Sort by popularity, date, or duration.',
   openGraph: {
-    title: 'Browse Free Christian Audiobooks | ScrollReader',
+    title: 'Browse Free Christian Audiobooks | Scroll Reader',
     description: 'Explore our full library of free Christian audiobooks. Filter by category, topic, or author.',
     url: 'https://scrollreader.com/audiobooks',
   },

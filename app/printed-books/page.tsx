@@ -24,7 +24,7 @@ function isAmazonLink(url: string) {
 
 function getStoreName(url: string) {
   if (url.includes('amazon') || url.includes('amzn.to')) return 'Amazon';
-  if (url.includes('scrollreader') || url.includes('shop.scrollreader')) return 'ScrollReader Shop';
+  if (url.includes('scrollreader') || url.includes('shop.scrollreader')) return 'Scroll Reader Shop';
   if (url.includes('grantedministries')) return 'Granted Ministries';
   try {
     return new URL(url).hostname.replace('www.', '').replace('shop.', '');

@@ -100,9 +100,9 @@ export function Sidebar() {
         {/* Logo */}
         <div style={{ padding: '24px 20px 16px' }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-            <img src="/logo.png" alt="ScrollReader Logo" style={{ width: 'auto', height: 36, objectFit: 'contain' }} />
+            <img src="/logo.png" alt="Scroll Reader Logo" style={{ width: 'auto', height: 36, objectFit: 'contain' }} />
             <span style={{ fontWeight: 800, fontSize: '1.0625rem', color: 'var(--color-text-primary)', letterSpacing: '-0.01em' }}>
-              ScrollReader
+              Scroll Reader
             </span>
           </Link>
           <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 4, marginLeft: 46 }}>
@@ -141,7 +141,7 @@ export function Sidebar() {
 
         {/* Footer */}
         <div style={{ padding: '16px 20px', borderTop: '1px solid var(--color-border)', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-          © {new Date().getFullYear()} ScrollReader
+          © {new Date().getFullYear()} Scroll Reader
         </div>
       </aside>
     </>

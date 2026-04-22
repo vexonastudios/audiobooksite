@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: 'Audiobook Topics',
   description: 'Discover free Christian audiobooks by topic — Prayer, Faith, Holiness, Evangelism, Suffering, and more.',
   openGraph: {
-    title: 'Audiobook Topics | ScrollReader',
+    title: 'Audiobook Topics | Scroll Reader',
     description: 'Discover free Christian audiobooks by topic.',
     url: 'https://scrollreader.com/topics',
   },

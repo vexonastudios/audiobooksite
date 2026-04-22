@@ -76,10 +76,10 @@ export default function AnnouncementsPage() {
           <Bell size={13} /> Announcements
         </div>
         <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 800, lineHeight: 1.15, marginBottom: 10 }}>
-          ScrollReader Updates
+          Scroll Reader Updates
         </h1>
         <p style={{ color: 'var(--color-text-secondary)', fontSize: '1.0625rem', lineHeight: 1.65, maxWidth: 560 }}>
-          Audio announcements from the ScrollReader team — new books, site updates, and more.
+          Audio announcements from the Scroll Reader team — new books, site updates, and more.
         </p>
       </div>
 

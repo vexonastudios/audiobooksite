@@ -1,7 +1,7 @@
 {
   "name": "scroll-radio-generator",
   "version": "1.0.0",
-  "description": "Scroll Radio — Now Playing block generator for ScrollReader",
+  "description": "Scroll Radio — Now Playing block generator for Scroll Reader",
   "type": "module",
   "main": "main.js",
   "scripts": {
