@@ -501,6 +501,19 @@ export default function HomePage() {
         <ScrollRow books={recentBooks} />
       </section>
 
+      {/* Trending This Week */}
+      {trendingBooks.length > 0 && (
+        <section style={{ marginBottom: 40 }}>
+          <div className="section-header">
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <TrendingUp size={20} style={{ color: 'var(--color-brand)' }} />
+              Trending This Week
+            </h2>
+          </div>
+          <ScrollRow books={trendingBooks} />
+        </section>
+      )}
+
       {/* Recent Articles */}
       {recentArticles.length > 0 && (
         <section style={{ marginBottom: 40 }}>
@@ -552,18 +565,7 @@ export default function HomePage() {
         <ScrollRow books={exploreBooks} />
       </section>
 
-      {/* Trending This Week */}
-      {trendingBooks.length > 0 && (
-        <section style={{ marginBottom: 40 }}>
-          <div className="section-header">
-            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <TrendingUp size={20} style={{ color: 'var(--color-brand)' }} />
-              Trending This Week
-            </h2>
-          </div>
-          <ScrollRow books={trendingBooks} />
-        </section>
-      )}
+
 
       {/* Stats banner */}
       <div style={{
