@@ -63,19 +63,6 @@ export default async function HomePage() {
         audiobookCount={audiobookCount}
       />
 
-      {/* ── Stats banner ── Server-rendered; count is known at request time */}
-      <div className="stats-banner" role="complementary" aria-label="Library stats">
-        <Headphones size={40} aria-hidden="true" style={{ opacity: 0.8, flexShrink: 0 }} />
-        <div>
-          <h2 style={{ color: 'white', fontWeight: 800, fontSize: '1.25rem', marginBottom: 4 }}>
-            {audiobookCount} Audiobooks — All Free, Forever
-          </h2>
-          <p style={{ opacity: 0.85, fontSize: '0.9375rem', margin: 0 }}>
-            Classic Christian literature from missionary biographies to Puritan devotions. No subscription needed.
-          </p>
-        </div>
-      </div>
-
       {/*
         ── SEO-only link list ──────────────────────────────────────────────────
         Renders actual <a> tags for recent books and articles in the raw HTML

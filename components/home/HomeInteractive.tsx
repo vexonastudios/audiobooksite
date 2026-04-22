@@ -8,7 +8,7 @@ import type { CommunityQuote } from '@/lib/db/quotes';
 import Link from 'next/link';
 import {
   ChevronRight, ChevronLeft, BookOpen, Quote, ArrowUp, Heart, TrendingUp, Headphones,
-  Bookmark, Search, Smartphone, HistoryIcon, UserPlus, RefreshCw, Star,
+  Bookmark, Search, Smartphone, HistoryIcon, UserPlus, RefreshCw, Star, X,
 } from 'lucide-react';
 import { SignInButton } from '@clerk/nextjs';
 import { ScrollRow } from '@/components/ui/ScrollRow';
@@ -353,6 +353,19 @@ export function HomeInteractive({ serverRecentBooks, serverArticles, audiobookCo
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [communityQuotes, setCommunityQuotes] = useState<CommunityQuote[]>([]);
   const [trendingBooks, setTrendingBooks] = useState<Audiobook[]>([]);
+  const [showStatsBanner, setShowStatsBanner] = useState(true);
+
+  // Check if user previously dismissed the banner
+  useEffect(() => {
+    if (localStorage.getItem('hideStatsBanner')) {
+      setShowStatsBanner(false);
+    }
+  }, []);
+
+  const dismissStatsBanner = () => {
+    setShowStatsBanner(false);
+    localStorage.setItem('hideStatsBanner', 'true');
+  };
 
   // Use server-fetched books immediately; fall through to store once loaded
   const recentBooks = isLoaded
@@ -428,6 +441,24 @@ export function HomeInteractive({ serverRecentBooks, serverArticles, audiobookCo
         </div>
         <ScrollRow books={recentBooks} />
       </section>
+
+      {/* Stats Banner — dismissible CTA */}
+      {showStatsBanner && (
+        <div className="stats-banner" role="complementary" aria-label="Library stats">
+          <button className="stats-banner-close" onClick={dismissStatsBanner} aria-label="Dismiss">
+            <X size={18} aria-hidden="true" />
+          </button>
+          <Headphones size={40} aria-hidden="true" style={{ opacity: 0.8, flexShrink: 0 }} className="stats-banner-icon" />
+          <div>
+            <h2 style={{ color: 'white', fontWeight: 800, fontSize: '1.25rem', marginBottom: 4 }} className="stats-banner-title">
+              {audiobookCount} Audiobooks — All Free, Forever
+            </h2>
+            <p style={{ opacity: 0.85, fontSize: '0.9375rem', margin: 0 }} className="stats-banner-text">
+              Classic Christian literature from missionary biographies to Puritan devotions. No subscription needed.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Trending This Week */}
       {trendingBooks.length > 0 && (
