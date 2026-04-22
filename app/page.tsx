@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { useUserStore } from '@/lib/store/userStore';
 import type { Audiobook, Article } from '@/lib/types';
@@ -8,12 +8,10 @@ import type { CommunityQuote } from '@/lib/db/quotes';
 import Link from 'next/link';
 import { Headphones, ChevronRight, ChevronLeft, BookOpen, Quote, ArrowUp, Heart, TrendingUp } from 'lucide-react';
 import { NotificationBanner } from '@/components/ui/NotificationBanner';
-import { BookCard } from '@/components/ui/BookCard';
 import { ScrollRow } from '@/components/ui/ScrollRow';
-import { useState, useEffect } from 'react';
 
 const BOOK_CARD_WIDTH = 168;
-const CL_CARD_WIDTH = 134; // Slightly smaller for Continue Listening
+const CL_CARD_WIDTH = 134;
 
 // ── Article thumbnail colors ───────────────────────────────────────────────────
 const ARTICLE_GRADIENTS = [
@@ -94,7 +92,7 @@ function ArticleScrollRow({ articles, audiobooks }: { articles: Article[]; audio
     checkScroll();
     window.addEventListener('resize', checkScroll);
     return () => window.removeEventListener('resize', checkScroll);
-  }, [articles]);
+  }, []); // articles length won't change after load; resize is the only trigger needed
 
   const scrollLeft = () => {
     if (ref.current) ref.current.scrollBy({ left: -(240 + 14) * 3, behavior: 'smooth' });
@@ -110,7 +108,7 @@ function ArticleScrollRow({ articles, audiobooks }: { articles: Article[]; audio
           <ArticleCard key={a.id} article={a} audiobooks={audiobooks} index={i} />
         ))}
       </div>
-      
+
       {canScrollLeft && (
         <>
           <div className="scroll-fade left" />
@@ -119,7 +117,7 @@ function ArticleScrollRow({ articles, audiobooks }: { articles: Article[]; audio
           </button>
         </>
       )}
-      
+
       {canScrollRight && (
         <>
           <div className="scroll-fade right" />
@@ -153,17 +151,20 @@ function HeroSubtitle({ audiobookCount }: { audiobookCount: number }) {
   const [stats, setStats] = useState<PersonalStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
 
-  // Fetch fresh personal stats from the DB on every home page mount
   useEffect(() => {
     if (!isSignedIn) return;
+    // Abort controller prevents state updates after unmount or re-trigger
+    const controller = new AbortController();
     setStatsLoading(true);
-    fetch('/api/user/stats')
+    fetch('/api/user/stats', { signal: controller.signal })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setStats(data); })
-      .catch(() => {})
+      .catch(() => {}) // AbortError silently ignored too
       .finally(() => setStatsLoading(false));
+    return () => controller.abort();
   }, [isSignedIn]);
 
+  // Not signed in — generic subtitle
   if (!isSignedIn) {
     return (
       <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', margin: 0 }}>
@@ -172,7 +173,7 @@ function HeroSubtitle({ audiobookCount }: { audiobookCount: number }) {
     );
   }
 
-  // Loading skeleton while fetching
+  // Signed in but still fetching on first load — show skeleton
   if (statsLoading && !stats) {
     return (
       <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', marginTop: 4 }}>
@@ -183,7 +184,7 @@ function HeroSubtitle({ audiobookCount }: { audiobookCount: number }) {
     );
   }
 
-  // No listening history yet — fall back to generic subtitle
+  // No listening history yet
   if (!stats || stats.booksStarted === 0) {
     return (
       <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', margin: 0 }}>
@@ -256,7 +257,6 @@ function HomeCommunityQuoteCard({ q }: { q: CommunityQuote }) {
           (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border)';
         }}
       >
-        {/* Quote text */}
         <p style={{
           margin: 0,
           fontSize: '0.85rem',
@@ -273,7 +273,6 @@ function HomeCommunityQuoteCard({ q }: { q: CommunityQuote }) {
           {q.text}
         </p>
 
-        {/* Footer: author + upvotes */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, minWidth: 0 }}>
             {q.bookCover && (
@@ -343,7 +342,7 @@ function CommunityQuotesScrollRow({ quotes }: { quotes: CommunityQuote[] }) {
     checkScroll();
     window.addEventListener('resize', checkScroll);
     return () => window.removeEventListener('resize', checkScroll);
-  }, [quotes]);
+  }, []);
 
   return (
     <div className="scroll-row-wrapper" onMouseEnter={checkScroll}>
@@ -374,71 +373,70 @@ function CommunityQuotesScrollRow({ quotes }: { quotes: CommunityQuote[] }) {
 
 // ── Home Page ─────────────────────────────────────────────────────────────────
 export default function HomePage() {
-  const { audiobooks, articles, isLoaded, getByCategory, getRecent } = useLibraryStore();
+  const { audiobooks, articles, isLoaded, getRecent } = useLibraryStore();
   const history = useUserStore((s) => s.history);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [dailyTags, setDailyTags] = useState<string[]>([]);
   const [dailyExplore, setDailyExplore] = useState<Audiobook[]>([]);
 
-  const categories = useLibraryStore((s) => s.getAllCategories());
-  const topics = useLibraryStore((s) => s.getAllTopics());
-  const recentBooks = getRecent(20);
-  const recentArticles = articles.slice(0, 20);
+  // Memoize expensive derived lists — only recomputes when audiobooks/articles change
+  const recentBooks = useMemo(() => getRecent(20), [audiobooks]); // eslint-disable-line react-hooks/exhaustive-deps
+  const recentArticles = useMemo(() => articles.slice(0, 20), [articles]);
+  const categories = useMemo(() => {
+    const s = new Set<string>();
+    audiobooks.forEach(b => b.categories.forEach(c => s.add(c)));
+    return Array.from(s).sort();
+  }, [audiobooks]);
+  const topics = useMemo(() => {
+    const s = new Set<string>();
+    audiobooks.forEach(b => b.topics.forEach(t => s.add(t)));
+    return Array.from(s).sort();
+  }, [audiobooks]);
 
   // Community quotes for home page preview
   const [communityQuotes, setCommunityQuotes] = useState<CommunityQuote[]>([]);
-  const [communityLoaded, setCommunityLoaded] = useState(false);
 
   // Trending this week
   const [trendingBooks, setTrendingBooks] = useState<Audiobook[]>([]);
-  const [trendingLoaded, setTrendingLoaded] = useState(false);
 
+  // Fetch community quotes once on mount
   useEffect(() => {
-    if (!communityLoaded) {
-      fetch('/api/quotes/community?limit=12&sort=popular')
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (data?.quotes?.length) setCommunityQuotes(data.quotes);
-        })
-        .catch(() => {})
-        .finally(() => setCommunityLoaded(true));
-    }
-  }, [communityLoaded]);
+    const controller = new AbortController();
+    fetch('/api/quotes/community?limit=12&sort=popular', { signal: controller.signal })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.quotes?.length) setCommunityQuotes(data.quotes); })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
 
+  // Fetch trending once on mount
   useEffect(() => {
-    if (!trendingLoaded) {
-      fetch('/api/analytics/trending')
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (data?.books?.length) setTrendingBooks(data.books);
-        })
-        .catch(() => {})
-        .finally(() => setTrendingLoaded(true));
-    }
-  }, [trendingLoaded]);
+    const controller = new AbortController();
+    fetch('/api/analytics/trending', { signal: controller.signal })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.books?.length) setTrendingBooks(data.books); })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
 
+  // Build daily pill tags when categories/topics change
   useEffect(() => {
-    // Merge categories and topics, remove duplicates
     const allTags = Array.from(new Set([...categories, ...topics])).sort();
-    if (allTags.length > 0) {
-      // Use current day as pseudo-random seed to rotate tags daily
-      const seed = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
-      const shuffled = [...allTags].sort((a, b) => {
-         const hashA = (a.charCodeAt(0) + seed) % 100;
-         const hashB = (b.charCodeAt(0) + seed) % 100;
-         return hashA - hashB;
-      });
-      // Show ~15 random distinct tags each day
-      setDailyTags(shuffled.slice(0, 15));
-    }
+    if (allTags.length === 0) return;
+    const seed = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+    const shuffled = [...allTags].sort((a, b) => {
+      const hashA = (a.charCodeAt(0) + seed) % 100;
+      const hashB = (b.charCodeAt(0) + seed) % 100;
+      return hashA - hashB;
+    });
+    setDailyTags(shuffled.slice(0, 15));
   }, [categories, topics]);
 
-  // Build the daily-shuffled Explore pool when books load (excludes recent 20)
+  // Build daily-shuffled Explore pool when books load (excludes recent 20)
   useEffect(() => {
     if (audiobooks.length === 0) return;
-    const recentIds = new Set(getRecent(20).map(b => b.id));
+    const recentIds = new Set(recentBooks.map(b => b.id));
     const pool = audiobooks.filter(b => !recentIds.has(b.id));
-    // Deterministic daily shuffle via seeded sort
     const seed = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
     const shuffled = [...pool].sort((a, b) => {
       const hashA = (a.id.charCodeAt(0) * 31 + seed) % 997;
@@ -446,18 +444,26 @@ export default function HomePage() {
       return hashA - hashB;
     });
     setDailyExplore(shuffled.slice(0, 20));
-  }, [audiobooks]);
+  }, [audiobooks, recentBooks]);
 
-  // "Continue Listening" — map history bookId → audiobook
-  const continueListening = history
-    .slice(0, 10)
-    .map((h) => audiobooks.find((b) => b.id === h.bookId))
-    .filter(Boolean) as Audiobook[];
+  // "Continue Listening" — memoized to avoid O(n) search on every render
+  const continueListening = useMemo(() => {
+    const bookMap = new Map(audiobooks.map(b => [b.id, b]));
+    return history
+      .slice(0, 10)
+      .map(h => bookMap.get(h.bookId))
+      .filter(Boolean) as Audiobook[];
+  }, [history, audiobooks]);
 
-  // "Explore" row — tag-filtered from the daily shuffle, or the shuffle itself
-  const exploreBooks = activeTag
-    ? audiobooks.filter(b => b.categories?.includes(activeTag) || b.topics?.includes(activeTag)).slice(0, 20)
-    : dailyExplore;
+  // "Explore" row — tag-filtered or daily shuffle
+  const exploreBooks = useMemo(() => {
+    if (activeTag) {
+      return audiobooks
+        .filter(b => b.categories?.includes(activeTag) || b.topics?.includes(activeTag))
+        .slice(0, 20);
+    }
+    return dailyExplore;
+  }, [activeTag, audiobooks, dailyExplore]);
 
   if (!isLoaded) {
     return (
@@ -481,7 +487,7 @@ export default function HomePage() {
         <HeroSubtitle audiobookCount={audiobooks.length} />
       </div>
 
-      {/* Continue Listening — compact, no title/author/length */}
+      {/* Continue Listening */}
       {continueListening.length > 0 && (
         <section style={{ marginBottom: 40 }}>
           <div className="section-header">
@@ -514,7 +520,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Recent Articles */}
+      {/* Latest Articles */}
       {recentArticles.length > 0 && (
         <section style={{ marginBottom: 40 }}>
           <div className="section-header">
@@ -562,10 +568,17 @@ export default function HomePage() {
           ))}
         </div>
 
-        <ScrollRow books={exploreBooks} />
+        {/* Skeleton while daily shuffle is being built */}
+        {exploreBooks.length === 0 ? (
+          <div style={{ display: 'flex', gap: 16 }}>
+            {[1,2,3,4,5].map(i => (
+              <div key={i} className="skeleton" style={{ width: BOOK_CARD_WIDTH, height: 230, borderRadius: 'var(--radius-lg)' }} />
+            ))}
+          </div>
+        ) : (
+          <ScrollRow books={exploreBooks} />
+        )}
       </section>
-
-
 
       {/* Stats banner */}
       <div style={{
