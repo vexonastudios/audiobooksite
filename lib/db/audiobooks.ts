@@ -53,7 +53,7 @@ function rowToAudiobook(row: AudiobookRow, chapters: ChapterRow[] = []): Audiobo
     coverImage: row.cover_image,
     thumbnailUrl: row.thumbnail_url,
     mp3Url: row.mp3_url,
-    mp3UrlLow: row.mp3_url_low || undefined,
+    mp3UrlLow: row.mp3_url_low || '',
     totalDuration: row.total_duration,
     length: row.length_str,
     originalYear: String(row.original_year ?? ''),
