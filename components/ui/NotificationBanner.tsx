@@ -106,7 +106,6 @@ export function NotificationBanner() {
         zIndex: 100,
         position: 'relative',
         boxShadow: '0 2px 8px rgba(245,158,11,0.12)',
-        flexWrap: 'wrap',
         marginBottom: 24,
         marginTop: -8,
         borderRadius: 'var(--radius-md)',
@@ -123,7 +122,7 @@ export function NotificationBanner() {
       </div>
 
       {/* Title + body */}
-      <div style={{ flex: 1, minWidth: 200 }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 700, fontSize: '0.875rem', color: '#92400E', lineHeight: 1.2 }}>
           {notif.title}
         </div>
