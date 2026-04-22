@@ -40,9 +40,13 @@ export function ReadAlongPanel({ slug, currentTime, isOpen, onClose, onSeek, boo
     if (!isOpen || cues.length > 0) return;
     setLoading(true);
     setError(false);
-    const url = vttUrl || `/transcripts/${slug}.vtt`;
+    const url = vttUrl || `/api/transcripts?slug=${slug}`;
     fetch(url)
-      .then(r => { if (!r.ok) throw new Error('not found'); return r.text(); })
+      .then(async r => {
+        if (!r.ok) throw new Error('Not found');
+        if (r.headers.get('content-type')?.includes('application/json')) throw new Error('Unavailable');
+        return r.text();
+      })
       .then(text => { setCues(parseVTT(text)); setLoading(false); })
       .catch(() => { setError(true); setLoading(false); });
   }, [isOpen, slug, cues.length, vttUrl]);

@@ -71,9 +71,13 @@ export default function AudiobookClient() {
   useEffect(() => {
     if (!book) return;
     setTranscriptStatus('loading');
-    const url = book.vttUrl || `/transcripts/${book.slug}.vtt`;
+    const url = book.vttUrl || `/api/transcripts?slug=${book.slug}`;
     fetch(url)
-      .then(r => r.ok ? r.text() : Promise.reject())
+      .then(async r => {
+        if (!r.ok) throw new Error('Not found');
+        if (r.headers.get('content-type')?.includes('application/json')) throw new Error('Unavailable');
+        return r.text();
+      })
       .then(text => {
         setLoadedCues(parseVTT(text));
         setTranscriptStatus('available');
