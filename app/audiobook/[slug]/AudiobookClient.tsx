@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLibraryStore, slugify } from '@/lib/store/libraryStore';
@@ -16,6 +16,7 @@ import { DownloadDisclaimerModal } from '@/components/ui/DownloadDisclaimerModal
 import { parseVTT, getContextText } from '@/lib/parseVTT';
 import type { TranscriptCue } from '@/lib/parseVTT';
 import authorsData from '@/public/data/authors.json';
+import { getRecommendations } from '@/lib/recommendations';
 
 function formatTime(s: number) {
   if (isNaN(s) || !isFinite(s)) return '0:00';
@@ -120,7 +121,7 @@ export default function AudiobookClient() {
   // Find active chapter index for display
   const activeChapterIndex = usePlayerStore(s => s.activeChapterIndex);
   const currentChapterIdx = isCurrent ? activeChapterIndex : standbyChapterIdx;
-  const bookmarks = book ? getBookmarksByBook(book.id) : [];
+  const bookBookmarks = book ? getBookmarksByBook(book.id) : [];
 
   if (!isLoaded) {
     return (
@@ -145,9 +146,20 @@ export default function AudiobookClient() {
     );
   }
 
-  // Related books (same first category)
-  const related = useLibraryStore.getState().getByCategory(book.categories[0] || '')
-    .filter(b => b.id !== book.id).slice(0, 8);
+  // Related books — personalized recommendation engine.
+  // Blends content similarity to this book with the user's listening history,
+  // favorites, bookmarks, and saved quotes. Falls back to pure content-similarity
+  // for anonymous users with no history.
+  const { favorites, bookmarks, quotes } = useUserStore();
+  const related = useMemo(() => {
+    const allBooks = useLibraryStore.getState().audiobooks;
+    return getRecommendations(allBooks, { history, favorites, bookmarks, quotes }, {
+      strategy: 'similar',
+      seedBook: book,
+      excludeIds: [book.id],
+      limit: 10,
+    });
+  }, [book, history, favorites, bookmarks, quotes]);
 
   const handlePlayPause = () => {
     if (isCurrent) {
@@ -744,11 +756,11 @@ export default function AudiobookClient() {
                       </div>
                     )}
 
-                    {bookmarks.length === 0 ? (
+                    {bookBookmarks.length === 0 ? (
                       <div className="text-muted text-center" style={{ padding: '32px 0' }}>No bookmarks saved for this book.</div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        {bookmarks.sort((a,b) => a.time - b.time).map(bm => (
+                        {bookBookmarks.sort((a,b) => a.time - b.time).map(bm => (
                           <div key={bm.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '16px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
                             <div>
                                <div style={{ fontWeight: 600, color: 'var(--color-brand)', marginBottom: 4, cursor: 'pointer' }}

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { SignInButton } from '@clerk/nextjs';
 import { ScrollRow } from '@/components/ui/ScrollRow';
+import { getRecommendations } from '@/lib/recommendations';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const CL_CARD_WIDTH = 134;
@@ -412,6 +413,19 @@ export function HomeInteractive({ serverRecentBooks, serverArticles, audiobookCo
     return history.slice(0, 10).map(h => map.get(h.bookId)).filter(Boolean) as Audiobook[];
   }, [history, audiobooks]);
 
+  // Personalized "Picked For You" row — only shown after 3+ books listened.
+  // Reads all user signals to build a taste profile and scores the full library.
+  const favorites = useUserStore(s => s.favorites);
+  const bookmarks = useUserStore(s => s.bookmarks);
+  const quotes    = useUserStore(s => s.quotes);
+  const pickedForYou = useMemo(() => {
+    if (!isLoaded || history.length < 3) return [];
+    return getRecommendations(audiobooks, { history, favorites, bookmarks, quotes }, {
+      strategy: 'personal',
+      limit: 15,
+    });
+  }, [isLoaded, audiobooks, history, favorites, bookmarks, quotes]);
+
   const exploreBooks = useMemo(() => {
     if (!activeTag) return dailyExplore;
     return audiobooks.filter(b => b.categories?.includes(activeTag) || b.topics?.includes(activeTag)).slice(0, 20);
@@ -440,6 +454,20 @@ export function HomeInteractive({ serverRecentBooks, serverArticles, audiobookCo
       {/* Continue Listening — smart layout with side panel on desktop when < 5 books */}
       {continueListening.length > 0 && (
         <ContinueListeningSection books={continueListening} isSignedIn={isSignedIn} />
+      )}
+
+      {/* Picked For You — personalised recommendation row, appears after 3+ listens */}
+      {mounted && pickedForYou.length > 0 && (
+        <section style={{ marginBottom: 40 }}>
+          <div className="section-header">
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Star size={18} aria-hidden="true" style={{ color: 'var(--color-brand)', flexShrink: 0 }} />
+              Picked For You
+            </h2>
+            <Link href="/audiobooks" className="see-all-link">Browse all</Link>
+          </div>
+          <ScrollRow books={pickedForYou} />
+        </section>
       )}
 
       {/* Recent Additions — starts with server data, smooth upgrade when store loads */}
