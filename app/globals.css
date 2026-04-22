@@ -51,6 +51,11 @@
 /* Dark mode — triggered by OS setting OR by [data-theme="dark"] override */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    /* Brand color override for dark mode: Gold/Yellow */
+    --color-brand:        #eab308;
+    --color-brand-light:  #fde047;
+    --color-brand-dark:   #ca8a04;
+
     --color-bg:           #0a0a0a;
     --color-surface:      #171717;
     --color-surface-2:    #262626;
@@ -63,6 +68,11 @@
 
 /* Force dark mode regardless of OS (user chose "Dark" in Settings) */
 [data-theme="dark"] {
+  /* Brand color override for dark mode: Gold/Yellow */
+  --color-brand:        #eab308;
+  --color-brand-light:  #fde047;
+  --color-brand-dark:   #ca8a04;
+
   --color-bg:           #0a0a0a;
   --color-surface:      #171717;
   --color-surface-2:    #262626;
