@@ -298,10 +298,12 @@ function ContinueListeningSection({
             ) : (
               // ── Sign-up CTA for guests ───────────────────────────────────────
               <div className="cl-panel-inner cl-panel-cta">
-                <div className="cl-cta-icon">
-                  <UserPlus size={22} aria-hidden="true" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div className="cl-cta-icon">
+                    <UserPlus size={15} aria-hidden="true" />
+                  </div>
+                  <h3 className="cl-cta-title">Free account — worth it</h3>
                 </div>
-                <h3 className="cl-cta-title">Free account — worth it</h3>
                 <ul className="cl-cta-list" aria-label="Account benefits">
                   <li>
                     <RefreshCw size={13} aria-hidden="true" />
