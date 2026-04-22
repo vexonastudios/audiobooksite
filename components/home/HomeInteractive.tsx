@@ -8,7 +8,9 @@ import type { CommunityQuote } from '@/lib/db/quotes';
 import Link from 'next/link';
 import {
   ChevronRight, ChevronLeft, BookOpen, Quote, ArrowUp, Heart, TrendingUp, Headphones,
+  Bookmark, Search, Smartphone, HistoryIcon, UserPlus, RefreshCw, Star,
 } from 'lucide-react';
+import { SignInButton } from '@clerk/nextjs';
 import { ScrollRow } from '@/components/ui/ScrollRow';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -208,6 +210,126 @@ function HeroSubtitle({ audiobookCount }: { audiobookCount: number }) {
   );
 }
 
+// ── Continue Listening side panel ────────────────────────────────────────────
+// Shown on desktop when the user has < 5 books, filling the wasted whitespace
+// with genuinely useful content rather than an empty grey expanse.
+
+const FEATURE_TIPS = [
+  {
+    icon: Bookmark,
+    title: 'Bookmarks',
+    desc: 'Tap ⋮ on any audiobook to pin a moment in time — great for quotes you want to revisit.',
+  },
+  {
+    icon: Quote,
+    title: 'Save Quotes',
+    desc: 'Highlight any transcript line while listening to save it to your personal quote collection.',
+  },
+  {
+    icon: Search,
+    title: 'Explore by Topic',
+    desc: 'Filter by Missions, Prayer, Puritan, Biography and more using the Explore section below.',
+  },
+  {
+    icon: HistoryIcon,
+    title: 'Listening History',
+    desc: 'Every book you start is tracked. Pick up exactly where you left off, any time.',
+  },
+  {
+    icon: Smartphone,
+    title: 'Add to Home Screen',
+    desc: 'Open in your browser then tap Share → Add to Home Screen for an app-like experience.',
+  },
+];
+
+function ContinueListeningSection({
+  books,
+  isSignedIn,
+}: {
+  books: Audiobook[];
+  isSignedIn: boolean;
+}) {
+  // Show the panel on desktop when there are fewer than 5 books (lots of wasted space)
+  const showPanel = books.length < 5;
+
+  // Pick 2 tips to show — rotate daily so returning users see variety
+  const tipSeed = Math.floor(Date.now() / 86_400_000) % FEATURE_TIPS.length;
+  const tips = [
+    FEATURE_TIPS[tipSeed % FEATURE_TIPS.length],
+    FEATURE_TIPS[(tipSeed + 1) % FEATURE_TIPS.length],
+  ];
+
+  return (
+    <section style={{ marginBottom: 40 }}>
+      <div className="section-header">
+        <h2 className="section-title">Continue Listening</h2>
+        <Link href="/history" className="see-all-link">See all</Link>
+      </div>
+      <div className={`cl-layout${showPanel ? ' cl-layout--with-panel' : ''}`}>
+        {/* Book covers */}
+        <div className="cl-books">
+          <ScrollRow books={books} cardWidth={CL_CARD_WIDTH} compact={true} />
+        </div>
+
+        {/* Side panel — desktop only, only when < 5 books */}
+        {showPanel && (
+          <aside className="cl-panel" aria-label="Site features">
+            {isSignedIn ? (
+              // ── Feature discovery for signed-in light users ──────────────────
+              <div className="cl-panel-inner">
+                <p className="cl-panel-eyebrow">
+                  <Star size={13} aria-hidden="true" style={{ color: 'var(--color-brand)' }} />
+                  Did you know?
+                </p>
+                <div className="cl-tips">
+                  {tips.map((tip, i) => (
+                    <div key={i} className="cl-tip">
+                      <div className="cl-tip-icon">
+                        <tip.icon size={15} aria-hidden="true" />
+                      </div>
+                      <div>
+                        <p className="cl-tip-title">{tip.title}</p>
+                        <p className="cl-tip-desc">{tip.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              // ── Sign-up CTA for guests ───────────────────────────────────────
+              <div className="cl-panel-inner cl-panel-cta">
+                <div className="cl-cta-icon">
+                  <UserPlus size={22} aria-hidden="true" />
+                </div>
+                <h3 className="cl-cta-title">Free account — worth it</h3>
+                <ul className="cl-cta-list" aria-label="Account benefits">
+                  <li>
+                    <RefreshCw size={13} aria-hidden="true" />
+                    Sync progress across all your devices
+                  </li>
+                  <li>
+                    <Bookmark size={13} aria-hidden="true" />
+                    Save bookmarks &amp; favourite quotes
+                  </li>
+                  <li>
+                    <HistoryIcon size={13} aria-hidden="true" />
+                    Full listening history, always intact
+                  </li>
+                </ul>
+                <SignInButton mode="modal">
+                  <button className="cl-cta-btn" aria-label="Sign in or create a free account">
+                    Sign in free →
+                  </button>
+                </SignInButton>
+              </div>
+            )}
+          </aside>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // ── Props from the server page ─────────────────────────────────────────────────
 export interface HomeInteractiveProps {
   /** Pre-fetched by the RSC — used immediately, no Zustand wait needed */
@@ -227,6 +349,7 @@ export interface HomeInteractiveProps {
 export function HomeInteractive({ serverRecentBooks, serverArticles, audiobookCount }: HomeInteractiveProps) {
   const { audiobooks, isLoaded } = useLibraryStore();
   const history = useUserStore(s => s.history);
+  const isSignedIn = useUserStore(s => s.isSignedIn);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [communityQuotes, setCommunityQuotes] = useState<CommunityQuote[]>([]);
   const [trendingBooks, setTrendingBooks] = useState<Audiobook[]>([]);
@@ -292,15 +415,9 @@ export function HomeInteractive({ serverRecentBooks, serverArticles, audiobookCo
         <HeroSubtitle audiobookCount={audiobookCount} />
       </div>
 
-      {/* Continue Listening — only appears when store has loaded + user has history */}
+      {/* Continue Listening — smart layout with side panel on desktop when < 5 books */}
       {continueListening.length > 0 && (
-        <section style={{ marginBottom: 40 }}>
-          <div className="section-header">
-            <h2 className="section-title">Continue Listening</h2>
-            <Link href="/history" className="see-all-link">See all</Link>
-          </div>
-          <ScrollRow books={continueListening} cardWidth={CL_CARD_WIDTH} compact={true} />
-        </section>
+        <ContinueListeningSection books={continueListening} isSignedIn={isSignedIn} />
       )}
 
       {/* Recent Additions — starts with server data, smooth upgrade when store loads */}
