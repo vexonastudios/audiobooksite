@@ -3,6 +3,7 @@
 import { useOfflineStore } from '@/lib/store/offlineStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
+import { useUserStore } from '@/lib/store/userStore';
 import Link from 'next/link';
 import { DownloadCloud, Trash2, Play, WifiOff, ChevronRight, Headphones } from 'lucide-react';
 
@@ -20,9 +21,19 @@ export default function DownloadsPage() {
   const { offlineBooks, removeBookOffline, totalStorageBytes } = useOfflineStore();
   const getBySlug = useLibraryStore((s) => s.getBySlug);
   const loadBook = usePlayerStore((s) => s.loadBook);
+  const history = useUserStore((s) => s.history);
 
   const books = Object.values(offlineBooks).sort((a, b) => b.downloadedAt - a.downloadedAt);
   const totalBytes = totalStorageBytes();
+
+  // Helper: format seconds as h:mm:ss or m:ss
+  function formatTime(secs: number): string {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = Math.floor(secs % 60);
+    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
 
   return (
     <div className="page" style={{ maxWidth: 680, margin: '0 auto', padding: '40px 20px 120px' }}>
@@ -82,6 +93,20 @@ export default function DownloadsPage() {
           {books.map((saved) => {
             const book = getBySlug(saved.slug);
             const cover = book?.coverImage || book?.thumbnailUrl || '';
+            const historyEntry = history.find(h => h.bookId === saved.id);
+            const resumeAt = historyEntry?.position ?? 0;
+
+            // Calculate progress % if we have duration info from the book
+            let progressPct: number | null = null;
+            if (book && resumeAt > 0) {
+              const parts = book.totalDuration?.split(':').map(Number) ?? [];
+              const totalSecs = parts.length === 3
+                ? parts[0] * 3600 + parts[1] * 60 + parts[2]
+                : parts.length === 2 ? parts[0] * 60 + parts[1] : 0;
+              if (totalSecs > 0) {
+                progressPct = Math.min(100, Math.round((resumeAt / totalSecs) * 100));
+              }
+            }
 
             return (
               <div
@@ -139,20 +164,27 @@ export default function DownloadsPage() {
                     <span className="text-secondary" style={{ fontSize: '0.78rem' }}>
                       {formatBytes(saved.sizeBytes)}
                     </span>
-                    <span className="text-secondary" style={{ fontSize: '0.78rem' }}>·</span>
-                    <span className="text-secondary" style={{ fontSize: '0.78rem' }}>
-                      {formatDate(saved.downloadedAt)}
-                    </span>
+                    {resumeAt > 0 && (
+                      <span className="text-secondary" style={{ fontSize: '0.78rem' }}>
+                        · {formatTime(resumeAt)}
+                      </span>
+                    )}
                   </div>
+                  {/* Progress bar */}
+                  {progressPct !== null && progressPct > 0 && (
+                    <div style={{ marginTop: 6, width: '100%', height: 3, background: 'var(--color-surface-2)', borderRadius: 2, overflow: 'hidden' }}>
+                      <div style={{ width: `${progressPct}%`, height: '100%', background: 'var(--color-brand)', borderRadius: 2 }} />
+                    </div>
+                  )}
                 </div>
 
                 {/* Actions */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                  {/* Play button */}
+                  {/* Play / Resume button */}
                   {book && (
                     <button
-                      onClick={() => loadBook(book)}
-                      title="Play"
+                      onClick={() => loadBook(book, resumeAt)}
+                      title={resumeAt > 0 ? `Resume from ${formatTime(resumeAt)}` : 'Play'}
                       style={{
                         width: 36, height: 36, borderRadius: '50%',
                         background: 'var(--color-brand)', color: 'white',
