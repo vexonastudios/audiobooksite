@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Headphones, Users, Tag, Bookmark, Clock, BookOpen, Quote, Hash, Bell, Trophy, BookMarked, ChevronUp, Heart, Mail, Settings2, Radio, DownloadCloud } from 'lucide-react';
 import { useUIStore } from '@/lib/store/uiStore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const mainGroup = [
   { href: '/',            label: 'Home',       icon: Home       },
@@ -35,6 +35,20 @@ const moreGroup = [
 export function Sidebar() {
   const pathname = usePathname();
   const { sidebarOpen, closeSidebar } = useUIStore();
+  const [isOnline, setIsOnline] = useState(true);
+
+  // Track online status
+  useEffect(() => {
+    setIsOnline(navigator.onLine);
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   // Close sidebar whenever route changes (mobile navigation)
   useEffect(() => {
@@ -98,21 +112,31 @@ export function Sidebar() {
 
         {/* Nav */}
         <nav style={{ flex: 1, padding: '8px 12px', overflowY: 'auto' }}>
-          {renderGroup(mainGroup)}
+          {!isOnline && (
+            <div style={{ padding: '8px 12px', marginBottom: 12, background: 'rgba(239,68,68,0.08)', borderRadius: 8, border: '1px solid rgba(239,68,68,0.2)' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-error)' }}>You are offline</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: 2 }}>Only saved downloads are available.</div>
+            </div>
+          )}
 
-          <div style={{ height: 1, background: 'var(--color-border)', margin: '16px 8px' }} />
+          {isOnline && renderGroup(mainGroup)}
+
+          {isOnline && <div style={{ height: 1, background: 'var(--color-border)', margin: '16px 8px' }} />}
 
           <div style={{ padding: '0 12px', marginBottom: 8, fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>
             You
           </div>
-          {renderGroup(youGroup)}
+          {renderGroup(isOnline ? youGroup : youGroup.filter(g => g.href === '/downloads' || g.href === '/settings'))}
 
-          <div style={{ height: 1, background: 'var(--color-border)', margin: '16px 8px' }} />
-
-          <div style={{ padding: '0 12px', marginBottom: 8, fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center' }}>
-            More <ChevronUp size={16} style={{ strokeWidth: 2.5, marginLeft: 4 }} />
-          </div>
-          {renderGroup(moreGroup)}
+          {isOnline && (
+            <>
+              <div style={{ height: 1, background: 'var(--color-border)', margin: '16px 8px' }} />
+              <div style={{ padding: '0 12px', marginBottom: 8, fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center' }}>
+                More <ChevronUp size={16} style={{ strokeWidth: 2.5, marginLeft: 4 }} />
+              </div>
+              {renderGroup(moreGroup)}
+            </>
+          )}
         </nav>
 
         {/* Footer */}

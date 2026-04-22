@@ -23,13 +23,27 @@ export function TabBar() {
   const pathname = usePathname();
   const mobileNavActions = useUserStore((s) => s.mobileNavActions);
   const [mounted, setMounted] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
     setMounted(true);
+    setIsOnline(navigator.onLine);
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   // Use default tabs during SSR to prevent hydration mismatch
-  const tabsToRender = mounted && mobileNavActions?.length > 0 ? mobileNavActions : DEFAULT_TABS;
+  let tabsToRender = mounted && mobileNavActions?.length > 0 ? mobileNavActions : DEFAULT_TABS;
+  if (mounted && !isOnline) {
+    // When offline, enforce a stripped-down tab bar focused on downloads
+    tabsToRender = ['downloads', 'status'];
+  }
 
   return (
     <nav className="tab-bar">
