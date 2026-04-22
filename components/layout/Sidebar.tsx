@@ -102,7 +102,7 @@ export function Sidebar() {
         <div style={{ padding: '24px 20px 16px' }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
             <div className="desktop-only" style={{ display: 'flex', alignItems: 'center' }}>
-              <img src="/500px-scroll-logo-long.png" className="brand-logo" alt="Scroll Reader Logo" style={{ width: 'auto', height: 36, objectFit: 'contain' }} />
+              <img src="/500px-scroll-logo-long.png" className="brand-logo" alt="Scroll Reader Logo" style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
             </div>
             <div className="mobile-only" style={{ alignItems: 'center', gap: '10px' }}>
               <img src="/logo.png" alt="Scroll Reader Logo" style={{ width: 'auto', height: 36, objectFit: 'contain' }} />
