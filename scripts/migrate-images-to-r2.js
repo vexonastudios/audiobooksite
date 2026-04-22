@@ -27,7 +27,7 @@ const sql = neon(process.env.DATABASE_URL);
 
 const r2 = new S3Client({
   region: 'auto',
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  endpoint: process.env.R2_ENDPOINT, // full URL e.g. https://<account>.r2.cloudflarestorage.com
   credentials: {
     accessKeyId:     process.env.R2_ACCESS_KEY_ID,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
