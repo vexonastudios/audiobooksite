@@ -30,27 +30,34 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
         {[
           { href: '/admin', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
-          { href: '/admin/audiobooks', label: 'Audiobooks', icon: <BookOpen size={16} /> },
-          { href: '/admin/audiobooks/new', label: 'New Audiobook', icon: <PlusCircle size={16} /> },
-          { href: '/admin/articles', label: 'Articles', icon: <FileText size={16} /> },
-          { href: '/admin/articles/new', label: 'New Article', icon: <PlusCircle size={16} /> },
-          { href: '/admin/authors', label: 'Authors', icon: <User size={16} /> },
-          { href: '/admin/authors/new', label: 'New Author', icon: <PlusCircle size={16} /> },
-          { href: '/admin/notifications', label: 'Announcements', icon: <Mic size={16} /> },
-          { href: '/admin/notifications/new', label: 'New Announcement', icon: <PlusCircle size={16} /> },
+          { href: '/admin/audiobooks', label: 'Audiobooks', icon: <BookOpen size={16} />, newHref: '/admin/audiobooks/new' },
+          { href: '/admin/articles', label: 'Articles', icon: <FileText size={16} />, newHref: '/admin/articles/new' },
+          { href: '/admin/authors', label: 'Authors', icon: <User size={16} />, newHref: '/admin/authors/new' },
+          { href: '/admin/notifications', label: 'Announcements', icon: <Mic size={16} />, newHref: '/admin/notifications/new' },
           { href: '/admin/analytics', label: 'Analytics', icon: <BarChart2 size={16} /> },
           { href: '/admin/messages',  label: 'Messages',  icon: <MessageSquare size={16} /> },
-          { href: '/admin/radio',     label: 'Scroll Radio', icon: <Radio size={16} /> },
-          { href: '/admin/radio/new', label: 'Register Block', icon: <PlusCircle size={16} /> },
-        ].map(({ href, label, icon }) => (
-          <Link key={href} href={href} style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '10px 20px', color: '#4A5568',
-            textDecoration: 'none', fontSize: 14, fontWeight: 500,
-          }} className="admin-nav-link">
-            <span style={{ color: '#2e6aa7', display: 'flex', alignItems: 'center' }}>{icon}</span>
-            {label}
-          </Link>
+          { href: '/admin/radio',     label: 'Scroll Radio', icon: <Radio size={16} />, newHref: '/admin/radio/new' },
+        ].map(({ href, label, icon, newHref }) => (
+          <div key={href} style={{ display: 'flex', alignItems: 'stretch', padding: '0 8px' }}>
+            <Link href={href} style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '10px 12px', color: '#4A5568',
+              textDecoration: 'none', fontSize: 14, fontWeight: 500,
+              flex: 1, borderRadius: newHref ? '8px 0 0 8px' : '8px'
+            }} className="admin-nav-link">
+              <span style={{ color: '#2e6aa7', display: 'flex', alignItems: 'center' }}>{icon}</span>
+              {label}
+            </Link>
+            {newHref && (
+              <Link href={newHref} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '0 12px', color: '#718096',
+                textDecoration: 'none', borderRadius: '0 8px 8px 0'
+              }} className="admin-nav-link" aria-label={`New ${label}`} title={`New ${label}`}>
+                <PlusCircle size={16} />
+              </Link>
+            )}
+          </div>
         ))}
 
         <div style={{ flex: 1 }} />
