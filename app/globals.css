@@ -1164,19 +1164,20 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
 /* Desktop with panel: constrain books, let panel fill the rest */
 @media (min-width: 769px) {
   .cl-layout--with-panel {
-    gap: 20px;
+    gap: 24px;
     align-items: stretch;
+    justify-content: flex-start;
   }
 
   .cl-layout--with-panel .cl-books {
-    /* Cap at 5 compact cards (134px) + gaps (12px each) so the panel always has room */
-    flex: 0 0 auto;
-    max-width: calc(5 * 134px + 4 * 12px + 24px); /* 24px = scroll arrow breathing room */
+    /* Let books shrink to scroll if screen is tight, but don't force them to fill empty space */
+    flex: 0 1 auto;
   }
 
   .cl-panel {
     flex: 1;
-    min-width: 220px;
+    min-width: 280px;
+    max-width: 420px; /* Prevent the panel from getting absurdly wide */
     display: flex;
   }
 }
