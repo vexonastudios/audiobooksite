@@ -106,8 +106,8 @@ export function NotificationBanner() {
         zIndex: 100,
         position: 'relative',
         boxShadow: '0 2px 8px rgba(245,158,11,0.12)',
-        marginBottom: 24,
-        marginTop: -8,
+        marginBottom: 36,
+        marginTop: -4,
         borderRadius: 'var(--radius-md)',
       }}
     >

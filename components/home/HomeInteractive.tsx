@@ -391,14 +391,17 @@ export function HomeInteractive({ serverRecentBooks, serverArticles, audiobookCo
   const dailyTags = useMemo(() => {
     const all = Array.from(new Set([...categories, ...topics])).sort();
     if (!all.length) return [];
+    if (!mounted) return all.slice(0, 15);
     return dailyShuffle(all.map(t => ({ id: t }))).slice(0, 15).map(x => x.id);
-  }, [categories, topics]);
+  }, [categories, topics, mounted]);
 
   const dailyExplore = useMemo(() => {
     if (!audiobooks.length) return [];
     const recentIds = new Set(recentBooks.map(b => b.id));
-    return dailyShuffle(audiobooks.filter(b => !recentIds.has(b.id))).slice(0, 20);
-  }, [audiobooks, recentBooks]);
+    const pool = audiobooks.filter(b => !recentIds.has(b.id));
+    if (!mounted) return pool.slice(0, 20);
+    return dailyShuffle(pool).slice(0, 20);
+  }, [audiobooks, recentBooks, mounted]);
 
   const continueListening = useMemo(() => {
     const map = new Map(audiobooks.map(b => [b.id, b]));

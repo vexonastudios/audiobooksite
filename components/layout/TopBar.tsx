@@ -367,7 +367,7 @@ export function TopBar() {
             <Settings size={20} />
           </Link>
 
-          {!isLoaded ? (
+          {(!mounted || !isLoaded) ? (
             <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--color-surface-2)', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
           ) : isSignedIn ? (
             <UserButton />
