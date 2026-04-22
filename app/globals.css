@@ -909,6 +909,19 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
   border: 0;
 }
 
+/* SEO-only nav: visible to crawlers, invisible to sighted users.
+   Using the same technique as .sr-only — not display:none (which Google
+   can treat as cloaking) but rendered at 0 size with overflow hidden. */
+.sr-seo-nav {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;
