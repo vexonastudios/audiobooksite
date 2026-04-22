@@ -356,6 +356,10 @@ export function HomeInteractive({ serverRecentBooks, serverArticles, audiobookCo
   const [communityQuotes, setCommunityQuotes] = useState<CommunityQuote[]>([]);
   const [trendingBooks, setTrendingBooks] = useState<Audiobook[]>([]);
   const [showStatsBanner, setShowStatsBanner] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  // Hydration guard — prevents SSR/client mismatch on non-deterministic daily shuffle
+  useEffect(() => { setMounted(true); }, []);
 
   // Check if user previously dismissed the banner
   useEffect(() => {
@@ -393,7 +397,7 @@ export function HomeInteractive({ serverRecentBooks, serverArticles, audiobookCo
     if (!all.length) return [];
     if (!mounted) return all.slice(0, 15);
     return dailyShuffle(all.map(t => ({ id: t }))).slice(0, 15).map(x => x.id);
-  }, [categories, topics, mounted]);
+  }, [categories, topics, mounted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const dailyExplore = useMemo(() => {
     if (!audiobooks.length) return [];
@@ -401,7 +405,7 @@ export function HomeInteractive({ serverRecentBooks, serverArticles, audiobookCo
     const pool = audiobooks.filter(b => !recentIds.has(b.id));
     if (!mounted) return pool.slice(0, 20);
     return dailyShuffle(pool).slice(0, 20);
-  }, [audiobooks, recentBooks, mounted]);
+  }, [audiobooks, recentBooks, mounted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const continueListening = useMemo(() => {
     const map = new Map(audiobooks.map(b => [b.id, b]));
