@@ -4,6 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { LibraryProvider } from '@/components/providers/LibraryProvider';
 import { AudioEngine } from '@/components/providers/AudioEngine';
 import { SyncUserData } from '@/components/providers/SyncUserData';
+import { LegacyFavoritesMigration } from '@/components/providers/LegacyFavoritesMigration';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { GlobalAudioPlayer } from '@/components/player/GlobalAudioPlayer';
@@ -75,6 +76,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <LibraryProvider>
             {/* Sync DB quotes + favorites for signed-in users */}
             <SyncUserData />
+            {/* One-time migration of favorites from the old WordPress site */}
+            <LegacyFavoritesMigration />
             {/* Global audio event bridge */}
             <AudioEngine />
 
