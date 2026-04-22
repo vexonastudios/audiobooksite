@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useLibraryStore, slugify } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
-import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon, Heart, ExternalLink, RotateCcw, RotateCw, Youtube, Book } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon, Heart, ExternalLink, RotateCcw, RotateCw, Youtube, Book, DownloadCloud } from 'lucide-react';
 import { BookCard } from '@/components/ui/BookCard';
 import { ReadAlongPanel } from '@/components/ui/ReadAlongPanel';
 import { QuoteModal } from '@/components/ui/QuoteModal';
@@ -39,7 +39,7 @@ export default function AudiobookClient() {
   const searchParams = useSearchParams();
 
   // Local state
-  const [activeTab, setActiveTab] = useState<'chapters' | 'bookmarks' | 'share' | 'timer'>('chapters');
+  const [activeTab, setActiveTab] = useState<'chapters' | 'bookmarks' | 'share' | 'timer' | 'download'>('chapters');
   const [mobileTabOpen, setMobileTabOpen] = useState(false);
   const [bookmarkNote, setBookmarkNote] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
@@ -606,6 +606,12 @@ export default function AudiobookClient() {
                       <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Timer</span>
                     </button>
                   ),
+                  download: (
+                    <button key="download" onClick={(e) => { e.preventDefault(); setActiveTab('download'); setMobileTabOpen(true); }} style={btnStyle}>
+                      <DownloadCloud size={22} />
+                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Download</span>
+                    </button>
+                  ),
                   readalong: (
                     <button key="readalong" onClick={() => setReadAlongOpen(true)} style={{ ...btnStyle, opacity: transcriptStatus === 'unavailable' ? 0.3 : transcriptStatus === 'loading' ? 0.5 : 1 }} disabled={transcriptStatus !== 'available'}>
                       <BookOpen size={22} />
@@ -616,6 +622,7 @@ export default function AudiobookClient() {
                 return (
                   <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 24, padding: '12px 2px', background: 'var(--color-surface-2)', borderRadius: 'var(--radius-lg)' }}>
                     {playerQuickActions.map(id => actionMap[id] ?? null)}
+                    {actionMap['download']}
                   </div>
                 );
               })()}
@@ -648,6 +655,9 @@ export default function AudiobookClient() {
                 </button>
                 <button className={`tab ${activeTab === 'timer' ? 'active' : ''}`} onClick={() => setActiveTab('timer')}>
                   <Moon size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: '-3px' }}/> Timer
+                </button>
+                <button className={`tab ${activeTab === 'download' ? 'active' : ''}`} onClick={() => setActiveTab('download')}>
+                  <DownloadCloud size={16} style={{ display: 'inline', marginRight: 6, verticalAlign: '-3px' }}/> Download
                 </button>
 
                 {/* Desktop-only: Inject quick actions into the tabs row */}
@@ -897,6 +907,48 @@ export default function AudiobookClient() {
                         <button className="btn btn-secondary" onClick={() => setSleepTimer('chapter')} style={{ padding: '12px', justifyContent: 'flex-start', fontWeight: 500 }}>End of current chapter</button>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* DOWNLOAD TAB */}
+                {activeTab === 'download' && (
+                  <div style={{ padding: '8px 0' }}>
+                    <h3 style={{ marginBottom: 6 }}>Download Audiobook</h3>
+                    <p className="text-secondary text-sm" style={{ marginBottom: 20 }}>
+                      Download an MP3 file to your device to listen offline in any audio player.
+                    </p>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      {book.mp3UrlLow && (
+                        <a 
+                          href={`/api/download?bookId=${book.id}&quality=64k`}
+                          className="btn btn-primary" 
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 14, padding: '16px' }}
+                          download
+                        >
+                          <DownloadCloud size={24} />
+                          <div style={{ textAlign: 'left' }}>
+                            <div style={{ fontWeight: 600 }}>Standard Quality (64kbps)</div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.8, fontWeight: 400 }}>Smaller file size, optimized for voice</div>
+                          </div>
+                        </a>
+                      )}
+                      
+                      {book.mp3Url && (
+                        <a 
+                          href={`/api/download?bookId=${book.id}&quality=128k`}
+                          className="btn btn-secondary" 
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 14, padding: '16px' }}
+                          download
+                        >
+                          <DownloadCloud size={24} />
+                          <div style={{ textAlign: 'left' }}>
+                            <div style={{ fontWeight: 600 }}>High Quality (128kbps)</div>
+                            <div style={{ fontSize: '0.75rem', opacity: 0.8, fontWeight: 400 }}>Larger file size, better audio fidelity</div>
+                          </div>
+                        </a>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
