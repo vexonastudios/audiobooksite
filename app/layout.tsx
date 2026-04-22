@@ -10,6 +10,7 @@ import { TopBar } from '@/components/layout/TopBar';
 import { GlobalAudioPlayer } from '@/components/player/GlobalAudioPlayer';
 import { TabBar } from '@/components/layout/TabBar';
 import { PWAUpdater } from '@/components/ui/PWAUpdater';
+import { ThemeProvider } from '@/components/providers/ThemeProvider';
 
 export const metadata: Metadata = {
   title: {
@@ -78,6 +79,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <SyncUserData />
             {/* One-time migration of favorites from the old WordPress site */}
             <LegacyFavoritesMigration />
+            {/* Apply user's theme preference (light/dark/system) to <html> */}
+            <ThemeProvider />
             {/* Global audio event bridge */}
             <AudioEngine />
 

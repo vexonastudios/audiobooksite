@@ -22,6 +22,9 @@ export function PWAUpdater() {
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+    // Don't manage SW updates when running inside a Capacitor native wrapper —
+    // native apps receive updates through the app store, not the SW.
+    if ((window as any).Capacitor?.isNativePlatform?.()) return;
 
     let registration: ServiceWorkerRegistration | null = null;
 
@@ -29,6 +32,7 @@ export function PWAUpdater() {
     navigator.serviceWorker.register('/sw.js').catch((err) => {
       console.warn('SW registration failed:', err);
     });
+
 
     const onUpdateFound = () => {
       if (!registration) return;

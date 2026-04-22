@@ -5,7 +5,7 @@ import { useUserStore } from '@/lib/store/userStore';
 import {
   Settings, GripVertical, Check, List, BookmarkPlus, Heart,
   Share2, Moon, BookOpen, ChevronRight, Gauge, Info,
-  Home, Quote, Clock, User
+  Home, Quote, Clock, User, Sun, Monitor
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -210,6 +210,7 @@ export default function SettingsPage() {
     scrollRadioEnabled, toggleScrollRadio,
     quoteSettings, updateQuoteSettings,
     readAlongFontSize, setReadAlongFontSize,
+    colorScheme, setColorScheme,
   } = useUserStore();
 
   return (
@@ -230,6 +231,57 @@ export default function SettingsPage() {
           </p>
         </div>
       </div>
+
+      {/* ──────────────────────────────────────────────────────────────────── */}
+      {/* Section: Appearance                                                 */}
+      {/* ──────────────────────────────────────────────────────────────────── */}
+      <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: '0.875rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-muted)', marginBottom: 4 }}>
+          Appearance
+        </h2>
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
+          Choose between light and dark mode, or let your device decide.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+          {([
+            { id: 'light',  label: 'Light',  Icon: Sun },
+            { id: 'dark',   label: 'Dark',   Icon: Moon },
+            { id: 'system', label: 'System', Icon: Monitor },
+          ] as { id: 'light' | 'dark' | 'system'; label: string; Icon: any }[]).map(({ id, label, Icon }) => {
+            const isActive = colorScheme === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setColorScheme(id)}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  gap: 8, padding: '18px 8px', borderRadius: 'var(--radius-lg)',
+                  border: `2px solid ${isActive ? 'var(--color-brand)' : 'var(--color-border)'}`,
+                  background: isActive ? 'rgba(46,106,167,0.08)' : 'var(--color-surface)',
+                  cursor: 'pointer', transition: 'all 0.15s',
+                }}
+              >
+                <Icon
+                  size={22}
+                  color={isActive ? 'var(--color-brand)' : 'var(--color-text-secondary)'}
+                />
+                <span style={{
+                  fontSize: '0.8125rem', fontWeight: 700,
+                  color: isActive ? 'var(--color-brand)' : 'var(--color-text-secondary)',
+                }}>
+                  {label}
+                </span>
+                {isActive && (
+                  <span style={{
+                    width: 8, height: 8, borderRadius: '50%',
+                    background: 'var(--color-brand)',
+                  }} />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
       <ActionPickerSection
         title="Mobile Navigation"
@@ -505,6 +557,15 @@ export default function SettingsPage() {
         <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
           All preferences are stored locally on your device. They will persist between sessions but won't sync across devices.
         </p>
+      </div>
+
+      {/* Version footer */}
+      <div style={{
+        marginTop: 24, textAlign: 'center',
+        fontSize: '0.775rem', color: 'var(--color-text-muted)',
+        letterSpacing: '0.03em',
+      }}>
+        Scroll Reader · Version 0.1.0
       </div>
     </div>
   );

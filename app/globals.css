@@ -48,9 +48,9 @@
   --transition-slow:   400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Dark mode */
+/* Dark mode — triggered by OS setting OR by [data-theme="dark"] override */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --color-bg:           #0F0D1A;
     --color-surface:      #1C1830;
     --color-surface-2:    #241F3A;
@@ -60,6 +60,29 @@
     --color-text-muted:     #6B6888;
   }
 }
+
+/* Force dark mode regardless of OS (user chose "Dark" in Settings) */
+[data-theme="dark"] {
+  --color-bg:           #0F0D1A;
+  --color-surface:      #1C1830;
+  --color-surface-2:    #241F3A;
+  --color-border:       #302B4A;
+  --color-text-primary:   #F0EEF9;
+  --color-text-secondary: #A09CBF;
+  --color-text-muted:     #6B6888;
+}
+
+/* Force light mode regardless of OS (user chose "Light" in Settings) */
+[data-theme="light"] {
+  --color-bg:           #F8F9FA;
+  --color-surface:      #FFFFFF;
+  --color-surface-2:    #F0F4F8;
+  --color-border:       #E2E8F0;
+  --color-text-primary:   #1A202C;
+  --color-text-secondary: #4A5568;
+  --color-text-muted:     #718096;
+}
+
 
 /* ─── Reset ──────────────────────────────────────────────────────────────────── */
 *, *::before, *::after {

@@ -82,6 +82,10 @@ interface UserState {
   // Mobile App Navigation
   mobileNavActions: string[];
   setMobileNavActions: (actions: string[]) => void;
+
+  // Appearance
+  colorScheme: 'light' | 'dark' | 'system';
+  setColorScheme: (scheme: 'light' | 'dark' | 'system') => void;
 }
 
 export const useUserStore = create<UserState>()(
@@ -98,6 +102,8 @@ export const useUserStore = create<UserState>()(
       quoteSettings: { includeLink: true, includeBook: true, useQuotes: true },
       notificationsEnabled: true,
       heardNotificationIds: [],
+      colorScheme: 'system' as const,
+      setColorScheme: (scheme) => set({ colorScheme: scheme }),
       playerQuickActions: ['chapters', 'bookmark', 'quote', 'readalong'],
       readAlongFontSize: 1.2,
       mobileNavActions: ['home', 'browse', 'favorites', 'quotes'],
@@ -319,7 +325,7 @@ export const useUserStore = create<UserState>()(
     {
       name: 'scrollreader-user', // localStorage key
       skipHydration: true,       // prevent SSR/client mismatch that breaks React event system
-      version: 4,
+      version: 5,
       migrate: (persistedState: any, fromVersion: number) => {
         // v1 → v2: ensure quote and readalong are in playerQuickActions
         if (fromVersion < 2) {
@@ -342,6 +348,12 @@ export const useUserStore = create<UserState>()(
         if (fromVersion < 4) {
           if (persistedState.scrollRadioEnabled === undefined) {
             persistedState.scrollRadioEnabled = true;
+          }
+        }
+        // v4 → v5: Add colorScheme
+        if (fromVersion < 5) {
+          if (persistedState.colorScheme === undefined) {
+            persistedState.colorScheme = 'system';
           }
         }
         return persistedState;

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     'Follow Scroll Reader on social media, subscribe for monthly email updates, or listen to our free Christian audiobooks on Spotify, Apple Podcasts, and YouTube.',
   alternates: { canonical: 'https://scrollreader.com/connect' },
   openGraph: {
-    title: 'Connect with Scroll Reader | Scroll Reader',
+    title: 'Connect with Scroll Reader',
     description:
       'Follow Scroll Reader on social media, subscribe for monthly email updates, or listen on Spotify, Apple Podcasts, and YouTube.',
     url: 'https://scrollreader.com/connect',
