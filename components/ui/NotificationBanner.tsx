@@ -107,6 +107,9 @@ export function NotificationBanner() {
         position: 'relative',
         boxShadow: '0 2px 8px rgba(245,158,11,0.12)',
         flexWrap: 'wrap',
+        marginBottom: 24,
+        marginTop: -8,
+        borderRadius: 'var(--radius-md)',
       }}
     >
       {/* Icon */}
