@@ -24,7 +24,7 @@ const MIGRATED_FLAG = 'sr_wp_fav_migrated'; // Set after migration so it never r
 export function LegacyFavoritesMigration() {
   const addFavorite = useUserStore((s) => s.addFavorite);
   const favorites = useUserStore((s) => s.favorites);
-  const books = useLibraryStore((s) => s.books);
+  const books = useLibraryStore((s) => s.audiobooks);
 
   useEffect(() => {
     // Only run client-side, only once ever, only when the library is loaded
