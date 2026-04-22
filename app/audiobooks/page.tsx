@@ -39,7 +39,7 @@ function AudiobooksPageContent() {
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<SortKey>('popular');
+  const [sortBy, setSortBy] = useState<SortKey>('recent');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get('category'));
   const [selectedTopic, setSelectedTopic] = useState<string | null>(searchParams.get('topic'));
