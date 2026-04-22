@@ -7,11 +7,12 @@ import { useLibraryStore, slugify } from '@/lib/store/libraryStore';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
 import { useOfflineStore } from '@/lib/store/offlineStore';
-import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon, Heart, ExternalLink, RotateCcw, RotateCw, Youtube, Book, DownloadCloud } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Headphones, Share2, BookmarkPlus, Clock, List, AlertCircle, BookOpen, X, Quote, Moon, Heart, ExternalLink, RotateCcw, RotateCw, Youtube, Book, DownloadCloud, WifiOff, Info } from 'lucide-react';
 import { BookCard } from '@/components/ui/BookCard';
 import { ReadAlongPanel } from '@/components/ui/ReadAlongPanel';
 import { QuoteModal } from '@/components/ui/QuoteModal';
 import { HeartButton } from '@/components/ui/HeartButton';
+import { DownloadDisclaimerModal } from '@/components/ui/DownloadDisclaimerModal';
 import { parseVTT, getContextText } from '@/lib/parseVTT';
 import type { TranscriptCue } from '@/lib/parseVTT';
 import authorsData from '@/public/data/authors.json';
@@ -52,6 +53,8 @@ export default function AudiobookClient() {
   const [timerTick, setTimerTick] = useState(0);
   // Timestamp from shared link (?t=)
   const [timedStart, setTimedStart] = useState<number | null>(null);
+  // Download disclaimer modal
+  const [disclaimerModal, setDisclaimerModal] = useState<{ url: string; filename: string; quality: string; sizeLabel: string } | null>(null);
 
   // Parse ?t= param from URL on load
   useEffect(() => {
@@ -924,7 +927,29 @@ export default function AudiobookClient() {
                   const savedBook = book ? offlineBooks[book.id] : null;
                   const has64k = !!book?.mp3UrlLow;
 
-                  const formatBytes = (b: number) => b > 1e6 ? `${(b / 1e6).toFixed(0)}MB` : `${(b / 1024).toFixed(0)}KB`;
+                  const formatBytes = (b: number) => b >= 1e9 ? `${(b / 1e9).toFixed(1)}GB` : b >= 1e6 ? `${(b / 1e6).toFixed(0)}MB` : `${(b / 1024).toFixed(0)}KB`;
+
+                  // Estimate file size from duration + bitrate
+                  // Parse totalDuration "H:MM:SS" or "M:SS"
+                  const estimateSize = (kbps: number): string => {
+                    if (!book?.totalDuration) return '';
+                    const parts = book.totalDuration.split(':').map(Number);
+                    const secs = parts.length === 3
+                      ? parts[0] * 3600 + parts[1] * 60 + parts[2]
+                      : parts.length === 2 ? parts[0] * 60 + parts[1] : 0;
+                    if (!secs) return '';
+                    const bytes = (kbps * 1000 / 8) * secs;
+                    return `~${formatBytes(bytes)}`;
+                  };
+
+                  const openDisclaimer = (quality: '64k' | '128k') => {
+                    setDisclaimerModal({
+                      url: `/api/download?bookId=${book.id}&quality=${quality}`,
+                      filename: `${book.slug}-${quality}.mp3`,
+                      quality: quality === '64k' ? 'Standard · 64kbps' : 'High Quality · 128kbps',
+                      sizeLabel: estimateSize(quality === '64k' ? 64 : 128),
+                    });
+                  };
 
                   return (
                     <div style={{ padding: '8px 0' }}>
@@ -935,13 +960,27 @@ export default function AudiobookClient() {
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
+                        {/* ── How offline works ── */}
+                        <div style={{
+                          display: 'flex', alignItems: 'flex-start', gap: 10,
+                          background: 'rgba(91,76,245,0.05)', borderRadius: 'var(--radius-md)',
+                          border: '1px solid rgba(91,76,245,0.15)', padding: '10px 14px',
+                        }}>
+                          <Info size={15} style={{ color: 'var(--color-brand)', flexShrink: 0, marginTop: 1 }} />
+                          <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
+                            <strong>How it works:</strong> Open this page while online, then save the audio below. 
+                            Once saved, audio plays from your device — no internet needed. 
+                            Bookmarks and quotes you add offline sync automatically when you reconnect.
+                          </p>
+                        </div>
+
                         {/* ── In-App Offline (Cache API) ── */}
                         <div style={{ background: 'var(--color-surface-2)', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
                           <h4 style={{ marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.95rem' }}>
                             <Headphones size={17} /> Save for In-App Listening
                           </h4>
                           <p className="text-secondary" style={{ fontSize: '0.78rem', marginBottom: 14 }}>
-                            Play directly in Scroll Reader without internet. Works on desktop, Android Chrome, and iOS Safari (when added to home screen).
+                            Play in Scroll Reader without internet — desktop, Android, and iOS (add to Home Screen).
                           </p>
 
                           {/* Error banner */}
@@ -959,11 +998,9 @@ export default function AudiobookClient() {
                             </p>
                           ) : isSavedOffline ? (
                             <div>
-                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-brand)', fontWeight: 600, fontSize: '0.875rem' }}>
-                                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-brand)', flexShrink: 0 }} />
-                                  Ready for offline · {savedBook ? formatBytes(savedBook.sizeBytes) : ''} · {savedBook?.quality}
-                                </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-brand)', fontWeight: 600, fontSize: '0.875rem', marginBottom: 16 }}>
+                                <WifiOff size={15} />
+                                Ready offline · {savedBook ? formatBytes(savedBook.sizeBytes) : ''} · {savedBook?.quality}
                               </div>
                               <button
                                 className="btn btn-secondary"
@@ -990,21 +1027,23 @@ export default function AudiobookClient() {
                                 <button
                                   className="btn btn-primary"
                                   onClick={() => saveBookOffline(book, '64k')}
-                                  style={{ width: '100%' }}
+                                  style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                                 >
-                                  Save Standard Quality · 64kbps
+                                  <span>Save Standard Quality · 64kbps</span>
+                                  <span style={{ fontSize: '0.78rem', opacity: 0.8, fontWeight: 400 }}>{estimateSize(64)}</span>
                                 </button>
                               ) : (
-                                <button className="btn btn-primary" disabled style={{ width: '100%', opacity: 0.5 }}>
+                                <button className="btn btn-primary" disabled style={{ width: '100%', opacity: 0.45, cursor: 'not-allowed' }}>
                                   64kbps version not yet available
                                 </button>
                               )}
                               <button
                                 className="btn btn-secondary"
                                 onClick={() => saveBookOffline(book, '128k')}
-                                style={{ width: '100%' }}
+                                style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                               >
-                                Save High Quality · 128kbps
+                                <span>Save High Quality · 128kbps</span>
+                                <span style={{ fontSize: '0.78rem', opacity: 0.8, fontWeight: 400 }}>{estimateSize(128)}</span>
                               </button>
                             </div>
                           )}
@@ -1016,36 +1055,40 @@ export default function AudiobookClient() {
                             <DownloadCloud size={17} /> Download MP3 File
                           </h4>
                           <p className="text-secondary" style={{ fontSize: '0.78rem', marginBottom: 12 }}>
-                            Saves to your device's Downloads folder. Play in any audio app — works on iOS, Android, Windows, Mac.
+                            Saves to your Downloads folder. Play in any audio app on any device. Personal use only.
                           </p>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                             {has64k && (
-                              <a
-                                href={`/api/download?bookId=${book.id}&quality=64k`}
+                              <button
                                 className="btn btn-secondary"
-                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 14, padding: '13px 16px', textDecoration: 'none' }}
-                                download
+                                onClick={() => openDisclaimer('64k')}
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 16px', width: '100%' }}
                               >
-                                <DownloadCloud size={20} />
-                                <div style={{ textAlign: 'left' }}>
-                                  <div style={{ fontWeight: 600 }}>Standard Quality · 64kbps</div>
-                                  <div style={{ fontSize: '0.72rem', opacity: 0.7, fontWeight: 400 }}>Smaller file · optimized for voice</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                  <DownloadCloud size={20} />
+                                  <div style={{ textAlign: 'left' }}>
+                                    <div style={{ fontWeight: 600 }}>Standard Quality · 64kbps</div>
+                                    <div style={{ fontSize: '0.72rem', opacity: 0.7, fontWeight: 400 }}>Optimized for voice</div>
+                                  </div>
                                 </div>
-                              </a>
+                                <span style={{ fontSize: '0.78rem', opacity: 0.7 }}>{estimateSize(64)}</span>
+                              </button>
                             )}
                             {book.mp3Url && (
-                              <a
-                                href={`/api/download?bookId=${book.id}&quality=128k`}
+                              <button
                                 className="btn btn-secondary"
-                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 14, padding: '13px 16px', textDecoration: 'none' }}
-                                download
+                                onClick={() => openDisclaimer('128k')}
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 16px', width: '100%' }}
                               >
-                                <DownloadCloud size={20} />
-                                <div style={{ textAlign: 'left' }}>
-                                  <div style={{ fontWeight: 600 }}>High Quality · 128kbps</div>
-                                  <div style={{ fontSize: '0.72rem', opacity: 0.7, fontWeight: 400 }}>Larger file · best audio fidelity</div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                  <DownloadCloud size={20} />
+                                  <div style={{ textAlign: 'left' }}>
+                                    <div style={{ fontWeight: 600 }}>High Quality · 128kbps</div>
+                                    <div style={{ fontSize: '0.72rem', opacity: 0.7, fontWeight: 400 }}>Best audio fidelity</div>
+                                  </div>
                                 </div>
-                              </a>
+                                <span style={{ fontSize: '0.78rem', opacity: 0.7 }}>{estimateSize(128)}</span>
+                              </button>
                             )}
                           </div>
                         </div>
@@ -1135,6 +1178,18 @@ export default function AudiobookClient() {
         bookCover={book.coverImage}
         chapterTitle={book.chapters[currentChapterIdx]?.title}
       />
+
+      {/* Download Disclaimer Modal */}
+      {disclaimerModal && (
+        <DownloadDisclaimerModal
+          isOpen={true}
+          downloadUrl={disclaimerModal.url}
+          filename={disclaimerModal.filename}
+          quality={disclaimerModal.quality}
+          sizeLabel={disclaimerModal.sizeLabel}
+          onClose={() => setDisclaimerModal(null)}
+        />
+      )}
     </div>
   );
 }
