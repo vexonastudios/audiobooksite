@@ -58,8 +58,8 @@ export default function AudiobookList() {
         throw new Error(data.error || `HTTP ${res.status}`);
       }
       const data = await res.json();
-      // Update the book in state with both new URLs (128k may have been renamed too)
-      setBooks(b => b.map(x => x.id === id ? { ...x, mp3Url: data.mp3Url ?? x.mp3Url, mp3UrlLow: data.mp3UrlLow } : x));
+      // Update mp3UrlLow in state — the original 128k URL is untouched
+      setBooks(b => b.map(x => x.id === id ? { ...x, mp3UrlLow: data.mp3UrlLow } : x));
       setGenResults(r => ({ ...r, [id]: 'ok' }));
     } catch (e) {
       console.error('Generate 64k error:', e);
