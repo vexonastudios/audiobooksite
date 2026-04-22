@@ -10,6 +10,7 @@
 const AUDIO_CACHE    = 'scrollreader-audio-v1';
 const STATIC_CACHE   = 'scrollreader-static-v1';
 const PAGE_CACHE     = 'scrollreader-pages-v1';
+const IMAGE_CACHE    = 'scrollreader-images-v1';
 
 // Pages to pre-cache immediately when the SW installs so they're available offline right away
 const PRECACHE_PAGES = ['/downloads'];
@@ -33,7 +34,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((k) => ![AUDIO_CACHE, STATIC_CACHE, PAGE_CACHE].includes(k))
+          .filter((k) => ![AUDIO_CACHE, STATIC_CACHE, PAGE_CACHE, IMAGE_CACHE].includes(k))
           .map((k) => caches.delete(k))
       )
     ).then(() => self.clients.claim())
@@ -66,7 +67,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. HTML page navigation → Network-first, cache fallback
+  // 3. Cached images (book covers) → Cache-first for offline display
+  const isImage = url.pathname.match(/\.(png|jpg|jpeg|webp|avif|gif)$/i);
+  if (isImage) {
+    event.respondWith(
+      caches.open(IMAGE_CACHE).then(async (cache) => {
+        const cached = await cache.match(event.request);
+        if (cached) return cached;
+        try {
+          const response = await fetch(event.request);
+          return response;
+        } catch {
+          // Return nothing if image isn't cached and we're offline
+          return new Response('', { status: 404 });
+        }
+      })
+    );
+    return;
+  }
+
+  // 4. HTML page navigation → Network-first, cache fallback
   // This means pages always try to load fresh, but work offline if previously visited.
   if (event.request.mode === 'navigate') {
     event.respondWith(

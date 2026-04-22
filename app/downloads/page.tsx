@@ -18,7 +18,7 @@ function formatDate(ts: number): string {
 }
 
 export default function DownloadsPage() {
-  const { offlineBooks, removeBookOffline, totalStorageBytes } = useOfflineStore();
+  const { offlineBooks, removeBookOffline, removeAllOffline, totalStorageBytes } = useOfflineStore();
   const getBySlug = useLibraryStore((s) => s.getBySlug);
   const loadBook = usePlayerStore((s) => s.loadBook);
   const history = useUserStore((s) => s.history);
@@ -58,13 +58,27 @@ export default function DownloadsPage() {
         </div>
 
         {books.length > 0 && (
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            background: 'var(--color-surface-2)', border: '1px solid var(--color-border)',
-            borderRadius: 20, padding: '4px 12px', fontSize: '0.8rem', color: 'var(--color-text-secondary)',
-          }}>
-            <WifiOff size={13} />
-            {books.length} book{books.length !== 1 ? 's' : ''} · {formatBytes(totalBytes)} on device
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'var(--color-surface-2)', border: '1px solid var(--color-border)',
+              borderRadius: 20, padding: '4px 12px', fontSize: '0.8rem', color: 'var(--color-text-secondary)',
+            }}>
+              <WifiOff size={13} />
+              {books.length} book{books.length !== 1 ? 's' : ''} · {formatBytes(totalBytes)} on device
+            </div>
+            {books.length > 1 && (
+              <button
+                onClick={() => { if (confirm(`Remove all ${books.length} downloaded books from this device?`)) removeAllOffline(); }}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontSize: '0.78rem', color: 'var(--color-text-tertiary)',
+                  textDecoration: 'underline', padding: '2px 0',
+                }}
+              >
+                Remove all
+              </button>
+            )}
           </div>
         )}
       </div>

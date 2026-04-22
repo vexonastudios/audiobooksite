@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+const AUDIO_CACHE = 'scrollreader-audio-v1';
+const IMAGE_CACHE = 'scrollreader-images-v1';
+
 export interface OfflineBook {
   id: string;
   slug: string;
@@ -19,13 +22,18 @@ interface OfflineState {
   supportsOffline: boolean; // whether browser supports Cache API
 
   saveBookOffline: (book: any, quality: '64k' | '128k') => Promise<void>;
+  cancelDownload: (bookId: string) => void;
   removeBookOffline: (bookId: string) => Promise<void>;
+  removeAllOffline: () => Promise<void>;
   isOffline: (bookId: string) => boolean;
   getOfflineUrl: (bookId: string) => string | null;
   checkSupport: () => void;
   clearError: (bookId: string) => void;
   totalStorageBytes: () => number;
 }
+
+// Track AbortControllers for in-progress downloads so they can be cancelled
+const activeControllers: Record<string, AbortController> = {};
 
 export const useOfflineStore = create<OfflineState>()(
   persist(
@@ -41,6 +49,9 @@ export const useOfflineStore = create<OfflineState>()(
       },
 
       saveBookOffline: async (book, quality) => {
+        // Duplicate download guard
+        if (get().isDownloading[book.id] !== undefined) return;
+
         // Pick the right source URL. Always prefer the 64k URL for standard quality.
         const mp3Url = quality === '128k'
           ? book.mp3Url
@@ -68,6 +79,10 @@ export const useOfflineStore = create<OfflineState>()(
           }
         }
 
+        // Set up abort controller for cancellation
+        const abortController = new AbortController();
+        activeControllers[book.id] = abortController;
+
         // Clear any previous error and start progress at 0
         set((s) => ({
           isDownloading: { ...s.isDownloading, [book.id]: 0 },
@@ -79,7 +94,7 @@ export const useOfflineStore = create<OfflineState>()(
           // comes from the same origin — avoids CORS issues with R2 in iOS Safari SW context.
           const proxyUrl = `/api/download?bookId=${book.id}&quality=${quality}`;
 
-          const response = await fetch(proxyUrl);
+          const response = await fetch(proxyUrl, { signal: abortController.signal });
           if (!response.ok) throw new Error(`Download failed (HTTP ${response.status})`);
 
           const contentLength = response.headers.get('content-length');
@@ -106,7 +121,7 @@ export const useOfflineStore = create<OfflineState>()(
 
           // Build final blob and cache it keyed to the R2 URL so the SW can intercept it
           const blob = new Blob(chunks, { type: 'audio/mpeg' });
-          const cache = await caches.open('audiobook-offline-cache-v1');
+          const cache = await caches.open(AUDIO_CACHE);
 
           await cache.put(mp3Url, new Response(blob, {
             headers: {
@@ -115,6 +130,27 @@ export const useOfflineStore = create<OfflineState>()(
               'Accept-Ranges': 'bytes',
             },
           }));
+
+          // Also cache the cover image for offline display
+          if (book.coverImage || book.thumbnailUrl) {
+            try {
+              const imageCache = await caches.open(IMAGE_CACHE);
+              const coverUrl = book.thumbnailUrl || book.coverImage;
+              const imgResponse = await fetch(coverUrl, { signal: abortController.signal });
+              if (imgResponse.ok) {
+                await imageCache.put(coverUrl, imgResponse);
+              }
+              // Also cache the full-size cover if different from thumbnail
+              if (book.coverImage && book.coverImage !== coverUrl) {
+                const fullResponse = await fetch(book.coverImage, { signal: abortController.signal });
+                if (fullResponse.ok) {
+                  await imageCache.put(book.coverImage, fullResponse);
+                }
+              }
+            } catch {
+              // Non-critical — continue even if image caching fails
+            }
+          }
 
           const offlineBook: OfflineBook = {
             id: book.id,
@@ -137,15 +173,33 @@ export const useOfflineStore = create<OfflineState>()(
           });
 
         } catch (error) {
-          const msg = error instanceof Error ? error.message : 'Unknown error';
-          set((s) => {
-            const newDownloading = { ...s.isDownloading };
-            delete newDownloading[book.id];
-            return {
-              isDownloading: newDownloading,
-              errors: { ...s.errors, [book.id]: `Save failed: ${msg}` },
-            };
-          });
+          if (error instanceof DOMException && error.name === 'AbortError') {
+            // User cancelled — just clean up
+            set((s) => {
+              const newDownloading = { ...s.isDownloading };
+              delete newDownloading[book.id];
+              return { isDownloading: newDownloading };
+            });
+          } else {
+            const msg = error instanceof Error ? error.message : 'Unknown error';
+            set((s) => {
+              const newDownloading = { ...s.isDownloading };
+              delete newDownloading[book.id];
+              return {
+                isDownloading: newDownloading,
+                errors: { ...s.errors, [book.id]: `Save failed: ${msg}` },
+              };
+            });
+          }
+        } finally {
+          delete activeControllers[book.id];
+        }
+      },
+
+      cancelDownload: (bookId) => {
+        const controller = activeControllers[bookId];
+        if (controller) {
+          controller.abort();
         }
       },
 
@@ -154,8 +208,11 @@ export const useOfflineStore = create<OfflineState>()(
         if (!book) return;
         try {
           if ('caches' in window) {
-            const cache = await caches.open('audiobook-offline-cache-v1');
+            const cache = await caches.open(AUDIO_CACHE);
             await cache.delete(book.mp3Url);
+            // Also clean up cached cover images
+            const imageCache = await caches.open(IMAGE_CACHE);
+            if (book.coverImage) await imageCache.delete(book.coverImage).catch(() => {});
           }
         } catch (e) {
           console.warn('Could not clear cache entry:', e);
@@ -165,6 +222,18 @@ export const useOfflineStore = create<OfflineState>()(
           delete newBooks[bookId];
           return { offlineBooks: newBooks };
         });
+      },
+
+      removeAllOffline: async () => {
+        try {
+          if ('caches' in window) {
+            await caches.delete(AUDIO_CACHE);
+            await caches.delete(IMAGE_CACHE);
+          }
+        } catch (e) {
+          console.warn('Could not clear caches:', e);
+        }
+        set({ offlineBooks: {} });
       },
 
       isOffline: (bookId) => !!get().offlineBooks[bookId],

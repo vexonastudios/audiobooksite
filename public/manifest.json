@@ -3,6 +3,8 @@
   "short_name": "ScrollReader",
   "description": "Free Christian Audiobooks",
   "start_url": "/",
+  "scope": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#0F0D1A",
   "theme_color": "#5B4CF5",

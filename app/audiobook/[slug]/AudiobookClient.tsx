@@ -37,7 +37,7 @@ export default function AudiobookClient() {
           sleepTimerMode, sleepTimerEndsAt, setSleepTimer, clearSleepTimer,
           loadBook, setPlaying, setPlaybackSpeed, skipForward, skipBackward, jumpToChapter } = usePlayerStore();
   const { history, addBookmark, getBookmarksByBook, removeBookmark, skipInterval, isFavorited, toggleFavorite, playerQuickActions } = useUserStore();
-  const { offlineBooks, isDownloading, errors: offlineErrors, saveBookOffline, removeBookOffline, isOffline, supportsOffline, checkSupport, clearError } = useOfflineStore();
+  const { offlineBooks, isDownloading, errors: offlineErrors, saveBookOffline, cancelDownload, removeBookOffline, isOffline, supportsOffline, checkSupport, clearError } = useOfflineStore();
 
   const searchParams = useSearchParams();
 
@@ -1019,7 +1019,16 @@ export default function AudiobookClient() {
                               <div style={{ width: '100%', height: 8, background: 'var(--color-surface)', borderRadius: 4, overflow: 'hidden' }}>
                                 <div style={{ width: `${downloadProgress}%`, height: '100%', background: 'var(--color-brand)', borderRadius: 4, transition: 'width 0.4s ease' }} />
                               </div>
-                              <p className="text-secondary" style={{ fontSize: '0.75rem', marginTop: 8 }}>Keep this tab open while saving…</p>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                                <p className="text-secondary" style={{ fontSize: '0.75rem', margin: 0 }}>Keep this tab open while saving…</p>
+                                <button
+                                  className="btn btn-secondary"
+                                  onClick={() => cancelDownload(book.id)}
+                                  style={{ fontSize: '0.75rem', padding: '4px 12px', lineHeight: 1.4 }}
+                                >
+                                  Cancel
+                                </button>
+                              </div>
                             </div>
                           ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
