@@ -322,8 +322,11 @@ export function TopBar() {
           <button className="btn btn-icon" onClick={toggleSidebar} aria-label="Open menu" style={{ flexShrink: 0, paddingLeft: 0 }}>
             <Menu size={24} />
           </button>
-          <Link href="/" aria-label="Home" style={{ display: 'flex', alignItems: 'center', marginLeft: 4, textDecoration: 'none' }}>
-            <img src="/scroll-reader-logo.png" className="brand-logo" alt="Scroll Reader" style={{ height: 32, width: 'auto', objectFit: 'contain' }} />
+          <Link href="/" aria-label="Home" style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 4, textDecoration: 'none' }}>
+            <img src="/logo.png" alt="Scroll Reader" style={{ height: 32, width: 'auto', objectFit: 'contain' }} />
+            <span style={{ fontWeight: 700, fontSize: '1.0625rem', color: 'var(--color-text-primary)', letterSpacing: '-0.01em', lineHeight: 1 }}>
+              Scroll Reader
+            </span>
           </Link>
         </div>
 
