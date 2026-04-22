@@ -36,7 +36,7 @@ export default function AudiobookClient() {
           sleepTimerMode, sleepTimerEndsAt, setSleepTimer, clearSleepTimer,
           loadBook, setPlaying, setPlaybackSpeed, skipForward, skipBackward, jumpToChapter } = usePlayerStore();
   const { history, addBookmark, getBookmarksByBook, removeBookmark, skipInterval, isFavorited, toggleFavorite, playerQuickActions } = useUserStore();
-  const { offlineBooks, isDownloading, saveBookOffline, removeBookOffline, isOffline } = useOfflineStore();
+  const { offlineBooks, isDownloading, errors: offlineErrors, saveBookOffline, removeBookOffline, isOffline, supportsOffline, checkSupport, clearError } = useOfflineStore();
 
   const searchParams = useSearchParams();
 
@@ -68,6 +68,9 @@ export default function AudiobookClient() {
     const interval = setInterval(() => setTimerTick(Date.now()), 1000);
     return () => clearInterval(interval);
   }, [sleepTimerMode]);
+
+  // Check Cache API support for offline feature
+  useEffect(() => { checkSupport(); }, []);
 
   // Load VTT cues for bookmark context (preloaded when panel first opens or book plays)
   useEffect(() => {
@@ -917,100 +920,130 @@ export default function AudiobookClient() {
                   const isSavedOffline = book && isOffline(book.id);
                   const downloadProgress = book ? isDownloading[book.id] : undefined;
                   const isCurrentlyDownloading = downloadProgress !== undefined;
+                  const offlineError = book ? offlineErrors[book.id] : '';
+                  const savedBook = book ? offlineBooks[book.id] : null;
+                  const has64k = !!book?.mp3UrlLow;
+
+                  const formatBytes = (b: number) => b > 1e6 ? `${(b / 1e6).toFixed(0)}MB` : `${(b / 1024).toFixed(0)}KB`;
 
                   return (
                     <div style={{ padding: '8px 0' }}>
-                      <h3 style={{ marginBottom: 6 }}>Listen Offline</h3>
+                      <h3 style={{ marginBottom: 6 }}>Offline & Download</h3>
                       <p className="text-secondary text-sm" style={{ marginBottom: 20 }}>
-                        Save this audiobook to your device to listen without an internet connection, or download the MP3 file directly.
+                        Save for in-app offline listening, or download the MP3 to your device.
                       </p>
-                      
+
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        
-                        {/* Save to Browser App (PWA Offline) */}
+
+                        {/* ── In-App Offline (Cache API) ── */}
                         <div style={{ background: 'var(--color-surface-2)', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
-                          <h4 style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <Headphones size={18} /> In-App Offline Listening
+                          <h4 style={{ marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.95rem' }}>
+                            <Headphones size={17} /> Save for In-App Listening
                           </h4>
-                          
-                          {isSavedOffline ? (
+                          <p className="text-secondary" style={{ fontSize: '0.78rem', marginBottom: 14 }}>
+                            Play directly in Scroll Reader without internet. Works on desktop, Android Chrome, and iOS Safari (when added to home screen).
+                          </p>
+
+                          {/* Error banner */}
+                          {offlineError && (
+                            <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 8, padding: '10px 14px', marginBottom: 12, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                              <AlertCircle size={16} color="var(--color-error)" style={{ flexShrink: 0, marginTop: 1 }} />
+                              <div style={{ flex: 1, fontSize: '0.8rem', color: 'var(--color-error)' }}>{offlineError}</div>
+                              <button onClick={() => clearError(book.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)', padding: 0 }}><X size={14}/></button>
+                            </div>
+                          )}
+
+                          {!supportsOffline ? (
+                            <p className="text-secondary text-sm" style={{ fontStyle: 'italic' }}>
+                              Your browser doesn't support offline storage. Use the MP3 Download below instead.
+                            </p>
+                          ) : isSavedOffline ? (
                             <div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-brand)', fontWeight: 600, marginBottom: 16 }}>
-                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-brand)' }} />
-                                Saved and ready for offline play
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--color-brand)', fontWeight: 600, fontSize: '0.875rem' }}>
+                                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-brand)', flexShrink: 0 }} />
+                                  Ready for offline · {savedBook ? formatBytes(savedBook.sizeBytes) : ''} · {savedBook?.quality}
+                                </div>
                               </div>
-                              <button 
-                                className="btn btn-secondary" 
+                              <button
+                                className="btn btn-secondary"
                                 onClick={() => removeBookOffline(book.id)}
                                 style={{ width: '100%' }}
                               >
-                                Remove Download
+                                Remove from Device
                               </button>
                             </div>
                           ) : isCurrentlyDownloading ? (
                             <div>
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: '0.875rem' }}>
-                                <span>Downloading...</span>
-                                <span>{downloadProgress}%</span>
+                                <span>Saving to device...</span>
+                                <span style={{ fontWeight: 600 }}>{downloadProgress}%</span>
                               </div>
-                              <div style={{ width: '100%', height: 6, background: 'var(--color-surface)', borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
-                                <div style={{ width: `${downloadProgress}%`, height: '100%', background: 'var(--color-brand)', transition: 'width 0.3s ease' }} />
+                              <div style={{ width: '100%', height: 8, background: 'var(--color-surface)', borderRadius: 4, overflow: 'hidden' }}>
+                                <div style={{ width: `${downloadProgress}%`, height: '100%', background: 'var(--color-brand)', borderRadius: 4, transition: 'width 0.4s ease' }} />
                               </div>
+                              <p className="text-secondary" style={{ fontSize: '0.75rem', marginTop: 8 }}>Keep this tab open while saving…</p>
                             </div>
                           ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                              <button 
-                                className="btn btn-primary" 
-                                onClick={() => saveBookOffline(book, '64k')}
-                                style={{ width: '100%' }}
-                              >
-                                Save Standard Quality (Faster)
-                              </button>
-                              {book.mp3Url && (
-                                <button 
-                                  className="btn btn-secondary" 
-                                  onClick={() => saveBookOffline(book, '128k')}
+                              {has64k ? (
+                                <button
+                                  className="btn btn-primary"
+                                  onClick={() => saveBookOffline(book, '64k')}
                                   style={{ width: '100%' }}
                                 >
-                                  Save High Quality
+                                  Save Standard Quality · 64kbps
+                                </button>
+                              ) : (
+                                <button className="btn btn-primary" disabled style={{ width: '100%', opacity: 0.5 }}>
+                                  64kbps version not yet available
                                 </button>
                               )}
+                              <button
+                                className="btn btn-secondary"
+                                onClick={() => saveBookOffline(book, '128k')}
+                                style={{ width: '100%' }}
+                              >
+                                Save High Quality · 128kbps
+                              </button>
                             </div>
                           )}
                         </div>
 
-                        {/* Direct MP3 Download */}
+                        {/* ── Direct MP3 Download (works everywhere) ── */}
                         <div>
-                          <h4 style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.9rem' }}>
-                            <DownloadCloud size={16} /> Direct MP3 Download
+                          <h4 style={{ marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.95rem' }}>
+                            <DownloadCloud size={17} /> Download MP3 File
                           </h4>
+                          <p className="text-secondary" style={{ fontSize: '0.78rem', marginBottom: 12 }}>
+                            Saves to your device's Downloads folder. Play in any audio app — works on iOS, Android, Windows, Mac.
+                          </p>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                            {book.mp3UrlLow && (
-                              <a 
+                            {has64k && (
+                              <a
                                 href={`/api/download?bookId=${book.id}&quality=64k`}
-                                className="btn btn-secondary" 
-                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 14, padding: '12px 16px' }}
+                                className="btn btn-secondary"
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 14, padding: '13px 16px', textDecoration: 'none' }}
                                 download
                               >
                                 <DownloadCloud size={20} />
                                 <div style={{ textAlign: 'left' }}>
-                                  <div style={{ fontWeight: 600 }}>Standard Quality (64kbps)</div>
-                                  <div style={{ fontSize: '0.75rem', opacity: 0.8, fontWeight: 400 }}>For your personal media player</div>
+                                  <div style={{ fontWeight: 600 }}>Standard Quality · 64kbps</div>
+                                  <div style={{ fontSize: '0.72rem', opacity: 0.7, fontWeight: 400 }}>Smaller file · optimized for voice</div>
                                 </div>
                               </a>
                             )}
-                            
                             {book.mp3Url && (
-                              <a 
+                              <a
                                 href={`/api/download?bookId=${book.id}&quality=128k`}
-                                className="btn btn-secondary" 
-                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 14, padding: '12px 16px' }}
+                                className="btn btn-secondary"
+                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: 14, padding: '13px 16px', textDecoration: 'none' }}
                                 download
                               >
                                 <DownloadCloud size={20} />
                                 <div style={{ textAlign: 'left' }}>
-                                  <div style={{ fontWeight: 600 }}>High Quality (128kbps)</div>
-                                  <div style={{ fontSize: '0.75rem', opacity: 0.8, fontWeight: 400 }}>For your personal media player</div>
+                                  <div style={{ fontWeight: 600 }}>High Quality · 128kbps</div>
+                                  <div style={{ fontSize: '0.72rem', opacity: 0.7, fontWeight: 400 }}>Larger file · best audio fidelity</div>
                                 </div>
                               </a>
                             )}

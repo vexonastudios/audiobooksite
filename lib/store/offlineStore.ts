@@ -5,19 +5,26 @@ export interface OfflineBook {
   id: string;
   slug: string;
   title: string;
+  coverImage: string;
   sizeBytes: number;
   quality: '64k' | '128k';
   downloadedAt: number;
-  mp3Url: string; // The URL that was cached
+  mp3Url: string; // The original R2 URL - used as cache key
 }
 
 interface OfflineState {
   offlineBooks: Record<string, OfflineBook>;
   isDownloading: Record<string, number>; // bookId -> progress (0-100)
-  
+  errors: Record<string, string>; // bookId -> error message
+  supportsOffline: boolean; // whether browser supports Cache API
+
   saveBookOffline: (book: any, quality: '64k' | '128k') => Promise<void>;
   removeBookOffline: (bookId: string) => Promise<void>;
   isOffline: (bookId: string) => boolean;
+  getOfflineUrl: (bookId: string) => string | null;
+  checkSupport: () => void;
+  clearError: (bookId: string) => void;
+  totalStorageBytes: () => number;
 }
 
 export const useOfflineStore = create<OfflineState>()(
@@ -25,113 +32,158 @@ export const useOfflineStore = create<OfflineState>()(
     (set, get) => ({
       offlineBooks: {},
       isDownloading: {},
+      errors: {},
+      supportsOffline: true,
+
+      checkSupport: () => {
+        const supported = typeof window !== 'undefined' && 'caches' in window;
+        set({ supportsOffline: supported });
+      },
 
       saveBookOffline: async (book, quality) => {
-        const mp3Url = quality === '128k' ? book.mp3Url : (book.mp3UrlLow || book.mp3Url);
-        if (!mp3Url) return;
+        // Pick the right source URL. Always prefer the 64k URL for standard quality.
+        const mp3Url = quality === '128k'
+          ? book.mp3Url
+          : (book.mp3UrlLow || book.mp3Url);
 
-        set((state) => ({
-          isDownloading: { ...state.isDownloading, [book.id]: 0 }
+        if (!mp3Url) {
+          set((s) => ({ errors: { ...s.errors, [book.id]: 'No audio URL available for this book.' } }));
+          return;
+        }
+
+        // Check Cache API support
+        if (!('caches' in window)) {
+          set((s) => ({ errors: { ...s.errors, [book.id]: 'Your browser does not support offline storage. Try downloading the MP3 file directly.' } }));
+          return;
+        }
+
+        // Check storage quota (iOS Safari caps at ~50MB per origin)
+        if (navigator.storage?.estimate) {
+          const { quota = 0, usage = 0 } = await navigator.storage.estimate();
+          const available = quota - usage;
+          // A 64k/hr audiobook is ~29MB/hr; warn at < 30MB free
+          if (available < 30 * 1024 * 1024) {
+            set((s) => ({ errors: { ...s.errors, [book.id]: `Not enough storage space (${Math.round(available / 1024 / 1024)}MB free). Clear some saved books first, or download the MP3 file directly.` } }));
+            return;
+          }
+        }
+
+        // Clear any previous error and start progress at 0
+        set((s) => ({
+          isDownloading: { ...s.isDownloading, [book.id]: 0 },
+          errors: { ...s.errors, [book.id]: '' },
         }));
 
         try {
-          // Fetch the file to cache it
-          const response = await fetch(mp3Url);
-          if (!response.ok) throw new Error('Failed to download audio file');
+          // We proxy through our own /api/download endpoint so the fetch
+          // comes from the same origin — avoids CORS issues with R2 in iOS Safari SW context.
+          const proxyUrl = `/api/download?bookId=${book.id}&quality=${quality}`;
 
-          // Get total size for progress tracking
+          const response = await fetch(proxyUrl);
+          if (!response.ok) throw new Error(`Download failed (HTTP ${response.status})`);
+
           const contentLength = response.headers.get('content-length');
           const total = contentLength ? parseInt(contentLength, 10) : 0;
-          
+
           let loaded = 0;
           const reader = response.body?.getReader();
-          const chunks = [];
+          const chunks: Uint8Array[] = [];
 
           if (reader) {
             while (true) {
               const { done, value } = await reader.read();
               if (done) break;
-              
               if (value) {
                 chunks.push(value);
                 loaded += value.length;
                 if (total > 0) {
-                  const progress = Math.round((loaded / total) * 100);
-                  set((state) => ({
-                    isDownloading: { ...state.isDownloading, [book.id]: progress }
-                  }));
+                  const progress = Math.min(99, Math.round((loaded / total) * 100));
+                  set((s) => ({ isDownloading: { ...s.isDownloading, [book.id]: progress } }));
                 }
               }
             }
           }
 
-          // Combine chunks and put into cache
+          // Build final blob and cache it keyed to the R2 URL so the SW can intercept it
           const blob = new Blob(chunks, { type: 'audio/mpeg' });
           const cache = await caches.open('audiobook-offline-cache-v1');
-          
-          // Store it against the exact URL
+
           await cache.put(mp3Url, new Response(blob, {
             headers: {
               'Content-Type': 'audio/mpeg',
-              'Content-Length': loaded.toString()
-            }
+              'Content-Length': loaded.toString(),
+              'Accept-Ranges': 'bytes',
+            },
           }));
 
           const offlineBook: OfflineBook = {
             id: book.id,
             slug: book.slug,
             title: book.title,
+            coverImage: book.coverImage,
             sizeBytes: loaded,
             quality,
             downloadedAt: Date.now(),
-            mp3Url
+            mp3Url,
           };
 
-          set((state) => {
-            const newIsDownloading = { ...state.isDownloading };
-            delete newIsDownloading[book.id];
-            
+          set((s) => {
+            const newDownloading = { ...s.isDownloading };
+            delete newDownloading[book.id];
             return {
-              offlineBooks: { ...state.offlineBooks, [book.id]: offlineBook },
-              isDownloading: newIsDownloading
+              offlineBooks: { ...s.offlineBooks, [book.id]: offlineBook },
+              isDownloading: newDownloading,
             };
           });
 
         } catch (error) {
-          console.error('Failed to save offline:', error);
-          set((state) => {
-            const newIsDownloading = { ...state.isDownloading };
-            delete newIsDownloading[book.id];
-            return { isDownloading: newIsDownloading };
+          const msg = error instanceof Error ? error.message : 'Unknown error';
+          set((s) => {
+            const newDownloading = { ...s.isDownloading };
+            delete newDownloading[book.id];
+            return {
+              isDownloading: newDownloading,
+              errors: { ...s.errors, [book.id]: `Save failed: ${msg}` },
+            };
           });
-          throw error;
         }
       },
 
       removeBookOffline: async (bookId) => {
         const book = get().offlineBooks[bookId];
         if (!book) return;
-
         try {
-          const cache = await caches.open('audiobook-offline-cache-v1');
-          await cache.delete(book.mp3Url);
-
-          set((state) => {
-            const newBooks = { ...state.offlineBooks };
-            delete newBooks[bookId];
-            return { offlineBooks: newBooks };
-          });
-        } catch (error) {
-          console.error('Failed to remove from cache:', error);
+          if ('caches' in window) {
+            const cache = await caches.open('audiobook-offline-cache-v1');
+            await cache.delete(book.mp3Url);
+          }
+        } catch (e) {
+          console.warn('Could not clear cache entry:', e);
         }
+        set((s) => {
+          const newBooks = { ...s.offlineBooks };
+          delete newBooks[bookId];
+          return { offlineBooks: newBooks };
+        });
       },
 
-      isOffline: (bookId) => {
-        return !!get().offlineBooks[bookId];
-      }
+      isOffline: (bookId) => !!get().offlineBooks[bookId],
+
+      // Returns the original mp3 URL (the SW will intercept and serve from cache)
+      getOfflineUrl: (bookId) => get().offlineBooks[bookId]?.mp3Url ?? null,
+
+      clearError: (bookId) => {
+        set((s) => ({ errors: { ...s.errors, [bookId]: '' } }));
+      },
+
+      totalStorageBytes: () => {
+        return Object.values(get().offlineBooks).reduce((acc, b) => acc + b.sizeBytes, 0);
+      },
     }),
     {
       name: 'scrollreader-offline-storage',
+      // Don't persist isDownloading or errors — those are transient
+      partialize: (s) => ({ offlineBooks: s.offlineBooks }),
     }
   )
 );

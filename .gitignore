@@ -19,3 +19,8 @@ scroll-radio-generator/node_modules/
 scroll-radio-generator/temp/
 scroll-radio-generator/output/
 scroll-radio-generator/.env
+
+# clerk configuration (can include secrets)
+/.clerk/
+
+.env*.local

@@ -4,7 +4,7 @@ import { getAudiobookById } from '@/lib/db/audiobooks';
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const bookId = searchParams.get('bookId');
-  const quality = searchParams.get('quality') || '64k'; // default to 64k for smaller downloads
+  const quality = searchParams.get('quality') || '64k';
 
   if (!bookId) {
     return new NextResponse('Missing bookId', { status: 400 });
@@ -16,30 +16,45 @@ export async function GET(req: NextRequest) {
       return new NextResponse('Book not found', { status: 404 });
     }
 
-    const mp3Url = quality === '128k' ? book.mp3Url : (book.mp3UrlLow || book.mp3Url);
+    const mp3Url = quality === '128k'
+      ? book.mp3Url
+      : (book.mp3UrlLow || book.mp3Url);
 
     if (!mp3Url) {
-      return new NextResponse('Audio file not available', { status: 404 });
+      return new NextResponse('Audio file not available for this quality', { status: 404 });
     }
 
-    // Fetch the file from the R2 public URL
-    const response = await fetch(mp3Url);
+    // Forward any Range header from the client (needed for iOS audio seeking and offline caching)
+    const rangeHeader = req.headers.get('range');
+    const upstreamHeaders: HeadersInit = {};
+    if (rangeHeader) upstreamHeaders['Range'] = rangeHeader;
 
-    if (!response.ok) {
-      return new NextResponse(`Failed to fetch audio file: ${response.statusText}`, { status: 502 });
+    const response = await fetch(mp3Url, { headers: upstreamHeaders });
+
+    if (!response.ok && response.status !== 206) {
+      return new NextResponse(`Failed to fetch audio: ${response.statusText}`, { status: 502 });
     }
 
-    // Determine the filename for the download
+    // Build clean filename for download
     const filename = `${book.slug}-${quality}.mp3`;
 
-    // Stream the response with appropriate headers to force a download
+    // Pass through relevant headers so progress bars and seeking work
+    const responseHeaders: Record<string, string> = {
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Type': 'audio/mpeg',
+      'Accept-Ranges': 'bytes',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    };
+
+    const contentLength = response.headers.get('Content-Length');
+    if (contentLength) responseHeaders['Content-Length'] = contentLength;
+
+    const contentRange = response.headers.get('Content-Range');
+    if (contentRange) responseHeaders['Content-Range'] = contentRange;
+
     return new NextResponse(response.body, {
-      headers: {
-        'Content-Disposition': `attachment; filename="${filename}"`,
-        'Content-Type': 'audio/mpeg',
-        'Content-Length': response.headers.get('Content-Length') || '',
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
+      status: response.status, // preserve 206 for range requests
+      headers: responseHeaders,
     });
 
   } catch (error) {

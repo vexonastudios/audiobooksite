@@ -17,6 +17,7 @@ export interface Audiobook {
   categories: string[];
   topics: string[];
   mp3Url: string;
+  mp3UrlLow?: string | null;
   totalDuration: string;
   length: string;
   originalYear: string;
