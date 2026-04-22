@@ -99,13 +99,10 @@ export function Sidebar() {
       <aside className={`sidebar${sidebarOpen ? ' is-open' : ''}`}>
         {/* Logo */}
         <div style={{ padding: '24px 20px 16px' }}>
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-            <img src="/logo.png" alt="Scroll Reader Logo" style={{ width: 'auto', height: 36, objectFit: 'contain' }} />
-            <span style={{ fontWeight: 800, fontSize: '1.0625rem', color: 'var(--color-text-primary)', letterSpacing: '-0.01em' }}>
-              Scroll Reader
-            </span>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+            <img src="/scroll-reader-logo.png" className="brand-logo" alt="Scroll Reader Logo" style={{ width: 'auto', height: 36, objectFit: 'contain' }} />
           </Link>
-          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 4, marginLeft: 46 }}>
+          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 8 }}>
             Free Christian Audiobooks
           </p>
         </div>
