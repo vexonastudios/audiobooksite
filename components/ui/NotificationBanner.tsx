@@ -127,7 +127,7 @@ export function NotificationBanner() {
         <div style={{ fontWeight: 700, fontSize: '0.875rem', color: '#92400E', lineHeight: 1.2 }}>
           {notif.title}
         </div>
-        <div style={{ fontSize: '0.8125rem', color: '#B45309', marginTop: 2 }}>
+        <div className="notif-body" style={{ fontSize: '0.8125rem', color: '#B45309', marginTop: 2 }}>
           {notif.body_text.length > 100 ? notif.body_text.slice(0, 100) + '…' : notif.body_text}
         </div>
       </div>
@@ -163,6 +163,7 @@ export function NotificationBanner() {
       {/* All announcements link */}
       <Link
         href="/announcements"
+        className="notif-all-ann"
         style={{ fontSize: '0.75rem', color: '#B45309', textDecoration: 'underline', textUnderlineOffset: 3, whiteSpace: 'nowrap', flexShrink: 0 }}
       >
         All announcements

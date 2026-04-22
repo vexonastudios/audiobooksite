@@ -48,7 +48,7 @@ export default async function HomePage() {
       <NotificationBanner />
 
       {/* ── Hero ── Server-rendered so <h1> appears in raw HTML for crawlers */}
-      <div style={{ marginBottom: 8 }}>
+      <div className="hero-mobile-hidden" style={{ marginBottom: 8 }}>
         <h1 style={{ marginBottom: 8 }}>Free Christian Audiobooks</h1>
       </div>
 

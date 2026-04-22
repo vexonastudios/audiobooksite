@@ -156,7 +156,7 @@ function NowPlayingButton() {
         {loading ? (
           <>
             <Radio size={13} style={{ opacity: 0.5 }} />
-            Tuning in…
+            <span className="radio-btn-label">Tuning in…</span>
           </>
         ) : (
           <>
@@ -168,7 +168,7 @@ function NowPlayingButton() {
               flexShrink: 0,
               opacity: isActive ? 1 : undefined,
             }} />
-            {isActive ? '⏸ Live' : 'Now Playing'}
+            <span className="radio-btn-label">{isActive ? '⏸ Live' : 'Now Playing'}</span>
           </>
         )}
 
@@ -182,7 +182,7 @@ function NowPlayingButton() {
 
       <Link 
         href="/scroll-radio" 
-        className="btn btn-icon" 
+        className="btn btn-icon desktop-only" 
         aria-label="About Scroll Radio"
         title="What is Scroll Radio?"
       >

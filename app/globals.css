@@ -974,6 +974,22 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
   flex-shrink: 0;
 }
 
+/* Hide on mobile: hero title block, stats row, notification body/link */
+@media (max-width: 768px) {
+  .hero-mobile-hidden {
+    display: none !important;
+  }
+  .notif-body {
+    display: none !important;
+  }
+  .notif-all-ann {
+    display: none !important;
+  }
+  .radio-btn-label {
+    display: none !important;
+  }
+}
+
 /* Article card */
 .article-card-link {
   text-decoration: none;

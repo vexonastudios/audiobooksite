@@ -202,7 +202,7 @@ function HeroSubtitle({ audiobookCount }: { audiobookCount: number }) {
   if (!stats || stats.booksStarted === 0) return <p className="hero-subtitle">{audiobookCount} audiobooks from classic authors — always free.</p>;
 
   return (
-    <div className="hero-stats">
+    <div className="hero-stats hero-mobile-hidden">
       <span className="hero-stat"><Headphones size={15} aria-hidden="true" className="hero-stat-icon" /><strong>{formatListenTime(stats.totalListenSecs)}</strong>&nbsp;listened all-time</span>
       <span className="hero-stat"><BookOpen size={15} aria-hidden="true" className="hero-stat-icon" /><strong>{stats.booksStarted}</strong>&nbsp;{stats.booksStarted === 1 ? 'book' : 'books'} started</span>
       {stats.quotesSaved > 0 && <span className="hero-stat"><Quote size={15} aria-hidden="true" className="hero-stat-icon" /><strong>{stats.quotesSaved}</strong>&nbsp;{stats.quotesSaved === 1 ? 'quote' : 'quotes'} saved</span>}
