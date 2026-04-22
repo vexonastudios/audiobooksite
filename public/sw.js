@@ -24,7 +24,9 @@ self.addEventListener('install', (event) => {
         // Try to cache key pages at install time; don't fail install if network is down
         Promise.allSettled(PRECACHE_PAGES.map((url) => cache.add(url)))
       )
-      .finally(() => self.skipWaiting())
+    // NOTE: We do NOT call skipWaiting() here.
+    // The new SW waits politely until the user confirms the update toast.
+    // The PWAUpdater component sends 'SKIP_WAITING' when the user clicks "Update Now".
   );
 });
 
@@ -39,6 +41,14 @@ self.addEventListener('activate', (event) => {
       )
     ).then(() => self.clients.claim())
   );
+});
+
+// Listen for messages from the PWAUpdater component.
+// When the user clicks 'Update Now', the component sends SKIP_WAITING.
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // ── Fetch handler ────────────────────────────────────────────────────────────
