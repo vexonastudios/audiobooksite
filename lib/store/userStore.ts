@@ -75,6 +75,10 @@ interface UserState {
   toggleNotifications: () => void;
   markNotificationHeard: (id: string) => void;
 
+  // Scroll Radio
+  scrollRadioEnabled: boolean;
+  toggleScrollRadio: () => void;
+
   // Mobile App Navigation
   mobileNavActions: string[];
   setMobileNavActions: (actions: string[]) => void;
@@ -97,6 +101,7 @@ export const useUserStore = create<UserState>()(
       playerQuickActions: ['chapters', 'bookmark', 'quote', 'readalong'],
       readAlongFontSize: 1.2,
       mobileNavActions: ['home', 'browse', 'favorites', 'quotes'],
+      scrollRadioEnabled: true,
 
       addToHistory: (bookId, position) => {
         const entry: HistoryEntry = { bookId, position, lastListened: Date.now() };
@@ -196,6 +201,10 @@ export const useUserStore = create<UserState>()(
 
       toggleNotifications: () => set((state) => ({
         notificationsEnabled: !state.notificationsEnabled,
+      })),
+
+      toggleScrollRadio: () => set((state) => ({
+        scrollRadioEnabled: !state.scrollRadioEnabled,
       })),
 
       markNotificationHeard: (id) => set((state) => ({
@@ -310,7 +319,7 @@ export const useUserStore = create<UserState>()(
     {
       name: 'scrollreader-user', // localStorage key
       skipHydration: true,       // prevent SSR/client mismatch that breaks React event system
-      version: 3,
+      version: 4,
       migrate: (persistedState: any, fromVersion: number) => {
         // v1 → v2: ensure quote and readalong are in playerQuickActions
         if (fromVersion < 2) {
@@ -327,6 +336,12 @@ export const useUserStore = create<UserState>()(
         if (fromVersion < 3) {
           if (!persistedState.mobileNavActions) {
             persistedState.mobileNavActions = ['home', 'browse', 'favorites', 'quotes'];
+          }
+        }
+        // v3 → v4: Add scrollRadioEnabled
+        if (fromVersion < 4) {
+          if (persistedState.scrollRadioEnabled === undefined) {
+            persistedState.scrollRadioEnabled = true;
           }
         }
         return persistedState;

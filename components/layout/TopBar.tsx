@@ -80,6 +80,7 @@ function NowPlayingButton() {
   const currentBook = usePlayerStore((s) => s.currentBook);
   const isPlaying = usePlayerStore((s) => s.isPlaying);
   const setPlaying = usePlayerStore((s) => s.setPlaying);
+  const scrollRadioEnabled = useUserStore((s) => s.scrollRadioEnabled);
 
   useEffect(() => setMounted(true), []);
 
@@ -96,7 +97,7 @@ function NowPlayingButton() {
     return () => clearInterval(id);
   }, [poll]);
 
-  if (!mounted || !data?.active) return null;
+  if (!mounted || !data?.active || !scrollRadioEnabled) return null;
 
   const isRadioLoaded = currentBook?.id === (data.blockId ?? 'scroll-radio-live');
 
