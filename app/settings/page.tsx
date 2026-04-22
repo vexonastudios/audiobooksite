@@ -207,6 +207,7 @@ export default function SettingsPage() {
     playerQuickActions, setPlayerQuickActions,
     mobileNavActions, setMobileNavActions,
     notificationsEnabled, toggleNotifications,
+    scrollRadioEnabled, toggleScrollRadio,
     quoteSettings, updateQuoteSettings,
     readAlongFontSize, setReadAlongFontSize,
   } = useUserStore();
@@ -408,6 +409,7 @@ export default function SettingsPage() {
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               padding: '14px', cursor: 'pointer', gap: 12,
+              borderBottom: '1px solid var(--color-border)',
             }}
           >
             <div>
@@ -425,6 +427,34 @@ export default function SettingsPage() {
               <div style={{
                 position: 'absolute',
                 top: 3, left: notificationsEnabled ? 21 : 3,
+                width: 20, height: 20, borderRadius: '50%',
+                background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                transition: 'left 0.2s',
+              }} />
+            </div>
+          </label>
+
+          <label
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px', cursor: 'pointer', gap: 12,
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.9375rem', marginBottom: 2 }}>Scroll Radio button</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Show "Now Playing" in the top menu during broadcasts</div>
+            </div>
+            <div
+              onClick={toggleScrollRadio}
+              style={{
+                width: 44, height: 26, borderRadius: 13, flexShrink: 0,
+                background: scrollRadioEnabled ? 'var(--color-brand)' : 'var(--color-surface-2)',
+                position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
+              }}
+            >
+              <div style={{
+                position: 'absolute',
+                top: 3, left: scrollRadioEnabled ? 21 : 3,
                 width: 20, height: 20, borderRadius: '50%',
                 background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
                 transition: 'left 0.2s',
