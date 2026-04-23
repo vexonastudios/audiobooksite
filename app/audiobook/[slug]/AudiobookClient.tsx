@@ -37,7 +37,7 @@ export default function AudiobookClient() {
   const { currentBook, isPlaying, currentTime, duration, playbackSpeed, 
           sleepTimerMode, sleepTimerEndsAt, setSleepTimer, clearSleepTimer,
           loadBook, setPlaying, setPlaybackSpeed, skipForward, skipBackward, jumpToChapter } = usePlayerStore();
-  const { history, addBookmark, getBookmarksByBook, removeBookmark, skipInterval, isFavorited, toggleFavorite, playerQuickActions } = useUserStore();
+  const { history, addBookmark, getBookmarksByBook, removeBookmark, skipInterval, isFavorited, toggleFavorite, playerQuickActions, favorites, bookmarks, quotes } = useUserStore();
   const { offlineBooks, isDownloading, errors: offlineErrors, saveBookOffline, cancelDownload, removeBookOffline, isOffline, supportsOffline, checkSupport, clearError } = useOfflineStore();
 
   const searchParams = useSearchParams();
@@ -123,6 +123,18 @@ export default function AudiobookClient() {
   const currentChapterIdx = isCurrent ? activeChapterIndex : standbyChapterIdx;
   const bookBookmarks = book ? getBookmarksByBook(book.id) : [];
 
+  // Related books — personalized recommendation engine.
+  const related = useMemo(() => {
+    if (!book) return [];
+    const allBooks = useLibraryStore.getState().audiobooks;
+    return getRecommendations(allBooks, { history, favorites, bookmarks, quotes }, {
+      strategy: 'similar',
+      seedBook: book,
+      excludeIds: [book.id],
+      limit: 10,
+    });
+  }, [book, history, favorites, bookmarks, quotes]);
+
   if (!isLoaded) {
     return (
       <div className="page" style={{ display: 'flex', gap: 32, padding: '40px 24px' }}>
@@ -145,21 +157,6 @@ export default function AudiobookClient() {
       </div>
     );
   }
-
-  // Related books — personalized recommendation engine.
-  // Blends content similarity to this book with the user's listening history,
-  // favorites, bookmarks, and saved quotes. Falls back to pure content-similarity
-  // for anonymous users with no history.
-  const { favorites, bookmarks, quotes } = useUserStore();
-  const related = useMemo(() => {
-    const allBooks = useLibraryStore.getState().audiobooks;
-    return getRecommendations(allBooks, { history, favorites, bookmarks, quotes }, {
-      strategy: 'similar',
-      seedBook: book,
-      excludeIds: [book.id],
-      limit: 10,
-    });
-  }, [book, history, favorites, bookmarks, quotes]);
 
   const handlePlayPause = () => {
     if (isCurrent) {
@@ -542,7 +539,7 @@ export default function AudiobookClient() {
               </div>
 
               {/* Playback Buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, margin: '16px 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, margin: '32px 0 24px' }}>
                 {/* 48px invisible spacer mathematically balances the 48px Speed button on the right. Both can shrink equally. */}
                 <div style={{ width: 48, height: 44 }} />
                 <button 
@@ -640,7 +637,7 @@ export default function AudiobookClient() {
                   ),
                 };
                 return (
-                  <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 24, padding: '12px 2px', background: 'var(--color-surface-2)', borderRadius: 'var(--radius-lg)' }}>
+                  <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 32, padding: '16px 4px', background: 'var(--color-surface-2)', borderRadius: 'var(--radius-lg)' }}>
                     {playerQuickActions.map(id => actionMap[id] ?? null)}
                     {actionMap['download']}
                   </div>

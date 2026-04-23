@@ -51,10 +51,10 @@
 /* Dark mode — triggered by OS setting OR by [data-theme="dark"] override */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    /* Brand color override for dark mode: Gold/Yellow */
-    --color-brand:        #eab308;
-    --color-brand-light:  #fde047;
-    --color-brand-dark:   #ca8a04;
+    /* Brand color override for dark mode: Bright Blue */
+    --color-brand:        #4da3ff;
+    --color-brand-light:  #80c0ff;
+    --color-brand-dark:   #2e6aa7;
 
     --color-bg:           #0a0a0a;
     --color-surface:      #171717;
@@ -72,10 +72,10 @@
 
 /* Force dark mode regardless of OS (user chose "Dark" in Settings) */
 [data-theme="dark"] {
-  /* Brand color override for dark mode: Gold/Yellow */
-  --color-brand:        #eab308;
-  --color-brand-light:  #fde047;
-  --color-brand-dark:   #ca8a04;
+  /* Brand color override for dark mode: Bright Blue */
+  --color-brand:        #4da3ff;
+  --color-brand-light:  #80c0ff;
+  --color-brand-dark:   #2e6aa7;
 
   --color-bg:           #0a0a0a;
   --color-surface:      #171717;
@@ -835,6 +835,12 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
   border-bottom: 2px solid var(--color-border);
   gap: 0;
   margin-bottom: 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
@@ -846,6 +852,8 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
   margin-bottom: -2px;
   transition: all var(--transition-fast);
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tab-content-scroll {
