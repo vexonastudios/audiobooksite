@@ -11,6 +11,8 @@ export interface QuoteSettings {
 }
 
 interface UserState {
+  _hasHydrated: boolean;
+  setHasHydrated: (v: boolean) => void;
   history: HistoryEntry[];
   bookmarks: Bookmark[];
   quotes: SavedQuote[];
@@ -91,6 +93,8 @@ interface UserState {
 export const useUserStore = create<UserState>()(
   persist(
     (set, get) => ({
+      _hasHydrated: false,
+      setHasHydrated: (v) => set({ _hasHydrated: v }),
       history: [],
       bookmarks: [],
       quotes: [],
@@ -326,6 +330,9 @@ export const useUserStore = create<UserState>()(
       name: 'scrollreader-user', // localStorage key
       skipHydration: true,       // prevent SSR/client mismatch that breaks React event system
       version: 5,
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
       migrate: (persistedState: any, fromVersion: number) => {
         // v1 → v2: ensure quote and readalong are in playerQuickActions
         if (fromVersion < 2) {

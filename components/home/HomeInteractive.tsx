@@ -352,6 +352,7 @@ export interface HomeInteractiveProps {
 export function HomeInteractive({ serverRecentBooks, serverArticles, audiobookCount }: HomeInteractiveProps) {
   const { audiobooks, isLoaded } = useLibraryStore();
   const history = useUserStore(s => s.history);
+  const hasHydrated = useUserStore(s => s._hasHydrated);
   const isSignedIn = useUserStore(s => s.isSignedIn);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [communityQuotes, setCommunityQuotes] = useState<CommunityQuote[]>([]);
@@ -451,10 +452,25 @@ export function HomeInteractive({ serverRecentBooks, serverArticles, audiobookCo
         <HeroSubtitle audiobookCount={audiobookCount} />
       </div>
 
-      {/* Continue Listening — smart layout with side panel on desktop when < 5 books */}
-      {continueListening.length > 0 && (
+      {/* Continue Listening — always reserve the space to prevent layout shift.
+          Before user store hydrates we show a skeleton strip (same height as the
+          scroll row) so content below it never jumps when history data arrives. */}
+      {!hasHydrated ? (
+        // Skeleton placeholder — shown for ~50ms while localStorage is parsed.
+        // Height matches the compact scroll row so nothing shifts when it fills.
+        <section style={{ marginBottom: 40 }}>
+          <div className="section-header">
+            <div className="skeleton" style={{ height: 22, width: 160, borderRadius: 6 }} />
+          </div>
+          <div style={{ display: 'flex', gap: 12 }}>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="skeleton" style={{ width: CL_CARD_WIDTH, height: 175, flexShrink: 0, borderRadius: 'var(--radius-lg)' }} />
+            ))}
+          </div>
+        </section>
+      ) : continueListening.length > 0 ? (
         <ContinueListeningSection books={continueListening} isSignedIn={isSignedIn} />
-      )}
+      ) : null}
 
       {/* Picked For You — personalised recommendation row, appears after 3+ listens */}
       {mounted && pickedForYou.length > 0 && (
