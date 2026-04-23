@@ -21,25 +21,26 @@ export function NotificationBanner() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const notificationsEnabled = useUserStore(s => s.notificationsEnabled);
-  const heardIds = useUserStore(s => s.heardNotificationIds);
   const markHeard = useUserStore(s => s.markNotificationHeard);
 
+  const hasHydrated = useUserStore(s => s._hasHydrated);
+
   useEffect(() => {
-    if (!notificationsEnabled) return;
+    if (!hasHydrated || !notificationsEnabled) return;
 
     fetch('/api/notifications')
       .then(r => r.ok ? r.json() : null)
       .then((data: Notification | null) => {
         if (!data) return;
-        // Don't show if user already dismissed/heard it
-        if (heardIds.includes(data.id)) return;
+        // Check latest state from store directly to avoid stale closures
+        const currentHeardIds = useUserStore.getState().heardNotificationIds;
+        if (currentHeardIds.includes(data.id)) return;
         setNotif(data);
         // Small delay before animating in
         setTimeout(() => setVisible(true), 400);
       })
       .catch(() => {});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notificationsEnabled]);
+  }, [hasHydrated, notificationsEnabled]);
 
   const handleDismiss = () => {
     if (!notif) return;
