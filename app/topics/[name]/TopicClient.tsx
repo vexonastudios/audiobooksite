@@ -26,9 +26,16 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 const DEFAULT_COLOR = '#2e6aa7';
 
+function slugToTitle(slug: string): string {
+  return decodeURIComponent(slug)
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
 export default function TopicClient() {
   const params = useParams();
-  const topicName = decodeURIComponent(params.name as string);
+  const rawTopicName = params.name as string;
+  const topicName = slugToTitle(rawTopicName);
   const isLoaded = useLibraryStore((s) => s.isLoaded);
   const books = useLibraryStore((s) => s.getByTopic(topicName));
   const color = CATEGORY_COLORS[topicName] ?? DEFAULT_COLOR;

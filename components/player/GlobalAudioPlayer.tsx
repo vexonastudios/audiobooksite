@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePlayerStore } from '@/lib/store/playerStore';
 import { useUserStore } from '@/lib/store/userStore';
 import { Play, Pause, SkipBack, SkipForward, X, RotateCcw, RotateCw } from 'lucide-react';
@@ -20,8 +20,15 @@ const SPEEDS = [0.75, 1, 1.25, 1.5, 1.75, 2];
 
 export function GlobalAudioPlayer() {
   const { currentBook, isPlaying, currentTime, duration, activeChapterIndex,
-    playbackSpeed, setPlaying, skipForward, skipBackward, setPlaybackSpeed, jumpToChapter, close } = usePlayerStore();
+    playbackSpeed, setPlaying, skipForward, skipBackward, setPlaybackSpeed, jumpToChapter, close,
+    rehydrateAudio } = usePlayerStore();
   const skipInterval = useUserStore(s => s.skipInterval);
+
+  // On first mount, silently reconnect the audio element to the last saved book/position
+  useEffect(() => {
+    rehydrateAudio();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!currentBook) return null;
 

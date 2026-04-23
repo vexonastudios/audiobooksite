@@ -16,50 +16,38 @@ interface Notification {
 export default function AnnouncementsPage() {
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [playingId, setPlayingId] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { currentBook, isPlaying, setPlaying, loadBook } = usePlayerStore();
 
   useEffect(() => {
     fetch('/api/notifications/all')
       .then(r => r.ok ? r.json() : [])
       .then(data => { setItems(data); setLoading(false); })
       .catch(() => setLoading(false));
-      
-    // Cleanup isolated audio on unmount
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-      }
-    };
   }, []);
 
   const handlePlay = (notif: Notification) => {
-    if (playingId === notif.id && audioRef.current) {
-      audioRef.current.pause();
-      setPlayingId(null);
+    const isThisPlaying = currentBook?.id === `notif-${notif.id}`;
+    
+    if (isThisPlaying) {
+      setPlaying(!isPlaying);
       return;
     }
 
-    // 1. Pause the main audiobook player so it doesn't overlap or get hijacked
-    const mainAudio = getAudioElement();
-    if (!mainAudio.paused) {
-      mainAudio.pause();
-      usePlayerStore.getState().setPlaying(false);
-    }
+    const mockBook = {
+      id: `notif-${notif.id}`,
+      slug: '#',
+      title: notif.title,
+      authorName: 'Scroll Reader Team',
+      coverImage: 'https://scrollreader.com/wp-content/uploads/cropped-cropped-cropped-1080x1080-logo-270x270-1.jpg',
+      mp3Url: notif.audio_url,
+      description: notif.body_text,
+      pubDate: notif.created_at,
+      categories: [],
+      topics: [],
+      chapters: [{ id: '1', title: notif.title, duration: 0, startTime: 0 }]
+    };
 
-    // 2. Play using our isolated audio element
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-    } else {
-      audioRef.current.pause();
-    }
-
-    audioRef.current.src = notif.audio_url;
-    audioRef.current.load();
-    audioRef.current.onended = () => setPlayingId(null);
-    audioRef.current.play().catch(() => {});
-    setPlayingId(notif.id);
+    loadBook(mockBook as any);
   };
 
   return (
@@ -98,7 +86,7 @@ export default function AnnouncementsPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {items.map(notif => {
             const isExpired = notif.expires_at && new Date(notif.expires_at) < new Date();
-            const isPlaying = playingId === notif.id;
+            const isPlayingThis = currentBook?.id === `notif-${notif.id}` && isPlaying;
 
             return (
               <div
@@ -120,12 +108,12 @@ export default function AnnouncementsPage() {
                 {/* Icon */}
                 <div style={{
                   width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-                  background: isPlaying ? '#FEF3C7' : 'rgba(245,158,11,0.1)',
+                  background: isPlayingThis ? '#FEF3C7' : 'rgba(245,158,11,0.1)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: isPlaying ? '2px solid #FCD34D' : '2px solid transparent',
+                  border: isPlayingThis ? '2px solid #FCD34D' : '2px solid transparent',
                   transition: 'all 0.2s ease',
                 }}>
-                  {isPlaying
+                  {isPlayingThis
                     ? <Volume2 size={18} style={{ color: '#D97706' }} />
                     : <Bell size={18} style={{ color: '#D97706' }} />
                   }
@@ -159,9 +147,9 @@ export default function AnnouncementsPage() {
                       onClick={() => handlePlay(notif)}
                       style={{
                         display: 'inline-flex', alignItems: 'center', gap: 7,
-                        background: isPlaying ? '#D97706' : '#FFFBEB',
-                        color: isPlaying ? '#fff' : '#B45309',
-                        border: `1.5px solid ${isPlaying ? '#D97706' : '#FCD34D'}`,
+                        background: isPlayingThis ? '#D97706' : '#FFFBEB',
+                        color: isPlayingThis ? '#fff' : '#B45309',
+                        border: `1.5px solid ${isPlayingThis ? '#D97706' : '#FCD34D'}`,
                         borderRadius: 20,
                         padding: '7px 18px',
                         cursor: 'pointer',
@@ -170,8 +158,8 @@ export default function AnnouncementsPage() {
                         transition: 'all 0.15s ease',
                       }}
                     >
-                      {isPlaying
-                        ? <><Volume2 size={14} /> Playing…</>
+                      {isPlayingThis
+                        ? <><Volume2 size={14} /> Pause Audio</>
                         : <><Play size={14} /> Play Audio</>
                       }
                     </button>

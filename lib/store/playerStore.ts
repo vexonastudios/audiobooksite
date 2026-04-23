@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Audiobook, Chapter } from '@/lib/types';
 import { useUserStore } from './userStore';
 
@@ -32,6 +32,9 @@ interface PlayerState {
   setSleepTimer: (minutes: number | 'chapter') => void;
   clearSleepTimer: () => void;
   close: () => void;
+
+  // Called once on app boot to rehydrate the audio element
+  rehydrateAudio: () => void;
 }
 
 /**
@@ -58,7 +61,7 @@ export function getAudioElement(): HTMLAudioElement {
   if (!audioEl && typeof window !== 'undefined') {
     audioEl = new Audio();
     audioEl.preload = 'metadata';
-    // Prevent the browser from automatically scanning the local network for Cast/AirPlay receivers, 
+    // Prevent the browser from automatically scanning the local network for Cast/AirPlay receivers,
     // which triggers an intrusive "Access other devices on your local network" permission prompt.
     if ('disableRemotePlayback' in audioEl) {
       (audioEl as any).disableRemotePlayback = true;
@@ -67,117 +70,151 @@ export function getAudioElement(): HTMLAudioElement {
   return audioEl!;
 }
 
-export const usePlayerStore = create<PlayerState>()((set, get) => ({
-  currentBook: null,
-  isPlaying: false,
-  currentTime: 0,
-  duration: 0,
-  playbackSpeed: 1.0,
-  activeChapterIndex: 0,
-  volume: 1.0,
-
-  sleepTimerMode: null,
-  sleepTimerEndsAt: null,
-
-  loadBook: (book, startTime = 0) => {
-    const audio = getAudioElement();
-    const wasPlaying = !audio.paused;
-
-    if (audio.src !== book.mp3Url) {
-      audio.src = book.mp3Url;
-      audio.load();
-    }
-    audio.currentTime = startTime;
-    audio.playbackRate = get().playbackSpeed;
-    audio.volume = get().volume;
-    audio.play().catch(() => {});
-
-    set({
-      currentBook: book,
-      isPlaying: true,
-      currentTime: startTime,
-      activeChapterIndex: computeChapterIndex(book.chapters, startTime),
-    });
-  },
-
-  setPlaying: (playing) => {
-    const audio = getAudioElement();
-    if (playing) {
-      audio.play().catch(() => {});
-    } else {
-      audio.pause();
-    }
-    set({ isPlaying: playing });
-  },
-
-  setCurrentTime: (time) => {
-    const { currentBook } = get();
-    const chapterIndex = currentBook
-      ? computeChapterIndex(currentBook.chapters, time)
-      : 0;
-    set({ currentTime: time, activeChapterIndex: chapterIndex });
-  },
-
-  setDuration: (duration) => set({ duration }),
-
-  setPlaybackSpeed: (speed) => {
-    getAudioElement().playbackRate = speed;
-    set({ playbackSpeed: speed });
-  },
-
-  setVolume: (volume) => {
-    getAudioElement().volume = volume;
-    set({ volume });
-  },
-
-  skipForward: () => {
-    const audio = getAudioElement();
-    const interval = useUserStore.getState().skipInterval || 15;
-    audio.currentTime = Math.min(audio.currentTime + interval, audio.duration || 0);
-  },
-
-  skipBackward: () => {
-    const audio = getAudioElement();
-    const interval = useUserStore.getState().skipInterval || 15;
-    audio.currentTime = Math.max(audio.currentTime - interval, 0);
-  },
-
-  jumpToChapter: (index) => {
-    const { currentBook } = get();
-    if (!currentBook?.chapters[index]) return;
-    const time = currentBook.chapters[index].startTime;
-    const audio = getAudioElement();
-    audio.currentTime = time;
-    if (audio.paused) {
-      audio.play().catch(() => {});
-      set({ isPlaying: true });
-    }
-  },
-
-  setSleepTimer: (val) => {
-    if (val === 'chapter') {
-      set({ sleepTimerMode: 'chapter', sleepTimerEndsAt: null });
-    } else {
-      set({ sleepTimerMode: 'minutes', sleepTimerEndsAt: Date.now() + val * 60000 });
-    }
-  },
-
-  clearSleepTimer: () => {
-    set({ sleepTimerMode: null, sleepTimerEndsAt: null });
-  },
-
-  close: () => {
-    const audio = getAudioElement();
-    audio.pause();
-    audio.src = '';
-    set({
+export const usePlayerStore = create<PlayerState>()(
+  persist(
+    (set, get) => ({
       currentBook: null,
       isPlaying: false,
       currentTime: 0,
       duration: 0,
+      playbackSpeed: 1.0,
       activeChapterIndex: 0,
+      volume: 1.0,
+
       sleepTimerMode: null,
       sleepTimerEndsAt: null,
-    });
-  },
-}));
+
+      rehydrateAudio: () => {
+        const { currentBook, currentTime, playbackSpeed, volume } = get();
+        if (!currentBook?.mp3Url) return;
+        // Silently prepare the audio element at the last position — no auto-play.
+        const audio = getAudioElement();
+        audio.src = currentBook.mp3Url;
+        audio.playbackRate = playbackSpeed;
+        audio.volume = volume;
+        audio.load();
+        // Seek to last position once metadata is available
+        const seek = () => {
+          audio.currentTime = currentTime;
+          audio.removeEventListener('loadedmetadata', seek);
+        };
+        audio.addEventListener('loadedmetadata', seek);
+        // Ensure store reflects paused state on restore
+        set({ isPlaying: false });
+      },
+
+      loadBook: (book, startTime = 0) => {
+        const audio = getAudioElement();
+
+        if (audio.src !== book.mp3Url) {
+          audio.src = book.mp3Url;
+          audio.load();
+        }
+        audio.currentTime = startTime;
+        audio.playbackRate = get().playbackSpeed;
+        audio.volume = get().volume;
+        audio.play().catch(() => {});
+
+        set({
+          currentBook: book,
+          isPlaying: true,
+          currentTime: startTime,
+          activeChapterIndex: computeChapterIndex(book.chapters, startTime),
+        });
+      },
+
+      setPlaying: (playing) => {
+        const audio = getAudioElement();
+        if (playing) {
+          audio.play().catch(() => {});
+        } else {
+          audio.pause();
+        }
+        set({ isPlaying: playing });
+      },
+
+      setCurrentTime: (time) => {
+        const { currentBook } = get();
+        const chapterIndex = currentBook
+          ? computeChapterIndex(currentBook.chapters, time)
+          : 0;
+        set({ currentTime: time, activeChapterIndex: chapterIndex });
+      },
+
+      setDuration: (duration) => set({ duration }),
+
+      setPlaybackSpeed: (speed) => {
+        getAudioElement().playbackRate = speed;
+        set({ playbackSpeed: speed });
+      },
+
+      setVolume: (volume) => {
+        getAudioElement().volume = volume;
+        set({ volume });
+      },
+
+      skipForward: () => {
+        const audio = getAudioElement();
+        const interval = useUserStore.getState().skipInterval || 15;
+        audio.currentTime = Math.min(audio.currentTime + interval, audio.duration || 0);
+      },
+
+      skipBackward: () => {
+        const audio = getAudioElement();
+        const interval = useUserStore.getState().skipInterval || 15;
+        audio.currentTime = Math.max(audio.currentTime - interval, 0);
+      },
+
+      jumpToChapter: (index) => {
+        const { currentBook } = get();
+        if (!currentBook?.chapters[index]) return;
+        const time = currentBook.chapters[index].startTime;
+        const audio = getAudioElement();
+        audio.currentTime = time;
+        if (audio.paused) {
+          audio.play().catch(() => {});
+          set({ isPlaying: true });
+        }
+      },
+
+      setSleepTimer: (val) => {
+        if (val === 'chapter') {
+          set({ sleepTimerMode: 'chapter', sleepTimerEndsAt: null });
+        } else {
+          set({ sleepTimerMode: 'minutes', sleepTimerEndsAt: Date.now() + val * 60000 });
+        }
+      },
+
+      clearSleepTimer: () => {
+        set({ sleepTimerMode: null, sleepTimerEndsAt: null });
+      },
+
+      close: () => {
+        const audio = getAudioElement();
+        audio.pause();
+        audio.src = '';
+        set({
+          currentBook: null,
+          isPlaying: false,
+          currentTime: 0,
+          duration: 0,
+          activeChapterIndex: 0,
+          sleepTimerMode: null,
+          sleepTimerEndsAt: null,
+        });
+      },
+    }),
+    {
+      name: 'sr-player', // localStorage key
+      storage: createJSONStorage(() => localStorage),
+      // Only persist the data fields — never functions or volatile state
+      partialize: (state) => ({
+        currentBook:        state.currentBook,
+        currentTime:        state.currentTime,
+        playbackSpeed:      state.playbackSpeed,
+        activeChapterIndex: state.activeChapterIndex,
+        volume:             state.volume,
+      }),
+    },
+  ),
+);

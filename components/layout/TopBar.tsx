@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, usePathname } from 'next/navigation';
-import { Search, Settings, X, Menu, ArrowLeft, Radio, Info } from 'lucide-react';
+import { Search, Settings, X, Menu, ArrowLeft, Radio, Info, LogIn } from 'lucide-react';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useLibraryStore } from '@/lib/store/libraryStore';
 import { useUserStore } from '@/lib/store/userStore';
@@ -373,8 +373,9 @@ export function TopBar() {
             <UserButton />
           ) : (
             <SignInButton mode="modal">
-              <button className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.875rem' }}>
-                Sign In
+              <button className="btn btn-primary topbar-signin-btn" aria-label="Sign In">
+                <span className="signin-text">Sign In</span>
+                <LogIn size={16} className="signin-icon" />
               </button>
             </SignInButton>
           )}
@@ -428,6 +429,34 @@ export function TopBar() {
         </div>,
         document.body
       )}
+
+      <style>{`
+        .topbar-signin-btn {
+          padding: 8px 16px;
+          font-size: 0.875rem;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .signin-icon {
+          display: none;
+        }
+        @media (max-width: 768px) {
+          .topbar-signin-btn {
+            padding: 0 !important;
+            width: 36px;
+            height: 36px;
+            border-radius: 50% !important;
+            justify-content: center;
+          }
+          .signin-text {
+            display: none;
+          }
+          .signin-icon {
+            display: block;
+          }
+        }
+      `}</style>
     </>
   );
 }

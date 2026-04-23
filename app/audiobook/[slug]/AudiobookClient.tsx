@@ -1046,9 +1046,9 @@ export default function AudiobookClient() {
                                 <button
                                   className="btn btn-primary"
                                   onClick={() => saveBookOffline(book, '64k')}
-                                  style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                  style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}
                                 >
-                                  <span>Save Standard Quality · 64kbps</span>
+                                  <span style={{ textAlign: 'left', flex: 1, whiteSpace: 'normal', lineHeight: 1.2 }}>Save Standard Quality <span style={{ opacity: 0.8, fontWeight: 400 }}>· 64kbps</span></span>
                                   <span style={{ fontSize: '0.78rem', opacity: 0.8, fontWeight: 400 }}>{estimateSize(64)}</span>
                                 </button>
                               ) : (
@@ -1059,9 +1059,9 @@ export default function AudiobookClient() {
                               <button
                                 className="btn btn-secondary"
                                 onClick={() => saveBookOffline(book, '128k')}
-                                style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                                style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}
                               >
-                                <span>Save High Quality · 128kbps</span>
+                                <span style={{ textAlign: 'left', flex: 1, whiteSpace: 'normal', lineHeight: 1.2 }}>Save High Quality <span style={{ opacity: 0.8, fontWeight: 400 }}>· 128kbps</span></span>
                                 <span style={{ fontSize: '0.78rem', opacity: 0.8, fontWeight: 400 }}>{estimateSize(128)}</span>
                               </button>
                             </div>

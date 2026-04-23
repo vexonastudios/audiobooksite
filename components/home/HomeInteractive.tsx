@@ -198,9 +198,9 @@ function HeroSubtitle({ audiobookCount }: { audiobookCount: number }) {
     return () => ac.abort();
   }, [isSignedIn]);
 
-  if (!isSignedIn) return <p className="hero-subtitle">{audiobookCount} audiobooks from classic authors — always free.</p>;
-  if (loading && !stats) return <div className="hero-stats">{[88, 70, 72].map((w, i) => <span key={i} className="skeleton" style={{ height: 18, width: w, borderRadius: 6, display: 'inline-block' }} />)}</div>;
-  if (!stats || stats.booksStarted === 0) return <p className="hero-subtitle">{audiobookCount} audiobooks from classic authors — always free.</p>;
+  if (!isSignedIn) return <p className="hero-subtitle hero-mobile-hidden">{audiobookCount} audiobooks from classic authors — always free.</p>;
+  if (loading && !stats) return <div className="hero-stats hero-mobile-hidden">{[88, 70, 72].map((w, i) => <span key={i} className="skeleton" style={{ height: 18, width: w, borderRadius: 6, display: 'inline-block' }} />)}</div>;
+  if (!stats || stats.booksStarted === 0) return <p className="hero-subtitle hero-mobile-hidden">{audiobookCount} audiobooks from classic authors — always free.</p>;
 
   return (
     <div className="hero-stats hero-mobile-hidden">
