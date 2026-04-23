@@ -56,6 +56,7 @@ export default function AudiobookClient() {
   const [timedStart, setTimedStart] = useState<number | null>(null);
   // Download disclaimer modal
   const [disclaimerModal, setDisclaimerModal] = useState<{ url: string; filename: string; quality: string; sizeLabel: string } | null>(null);
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
 
   // Parse ?t= param from URL on load
   useEffect(() => {
@@ -1138,10 +1139,33 @@ export default function AudiobookClient() {
                   lineHeight: 1.7, 
                   fontSize: '0.9375rem',
                   maxWidth: '100%',
-                  overflow: 'hidden'
+                  overflow: 'hidden',
+                  display: '-webkit-box',
+                  WebkitBoxOrient: 'vertical',
+                  WebkitLineClamp: isDescExpanded ? 'unset' : 5,
                 }}
                 dangerouslySetInnerHTML={{ __html: book.description || book.excerpt }}
               />
+              
+              {((book.description || book.excerpt) || '').length > 300 && (
+                <button 
+                  onClick={() => setIsDescExpanded(!isDescExpanded)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--color-brand)',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    padding: '8px 0 0 0',
+                    cursor: 'pointer',
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left'
+                  }}
+                >
+                  {isDescExpanded ? 'Show less' : 'Read more'}
+                </button>
+              )}
             </div>
           </div>
         </div>
