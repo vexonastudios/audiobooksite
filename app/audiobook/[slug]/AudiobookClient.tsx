@@ -540,43 +540,41 @@ export default function AudiobookClient() {
               </div>
 
               {/* Playback Buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', margin: '32px 0 24px' }}>
-                {/* 48px invisible spacer mathematically balances the 48px Speed button on the right. Both can shrink equally. */}
-                <div style={{ width: 48, height: 44 }} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(6px, 3vw, 24px)', width: '100%', margin: '32px 0 24px' }}>
                 <button 
                   className="btn-icon" 
-                  style={{ width: 44, height: 44, background: 'transparent', border: 'none', opacity: !isCurrent || currentChapterIdx === 0 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === 0 ? 'none' : 'auto' }}
+                  style={{ width: 40, height: 40, background: 'transparent', border: 'none', opacity: !isCurrent || currentChapterIdx === 0 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === 0 ? 'none' : 'auto', flexShrink: 0 }}
                   onClick={() => jumpToChapter(currentChapterIdx - 1)}
                   title="Previous chapter"
                 >
-                  <SkipBack size={24} fill="currentColor" />
+                  <SkipBack size={22} fill="currentColor" />
                 </button>
-                <button className="btn-skip" style={{ width: 48, height: 48, background: 'transparent', border: 'none' }} onClick={skipBackward} disabled={!isCurrent} title={`Back ${skipInterval}s`}>
-                  <RotateCcw size={32} strokeWidth={2} />
-                  <span className="skip-label">{skipInterval}</span>
+                <button className="btn-skip" style={{ width: 44, height: 44, background: 'transparent', border: 'none', flexShrink: 0 }} onClick={skipBackward} disabled={!isCurrent} title={`Back ${skipInterval}s`}>
+                  <RotateCcw size={28} strokeWidth={2} />
+                  <span className="skip-label" style={{ fontSize: '0.65rem' }}>{skipInterval}</span>
                 </button>
-                <button className="btn-play-large" onClick={handlePlayPause} style={{ flexShrink: 0, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 72, height: 72, background: 'var(--color-brand)', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(var(--color-brand-rgb, 0,0,0), 0.3)' }}>
+                <button className="btn-play-large" onClick={handlePlayPause} style={{ flexShrink: 0, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 68, height: 68, background: 'var(--color-brand)', color: 'white', border: 'none', boxShadow: '0 4px 12px rgba(var(--color-brand-rgb, 0,0,0), 0.3)' }}>
                   {isCurrent && isPlaying
-                    ? <Pause size={32} strokeWidth={2.5} fill="currentColor" color="currentColor" />
-                    : <Play size={32} strokeWidth={2.5} style={{ marginLeft: 4 }} fill="currentColor" color="currentColor" />
+                    ? <Pause size={30} strokeWidth={2.5} fill="currentColor" color="currentColor" />
+                    : <Play size={30} strokeWidth={2.5} style={{ marginLeft: 4 }} fill="currentColor" color="currentColor" />
                   }
                 </button>
-                <button className="btn-skip" style={{ width: 48, height: 48, background: 'transparent', border: 'none' }} onClick={skipForward} disabled={!isCurrent} title={`Forward ${skipInterval}s`}>
-                  <RotateCw size={32} strokeWidth={2} />
-                  <span className="skip-label">{skipInterval}</span>
+                <button className="btn-skip" style={{ width: 44, height: 44, background: 'transparent', border: 'none', flexShrink: 0 }} onClick={skipForward} disabled={!isCurrent} title={`Forward ${skipInterval}s`}>
+                  <RotateCw size={28} strokeWidth={2} />
+                  <span className="skip-label" style={{ fontSize: '0.65rem' }}>{skipInterval}</span>
                 </button>
                 <button 
                   className="btn btn-icon" 
-                  style={{ width: 44, height: 44, background: 'transparent', border: 'none', opacity: !isCurrent || currentChapterIdx === book.chapters.length - 1 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === book.chapters.length - 1 ? 'none' : 'auto' }}
+                  style={{ width: 40, height: 40, background: 'transparent', border: 'none', opacity: !isCurrent || currentChapterIdx === book.chapters.length - 1 ? 0.3 : 1, pointerEvents: !isCurrent || currentChapterIdx === book.chapters.length - 1 ? 'none' : 'auto', flexShrink: 0 }}
                   onClick={() => jumpToChapter(currentChapterIdx + 1)}
                   title="Next chapter"
                 >
-                  <SkipForward size={24} fill="currentColor" />
+                  <SkipForward size={22} fill="currentColor" />
                 </button>
                 <button 
                   className="btn btn-icon" 
                   onClick={() => { const nextSpeed = playbackSpeed >= 2 ? 0.75 : playbackSpeed + 0.25; setPlaybackSpeed(nextSpeed); }} 
-                  style={{ width: 48, height: 44, background: 'transparent', border: 'none', fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}
+                  style={{ width: 40, height: 40, background: 'transparent', border: 'none', fontWeight: 700, fontSize: '0.85rem', color: 'var(--color-text-secondary)', flexShrink: 0 }}
                   title="Playback speed"
                 >
                   {playbackSpeed}x
@@ -585,60 +583,60 @@ export default function AudiobookClient() {
 
               {/* Mobile-Only Bottom Options Row — dynamically ordered from user preferences */}
               {(() => {
-                // Settings flex: 1 ensures equal columns. align-content handles text wrapping gracefully.
-                const btnStyle: React.CSSProperties = { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: 4, color: 'var(--color-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', textAlign: 'center' };
+                // Settings flex: 0 0 auto ensures they don't shrink
+                const btnStyle: React.CSSProperties = { flex: '0 0 68px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', gap: 6, color: 'var(--color-text-primary)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 0', textAlign: 'center' };
                 const actionMap: Record<string, React.ReactNode> = {
                   chapters: (
                     <button key="chapters" onClick={() => { setActiveTab('chapters'); setMobileTabOpen(true); }} style={btnStyle}>
-                      <List size={22} />
-                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Chapters</span>
+                      <List size={24} />
+                      <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Chapters</span>
                     </button>
                   ),
                   bookmark: (
                     <button key="bookmark" onClick={(e) => { e.preventDefault(); setActiveTab('bookmarks'); setMobileTabOpen(true); }} style={btnStyle}>
-                      <BookmarkPlus size={22} />
-                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Bookmark</span>
+                      <BookmarkPlus size={24} />
+                      <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Bookmark</span>
                     </button>
                   ),
                   favorite: (
                     <button key="favorite" onClick={(e) => { e.preventDefault(); if (!book) return; toggleFavorite({ type: 'audiobook', itemId: book.id, itemSlug: book.slug, title: book.title, author: book.authorName, cover: book.coverImage, thumbnail: book.thumbnailUrl }); }} style={btnStyle}>
-                      <Heart size={22} fill={book && isFavorited(book.id) ? 'var(--color-error)' : 'none'} color={book && isFavorited(book.id) ? 'var(--color-error)' : 'currentColor'} />
-                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Favorite</span>
+                      <Heart size={24} fill={book && isFavorited(book.id) ? 'var(--color-error)' : 'none'} color={book && isFavorited(book.id) ? 'var(--color-error)' : 'currentColor'} />
+                      <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Favorite</span>
                     </button>
                   ),
                   quote: (
                     <button key="quote" onClick={() => { setQuoteModalOpen(true); if (isPlaying) setPlaying(false); }} style={{ ...btnStyle, opacity: transcriptStatus === 'unavailable' ? 0.3 : transcriptStatus === 'loading' ? 0.5 : 1 }} disabled={transcriptStatus !== 'available'}>
-                      <Quote size={22} />
-                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Quote</span>
+                      <Quote size={24} />
+                      <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Quote</span>
                     </button>
                   ),
                   share: (
                     <button key="share" onClick={() => { setActiveTab('share'); setMobileTabOpen(true); }} style={btnStyle}>
-                      <Share2 size={22} />
-                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Share</span>
+                      <Share2 size={24} />
+                      <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Share</span>
                     </button>
                   ),
                   timer: (
                     <button key="timer" onClick={() => { setActiveTab('timer'); setMobileTabOpen(true); }} style={btnStyle}>
-                      <Moon size={22} />
-                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Timer</span>
+                      <Moon size={24} />
+                      <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Timer</span>
                     </button>
                   ),
                   download: (
                     <button key="download" onClick={(e) => { e.preventDefault(); setActiveTab('download'); setMobileTabOpen(true); }} style={btnStyle}>
-                      <DownloadCloud size={22} />
-                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Download</span>
+                      <DownloadCloud size={24} />
+                      <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Download</span>
                     </button>
                   ),
                   readalong: (
                     <button key="readalong" onClick={() => setReadAlongOpen(true)} style={{ ...btnStyle, opacity: transcriptStatus === 'unavailable' ? 0.3 : transcriptStatus === 'loading' ? 0.5 : 1 }} disabled={transcriptStatus !== 'available'}>
-                      <BookOpen size={22} />
-                      <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>Read Along</span>
+                      <BookOpen size={24} />
+                      <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>Read Along</span>
                     </button>
                   ),
                 };
                 return (
-                  <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 32, marginLeft: -12, marginRight: -12, padding: '16px 8px', background: 'var(--color-surface-2)', borderRadius: 'var(--radius-lg)' }}>
+                  <div className="mobile-player-options mobile-only hide-scrollbar" style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', marginTop: 32, marginLeft: -16, marginRight: -16, padding: '16px', background: 'var(--color-surface-2)', overflowX: 'auto', WebkitOverflowScrolling: 'touch', gap: 12 }}>
                     {playerQuickActions.map(id => actionMap[id] ?? null)}
                     {actionMap['download']}
                   </div>

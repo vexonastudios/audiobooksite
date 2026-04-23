@@ -1479,3 +1479,12 @@ h3 { font-size: clamp(1rem, 2vw, 1.25rem); }
     background: linear-gradient(145deg, var(--color-surface) 0%, rgba(46, 106, 167, 0.12) 100%);
   }
 }
+
+/* Utility to hide scrollbar but allow scrolling */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
