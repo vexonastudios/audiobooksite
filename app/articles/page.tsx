@@ -99,7 +99,6 @@ export default function ArticlesIndex() {
             key={article.id}
             href={`/articles/${article.slug}`}
             style={{ textDecoration: 'none', display: 'block' }}
-            className="article-card-link"
           >
             <article style={{
               background: 'var(--color-surface)',
@@ -142,13 +141,13 @@ export default function ArticlesIndex() {
 
               {/* Card body */}
               <div style={{ padding: '20px 22px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
                   {(article.categories ?? [])[0] && (
-                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-brand)', background: 'rgba(46,106,167,0.08)', padding: '3px 10px', borderRadius: 999 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--color-brand)', background: 'rgba(46,106,167,0.08)', padding: '3px 10px', borderRadius: 999, flexShrink: 0 }}>
                       {article.categories![0]}
                     </span>
                   )}
-                  <span style={{ color: 'var(--color-text-tertiary)', fontSize: 12, marginLeft: 'auto' }}>
+                  <span style={{ color: 'var(--color-text-tertiary)', fontSize: 12, whiteSpace: 'nowrap', flexShrink: 0 }}>
                     {new Date(article.pubDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                   </span>
                 </div>
@@ -157,9 +156,9 @@ export default function ArticlesIndex() {
                   {article.title}
                 </h3>
 
-                <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', lineHeight: 1.6, margin: '0 0 16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', flex: 1 }}
-                  dangerouslySetInnerHTML={{ __html: article.excerpt || article.description?.replace(/<[^>]*>/g, ' ').slice(0, 160) + '…' }}
-                />
+                <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', lineHeight: 1.6, margin: '0 0 16px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', flex: 1 }}>
+                  {(article.excerpt || article.description || '').replace(/<[^>]*>/g, ' ').trim()}
+                </p>
 
                 <div style={{ color: 'var(--color-text-tertiary)', fontSize: 13 }}>
                   By <strong style={{ color: 'var(--color-text-secondary)' }}>{article.authorName}</strong>
