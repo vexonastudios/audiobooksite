@@ -539,7 +539,7 @@ export default function AudiobookClient() {
               </div>
 
               {/* Playback Buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, margin: '32px 0 24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', margin: '32px 0 24px' }}>
                 {/* 48px invisible spacer mathematically balances the 48px Speed button on the right. Both can shrink equally. */}
                 <div style={{ width: 48, height: 44 }} />
                 <button 
@@ -637,7 +637,7 @@ export default function AudiobookClient() {
                   ),
                 };
                 return (
-                  <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 32, padding: '16px 4px', background: 'var(--color-surface-2)', borderRadius: 'var(--radius-lg)' }}>
+                  <div className="mobile-player-options mobile-only" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 32, marginLeft: -12, marginRight: -12, padding: '16px 8px', background: 'var(--color-surface-2)', borderRadius: 'var(--radius-lg)' }}>
                     {playerQuickActions.map(id => actionMap[id] ?? null)}
                     {actionMap['download']}
                   </div>
