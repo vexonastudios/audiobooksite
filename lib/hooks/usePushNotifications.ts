@@ -11,7 +11,7 @@ import {
 export type PushPermissionState = 'default' | 'granted' | 'denied' | 'unsupported';
 
 export function usePushNotifications() {
-  const { pushEnabled, setPushEnabled, isSignedIn } = useUserStore();
+  const { pushEnabled, setPushEnabled, isSignedIn, newBookAlertsEnabled } = useUserStore();
   const [permissionState, setPermissionState] = useState<PushPermissionState>('default');
   const [isLoading, setIsLoading] = useState(false);
   const [foregroundMessage, setForegroundMessage] = useState<{
@@ -57,11 +57,16 @@ export function usePushNotifications() {
 
       setPermissionState('granted');
 
+      const topics = ['all-users'];
+      if (newBookAlertsEnabled) {
+        topics.push('new-audiobooks');
+      }
+
       // Register token with our server (now allowed for anonymous guests too)
       await fetch('/api/user/push-subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, platform: 'web' }),
+        body: JSON.stringify({ token, platform: 'web', topics }),
       });
 
       setPushEnabled(true);

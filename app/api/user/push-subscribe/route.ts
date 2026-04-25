@@ -15,7 +15,7 @@ export const runtime = 'nodejs';
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
 
-  const { token, platform = 'web' } = await req.json();
+  const { token, platform = 'web', topics = ['all-users'] } = await req.json();
   if (!token) {
     return NextResponse.json({ error: 'token is required' }, { status: 400 });
   }
@@ -30,12 +30,14 @@ export async function POST(req: NextRequest) {
         updated_at = NOW()
   `;
 
-  // Subscribe the token to the broadcast topic
-  try {
-    await subscribeTokenToTopic(token, 'all-users');
-  } catch (err) {
-    // Non-fatal — token is saved, topic subscription may retry
-    console.warn('[push-subscribe] topic subscription failed:', err);
+  // Subscribe the token to the requested topics
+  for (const topic of topics) {
+    try {
+      await subscribeTokenToTopic(token, topic);
+    } catch (err) {
+      // Non-fatal — token is saved, topic subscription may retry
+      console.warn(`[push-subscribe] topic subscription failed for ${topic}:`, err);
+    }
   }
 
   return NextResponse.json({ success: true });
