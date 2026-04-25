@@ -15,10 +15,13 @@ function getAdminApp() {
     }
     admin.initializeApp({
       credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // Vercel stores multi-line env vars with literal \n — replace with actual newlines
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        projectId: process.env.FIREBASE_PROJECT_ID?.replace(/^["']|["']$/g, '').trim(),
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL?.replace(/^["']|["']$/g, '').trim(),
+        // Vercel stores multi-line env vars with literal \n — replace with actual newlines.
+        // Also defensively strip any wrapping quotes if the user pasted them by accident.
+        privateKey: process.env.FIREBASE_PRIVATE_KEY
+          ?.replace(/^["']|["']$/g, '')
+          ?.replace(/\\n/g, '\n'),
       }),
     });
     initialized = true;
