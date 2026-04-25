@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { requireAdmin, adminForbidden } from '@/lib/admin-auth';
 
 
-// GET /api/admin/notifications — list all (admin)
+// GET /api/admin/announcements — list all (admin)
 export async function GET() {
   try {
     await requireAdmin();
@@ -17,7 +17,7 @@ export async function GET() {
   return NextResponse.json(rows);
 }
 
-// POST /api/admin/notifications — create draft
+// POST /api/admin/announcements — create draft
 export async function POST(req: Request) {
   try {
     await requireAdmin();

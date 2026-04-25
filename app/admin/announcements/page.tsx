@@ -20,7 +20,7 @@ export default function AdminNotificationsPage() {
 
   const fetchAll = async () => {
     setLoading(true);
-    const res = await fetch('/api/admin/notifications');
+    const res = await fetch('/api/admin/announcements');
     if (res.ok) setItems(await res.json());
     setLoading(false);
   };
@@ -29,7 +29,7 @@ export default function AdminNotificationsPage() {
 
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    await fetch(`/api/admin/notifications/${id}`, { method: 'DELETE' });
+    await fetch(`/api/admin/announcements/${id}`, { method: 'DELETE' });
     setItems(a => a.filter(x => x.id !== id));
   };
 
@@ -44,7 +44,7 @@ export default function AdminNotificationsPage() {
             Create audio announcements delivered via ElevenLabs TTS
           </p>
         </div>
-        <Link href="/admin/notifications/new" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
+        <Link href="/admin/announcements/new" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
           <PlusCircle size={15} /> New Announcement
         </Link>
       </div>
@@ -55,7 +55,7 @@ export default function AdminNotificationsPage() {
         ) : items.length === 0 ? (
           <div style={{ padding: 48, textAlign: 'center', color: '#718096' }}>
             <Mic size={36} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-            <div>No announcements yet. <Link href="/admin/notifications/new" style={{ color: '#2e6aa7' }}>Create the first one.</Link></div>
+            <div>No announcements yet. <Link href="/admin/announcements/new" style={{ color: '#2e6aa7' }}>Create the first one.</Link></div>
           </div>
         ) : (
           <table>
@@ -98,7 +98,7 @@ export default function AdminNotificationsPage() {
                   <td>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <Link
-                        href={`/admin/notifications/${n.id}/edit`}
+                        href={`/admin/announcements/${n.id}/edit`}
                         title="Edit"
                         style={{ display: 'flex', alignItems: 'center', padding: '6px 10px', background: '#EBF5FF', color: '#2e6aa7', borderRadius: 7, textDecoration: 'none', fontSize: 13 }}
                       >

@@ -6,7 +6,7 @@ export const maxDuration = 30;
 
 const VOICE_ID = 'fnYMz3F5gMEDGMWcH1ex';
 
-// POST /api/admin/notifications/generate
+// POST /api/admin/announcements/generate
 // Body: { text: string }
 // Returns raw MP3 bytes for admin preview — no R2 upload
 export async function POST(req: NextRequest) {

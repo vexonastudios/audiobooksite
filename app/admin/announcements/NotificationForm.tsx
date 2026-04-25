@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft, Mic, Play, Upload, Eye, EyeOff,
-  Save, Calendar, Volume2, CheckCircle, Loader2, Bell,
+  Save, Calendar, Volume2, CheckCircle, Loader2,
 } from 'lucide-react';
 
 export interface NotifData {
@@ -55,9 +55,6 @@ export default function NotificationForm({
   // Save draft id once created
   const [savedId, setSavedId] = useState(initialData?.id ?? '');
 
-  // Push notification state
-  const [pushSending, setPushSending] = useState(false);
-  const [pushResult, setPushResult] = useState<{ count?: number; error?: string } | null>(null);
 
   useEffect(() => {
     // cleanup blob URL on unmount
@@ -87,7 +84,7 @@ export default function NotificationForm({
       };
 
       if (isNew && !savedId) {
-        res = await fetch('/api/admin/notifications', {
+        res = await fetch('/api/admin/announcements', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -97,7 +94,7 @@ export default function NotificationForm({
         setSavedId(data.id);
       } else {
         const id = savedId || initialData?.id;
-        res = await fetch(`/api/admin/notifications/${id}`, {
+        res = await fetch(`/api/admin/announcements/${id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -127,7 +124,7 @@ export default function NotificationForm({
     }
 
     try {
-      const res = await fetch('/api/admin/notifications/generate', {
+      const res = await fetch('/api/admin/announcements/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: bodyText }),
@@ -181,7 +178,7 @@ export default function NotificationForm({
 
     try {
       // Ensure latest text/title/expiry is saved first
-      await fetch(`/api/admin/notifications/${id}`, {
+      await fetch(`/api/admin/announcements/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -191,7 +188,7 @@ export default function NotificationForm({
         }),
       });
 
-      const res = await fetch('/api/admin/notifications/publish', {
+      const res = await fetch('/api/admin/announcements/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notificationId: id }),
@@ -214,7 +211,7 @@ export default function NotificationForm({
   const handleUnpublish = async () => {
     const id = savedId || initialData?.id;
     if (!id) return;
-    await fetch(`/api/admin/notifications/${id}`, {
+    await fetch(`/api/admin/announcements/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ published: false }),
@@ -222,41 +219,13 @@ export default function NotificationForm({
     setPublished(false);
   };
 
-  // ── Send Push Notification ────────────────────────────────────────────────
-  const handleSendPush = async () => {
-    if (!title.trim() || !bodyText.trim()) {
-      setErrorMsg('Title and body text are required before sending a push notification.');
-      return;
-    }
-    setPushSending(true);
-    setPushResult(null);
-    try {
-      const res = await fetch('/api/admin/push-send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: title.trim(),
-          body: bodyText.trim(),
-          link: '/',
-          trigger: 'manual',
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Push failed');
-      setPushResult({ count: data.subscriberCount });
-    } catch (e: unknown) {
-      setPushResult({ error: e instanceof Error ? e.message : 'Push failed' });
-    } finally {
-      setPushSending(false);
-    }
-  };
 
   return (
     <div>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={() => router.push('/admin/notifications')} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button onClick={() => router.push('/admin/announcements')} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <ArrowLeft size={14} /> Back
           </button>
           <h1 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -443,42 +412,6 @@ export default function NotificationForm({
             </div>
           </div>
 
-          {/* Push Notifications */}
-          <div className="card" style={{ borderColor: '#A78BFA' }}>
-            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#5B4CF5' }}>
-              <Bell size={13} /> Push Notification
-            </h2>
-            <p style={{ fontSize: 12, color: '#718096', marginBottom: 14, lineHeight: 1.6 }}>
-              Send a device push notification to all users who have opted in. Uses the title and script text above.
-            </p>
-
-            <button
-              onClick={handleSendPush}
-              disabled={pushSending}
-              className="btn-primary"
-              style={{
-                width: '100%', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', gap: 8, padding: '12px',
-                background: 'linear-gradient(135deg, #5B4CF5, #7c3aed)',
-              }}
-            >
-              {pushSending ? <Loader2 size={16} className="spin" /> : <Bell size={16} />}
-              {pushSending ? 'Sending…' : '🔔 Send Push to All Users'}
-            </button>
-
-            {pushResult && (
-              <div style={{
-                marginTop: 10, padding: '10px 14px', borderRadius: 8, fontSize: 13,
-                background: pushResult.error ? '#FEE2E2' : '#D1FAE5',
-                color: pushResult.error ? '#991B1B' : '#065F46',
-                fontWeight: 500,
-              }}>
-                {pushResult.error
-                  ? `❌ ${pushResult.error}`
-                  : `✅ Sent to ${pushResult.count ?? 0} subscriber${pushResult.count !== 1 ? 's' : ''}`}
-              </div>
-            )}
-          </div>
 
           {/* Voice info */}
           <div className="card">

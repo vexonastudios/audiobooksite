@@ -20,7 +20,7 @@ function r2Client() {
   });
 }
 
-// POST /api/admin/notifications/publish
+// POST /api/admin/announcements/publish
 // Body: { notificationId: string }
 // Regenerates audio → uploads to R2 → marks published
 export async function POST(req: NextRequest) {

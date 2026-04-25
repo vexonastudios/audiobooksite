@@ -33,7 +33,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           { href: '/admin/audiobooks', label: 'Audiobooks', icon: <BookOpen size={16} />, newHref: '/admin/audiobooks/new' },
           { href: '/admin/articles', label: 'Articles', icon: <FileText size={16} />, newHref: '/admin/articles/new' },
           { href: '/admin/authors', label: 'Authors', icon: <User size={16} />, newHref: '/admin/authors/new' },
-          { href: '/admin/notifications', label: 'Announcements', icon: <Mic size={16} />, newHref: '/admin/notifications/new' },
+          { href: '/admin/announcements', label: 'Announcements', icon: <Mic size={16} />, newHref: '/admin/announcements/new' },
           { href: '/admin/push',          label: 'Push Notifications', icon: <Bell size={16} /> },
           { href: '/admin/analytics', label: 'Analytics', icon: <BarChart2 size={16} /> },
           { href: '/admin/messages',  label: 'Messages',  icon: <MessageSquare size={16} /> },
