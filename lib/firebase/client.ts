@@ -85,6 +85,21 @@ export async function requestPushPermissionAndGetToken(): Promise<string | null>
 }
 
 /**
+ * Delete the push token to stop receiving notifications natively.
+ */
+export async function deletePushToken(): Promise<boolean> {
+  const msg = getFirebaseMessaging();
+  if (!msg) return false;
+  try {
+    const { deleteToken } = await import('firebase/messaging');
+    return await deleteToken(msg);
+  } catch (err) {
+    console.warn('[FCM] deleteToken failed:', err);
+    return false;
+  }
+}
+
+/**
  * Listen for foreground push messages (app is open).
  * Returns an unsubscribe function.
  */

@@ -14,9 +14,6 @@ export const runtime = 'nodejs';
  */
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
 
   const { token, platform = 'web' } = await req.json();
   if (!token) {
@@ -26,7 +23,7 @@ export async function POST(req: NextRequest) {
   // Upsert the token — update user_id if the token already exists (device switch)
   await sql`
     INSERT INTO push_subscriptions (id, user_id, fcm_token, platform, updated_at)
-    VALUES (gen_random_uuid()::text, ${userId}, ${token}, ${platform}, NOW())
+    VALUES (gen_random_uuid()::text, ${userId ?? null}, ${token}, ${platform}, NOW())
     ON CONFLICT (fcm_token) DO UPDATE
     SET user_id = EXCLUDED.user_id,
         platform = EXCLUDED.platform,

@@ -5,6 +5,7 @@ import { useUserStore } from '@/lib/store/userStore';
 import {
   requestPushPermissionAndGetToken,
   onForegroundMessage,
+  deletePushToken,
 } from '@/lib/firebase/client';
 
 export type PushPermissionState = 'default' | 'granted' | 'denied' | 'unsupported';
@@ -21,8 +22,6 @@ export function usePushNotifications() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!('Notification' in window)) {
-      // iOS Safari / some mobile browsers don't expose Notification at all
-      // but FCM via Capacitor or iOS 16.4+ PWA can still work — don't block the UI
       setPermissionState('default');
       return;
     }
@@ -44,13 +43,10 @@ export function usePushNotifications() {
     try {
       const token = await requestPushPermissionAndGetToken();
 
-      // If Notification API exists and was denied explicitly, update state
       if (!token) {
         if ('Notification' in window) {
           setPermissionState(Notification.permission as PushPermissionState);
         }
-        // Still set pushEnabled=true for Capacitor native — token comes separately
-        // on native platforms, but show the toggle as on so the UX isn't broken
         const isCapacitor = !!(window as any).Capacitor?.isNativePlatform?.();
         if (isCapacitor) {
           setPushEnabled(true);
@@ -61,33 +57,32 @@ export function usePushNotifications() {
 
       setPermissionState('granted');
 
-      // Register token with our server
-      if (isSignedIn) {
-        await fetch('/api/user/push-subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token, platform: 'web' }),
-        });
-      }
+      // Register token with our server (now allowed for anonymous guests too)
+      await fetch('/api/user/push-subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, platform: 'web' }),
+      });
 
       setPushEnabled(true);
       return true;
     } catch (err) {
       console.error('[push] enable failed:', err);
-      // Don't leave the user confused — still toggle the UI on
-      // so they can see something happened (token registration may succeed later)
       setPushEnabled(true);
       return true;
     } finally {
       setIsLoading(false);
     }
-  }, [isSignedIn, setPushEnabled]);
+  }, [setPushEnabled]);
 
   const disablePush = useCallback(async () => {
     setIsLoading(true);
     try {
+      // 1. Unregister natively so the browser stops receiving them immediately
+      await deletePushToken();
+      // 2. Also try to clean up our DB if they are signed in (best-effort)
       if (isSignedIn) {
-        await fetch('/api/user/push-unsubscribe', { method: 'POST' });
+        await fetch('/api/user/push-unsubscribe', { method: 'POST' }).catch(() => {});
       }
       setPushEnabled(false);
     } finally {
