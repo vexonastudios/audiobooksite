@@ -59,12 +59,24 @@ export async function requestPushPermissionAndGetToken(): Promise<string | null>
   if (!msg) return null;
 
   try {
-    // The service worker must be registered before calling getToken()
-    const swReg = await navigator.serviceWorker.ready;
+    // FCM requires its own dedicated service worker at /firebase-messaging-sw.js
+    // (generated at build time by scripts/generate-firebase-sw.mjs)
+    let swReg: ServiceWorkerRegistration;
+    try {
+      swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+        scope: '/',
+      });
+      console.log('[FCM] firebase-messaging-sw.js registered');
+    } catch {
+      // Fall back to the existing sw.js if registration fails
+      swReg = await navigator.serviceWorker.ready;
+    }
+
     const token = await getToken(msg, {
       vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
       serviceWorkerRegistration: swReg,
     });
+    console.log('[FCM] token obtained:', token ? token.slice(0, 20) + '…' : 'null');
     return token || null;
   } catch (err) {
     console.warn('[FCM] getToken failed:', err);
