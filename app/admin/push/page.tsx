@@ -125,8 +125,8 @@ export default function AdminPushPage() {
           <div style={{ background: '#F8F9FF', border: '1px solid #C4B5FD', borderRadius: 10, padding: '14px 16px', marginBottom: 18 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Preview</div>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 8, background: 'linear-gradient(135deg, #5B4CF5, #7c3aed)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Bell size={16} color="white" />
+              <div style={{ width: 36, height: 36, borderRadius: 8, background: '#111', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                <img src="/icon-192x192.png" alt="App Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <div>
                 <div style={{ fontWeight: 700, fontSize: 13, color: '#1A202C' }}>{title || 'Notification title'}</div>
