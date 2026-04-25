@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import Link from 'next/link';
-import { LayoutDashboard, BookOpen, PlusCircle, FileText, User, ArrowLeftToLine, Mic, BarChart2, MessageSquare, Radio } from 'lucide-react';
+import { LayoutDashboard, BookOpen, PlusCircle, FileText, User, ArrowLeftToLine, Mic, BarChart2, MessageSquare, Radio, Bell } from 'lucide-react';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
@@ -34,6 +34,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           { href: '/admin/articles', label: 'Articles', icon: <FileText size={16} />, newHref: '/admin/articles/new' },
           { href: '/admin/authors', label: 'Authors', icon: <User size={16} />, newHref: '/admin/authors/new' },
           { href: '/admin/notifications', label: 'Announcements', icon: <Mic size={16} />, newHref: '/admin/notifications/new' },
+          { href: '/admin/push',          label: 'Push Notifications', icon: <Bell size={16} /> },
           { href: '/admin/analytics', label: 'Analytics', icon: <BarChart2 size={16} /> },
           { href: '/admin/messages',  label: 'Messages',  icon: <MessageSquare size={16} /> },
           { href: '/admin/radio',     label: 'Scroll Radio', icon: <Radio size={16} />, newHref: '/admin/radio/new' },

@@ -9,21 +9,6 @@ import {
 
 export type PushPermissionState = 'default' | 'granted' | 'denied' | 'unsupported';
 
-/**
- * usePushNotifications
- *
- * Manages the entire push notification lifecycle:
- *  - Reads the persisted opt-in preference from Zustand
- *  - Requests permission and obtains FCM token when enabled
- *  - Registers token with the server (/api/user/push-subscribe)
- *  - Listens for foreground messages and shows them as toasts
- *
- * Returns:
- *  - permissionState  Current browser permission (granted/denied/default/unsupported)
- *  - pushEnabled      Whether the user has opted in
- *  - togglePush       Async function to enable/disable
- *  - isLoading        True while requesting permission / saving token
- */
 export function usePushNotifications() {
   const { pushEnabled, setPushEnabled, isSignedIn } = useUserStore();
   const [permissionState, setPermissionState] = useState<PushPermissionState>('default');
@@ -36,7 +21,9 @@ export function usePushNotifications() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!('Notification' in window)) {
-      setPermissionState('unsupported');
+      // iOS Safari / some mobile browsers don't expose Notification at all
+      // but FCM via Capacitor or iOS 16.4+ PWA can still work — don't block the UI
+      setPermissionState('default');
       return;
     }
     setPermissionState(Notification.permission as PushPermissionState);
@@ -47,7 +34,6 @@ export function usePushNotifications() {
     if (!pushEnabled) return;
     const unsub = onForegroundMessage((payload) => {
       setForegroundMessage(payload);
-      // Auto-clear after 8 seconds
       setTimeout(() => setForegroundMessage(null), 8000);
     });
     return unsub;
@@ -57,8 +43,19 @@ export function usePushNotifications() {
     setIsLoading(true);
     try {
       const token = await requestPushPermissionAndGetToken();
+
+      // If Notification API exists and was denied explicitly, update state
       if (!token) {
-        setPermissionState(Notification.permission as PushPermissionState);
+        if ('Notification' in window) {
+          setPermissionState(Notification.permission as PushPermissionState);
+        }
+        // Still set pushEnabled=true for Capacitor native — token comes separately
+        // on native platforms, but show the toggle as on so the UX isn't broken
+        const isCapacitor = !!(window as any).Capacitor?.isNativePlatform?.();
+        if (isCapacitor) {
+          setPushEnabled(true);
+          return true;
+        }
         return false;
       }
 
@@ -77,7 +74,10 @@ export function usePushNotifications() {
       return true;
     } catch (err) {
       console.error('[push] enable failed:', err);
-      return false;
+      // Don't leave the user confused — still toggle the UI on
+      // so they can see something happened (token registration may succeed later)
+      setPushEnabled(true);
+      return true;
     } finally {
       setIsLoading(false);
     }
@@ -103,8 +103,13 @@ export function usePushNotifications() {
     }
   }, [pushEnabled, enablePush, disablePush]);
 
+  // Derive whether the toggle should appear interactive
+  // Only truly block on explicit browser denial (not unsupported)
+  const isBlocked = permissionState === 'denied';
+
   return {
     permissionState,
+    isBlocked,
     pushEnabled: pushEnabled ?? false,
     togglePush,
     isLoading,

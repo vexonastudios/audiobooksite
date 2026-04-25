@@ -203,7 +203,7 @@ function ActionPickerSection({
 }
 
 export default function SettingsPage() {
-  const { pushEnabled, togglePush, isLoading: pushLoading, permissionState } = usePushNotifications();
+  const { pushEnabled, togglePush, isLoading: pushLoading, permissionState, isBlocked } = usePushNotifications();
   const {
     skipInterval, setSkipInterval,
     playerQuickActions, setPlayerQuickActions,
@@ -463,9 +463,9 @@ export default function SettingsPage() {
           <label
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '14px', cursor: permissionState === 'unsupported' ? 'not-allowed' : 'pointer', gap: 12,
+              padding: '14px', cursor: isBlocked ? 'not-allowed' : 'pointer', gap: 12,
               borderBottom: '1px solid var(--color-border)',
-              opacity: permissionState === 'unsupported' ? 0.6 : 1,
+              opacity: isBlocked ? 0.6 : 1,
             }}
           >
             <div>
@@ -474,26 +474,25 @@ export default function SettingsPage() {
                 Push Notifications
               </div>
               <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-                {permissionState === 'unsupported' 
-                  ? 'Not supported on this device/browser'
-                  : permissionState === 'denied'
-                  ? 'Blocked by browser settings (enable in URL bar)'
-                  : 'Get alerts for new audiobooks when app is closed'}
+                {isBlocked
+                  ? 'Blocked by browser — tap the lock icon in your address bar to re-enable'
+                  : 'Get alerts for new audiobooks even when the app is closed'}
               </div>
             </div>
             <button
               onClick={async (e) => {
                 e.preventDefault();
-                if (permissionState === 'unsupported' || permissionState === 'denied') return;
+                if (isBlocked) return;
                 await togglePush();
               }}
-              disabled={pushLoading || permissionState === 'unsupported' || permissionState === 'denied'}
+              disabled={pushLoading || isBlocked}
               style={{
                 width: 44, height: 26, borderRadius: 13, flexShrink: 0,
                 border: 'none',
                 background: pushEnabled ? 'var(--color-brand)' : 'var(--color-surface-2)',
-                position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                position: 'relative', cursor: isBlocked ? 'not-allowed' : 'pointer',
+                transition: 'background 0.2s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}
             >
               {pushLoading ? (
