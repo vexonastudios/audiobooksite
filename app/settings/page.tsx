@@ -329,6 +329,7 @@ export default function SettingsPage() {
       {/* ──────────────────────────────────────────────────────────────────── */}
       {/* Section: Appearance                                                 */}
       {/* ──────────────────────────────────────────────────────────────────── */}
+      <section style={{ marginBottom: 32 }}>
         <h2 style={{ fontSize: '0.875rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-muted)', marginBottom: 4 }}>
           Appearance
         </h2>
