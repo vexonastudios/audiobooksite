@@ -468,8 +468,8 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               title: `📖 New: ${form.title}`,
-              body: form.author
-                ? `By ${form.author} — now available on Scroll Reader`
+              body: form.authorName
+                ? `By ${form.authorName} — now available on Scroll Reader`
                 : 'A new audiobook is now available on Scroll Reader',
               link: `/audiobook/${form.slug || saved.id}`,
               trigger: 'new_audiobook',
