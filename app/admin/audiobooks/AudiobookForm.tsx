@@ -331,6 +331,7 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
   const [meta, setMeta] = useState<Metadata>({ categories: [], topics: [], authors: [] });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+  const [sendPushOnCreate, setSendPushOnCreate] = useState(true);
   const [audioUploading, setAudioUploading] = useState(false);
   const [audioProgress, setAudioProgress] = useState('');
   const [timestampPaste, setTimestampPaste] = useState('');
@@ -459,8 +460,24 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
       if (!res.ok) throw new Error(await res.text());
       setMsg({ type: 'ok', text: mode === 'edit' ? '✓ Saved successfully!' : '✓ Audiobook created!' });
       if (mode === 'new') {
-        const { id } = await res.json();
-        router.push(`/admin/audiobooks/${id}/edit`);
+        const saved = await res.json();
+        // Auto-send push notification to 'new-audiobooks' subscribers
+        if (sendPushOnCreate) {
+          fetch('/api/admin/push-send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: `📖 New: ${form.title}`,
+              body: form.author
+                ? `By ${form.author} — now available on Scroll Reader`
+                : 'A new audiobook is now available on Scroll Reader',
+              link: `/audiobook/${form.slug || saved.id}`,
+              trigger: 'new_audiobook',
+              topic: 'new-audiobooks',
+            }),
+          }).catch(() => {}); // Fire and forget — don't block the redirect
+        }
+        router.push(`/admin/audiobooks/${saved.id}/edit`);
       }
     } catch (e) {
       setMsg({ type: 'err', text: String(e) });
@@ -762,14 +779,42 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
       )}
 
       {/* ── Submit ─────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: 12, paddingTop: 20, marginTop: 8, borderTop: '1px solid #E2E8F0' }}>
-        <button type="submit" disabled={saving} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <Save size={15} />
-          {saving ? 'Saving…' : mode === 'edit' ? 'Save Changes' : 'Create Audiobook'}
-        </button>
-        <a href="/admin/audiobooks" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <X size={14} /> Cancel
-        </a>
+      <div style={{ paddingTop: 20, marginTop: 8, borderTop: '1px solid #E2E8F0' }}>
+        {/* Push notification opt-in — only shown when creating a new book */}
+        {mode === 'new' && (
+          <label style={{
+            display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16,
+            padding: '12px 14px', borderRadius: 8,
+            background: sendPushOnCreate ? 'rgba(91,76,245,0.06)' : '#F8F9FA',
+            border: `1.5px solid ${sendPushOnCreate ? '#5B4CF5' : '#E2E8F0'}`,
+            cursor: 'pointer', transition: 'all 0.15s',
+          }}>
+            <input
+              type="checkbox"
+              checked={sendPushOnCreate}
+              onChange={e => setSendPushOnCreate(e.target.checked)}
+              style={{ width: 16, height: 16, accentColor: '#5B4CF5', flexShrink: 0 }}
+            />
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 13, color: '#1A202C' }}>
+                🔔 Send push notification to subscribers
+              </div>
+              <div style={{ fontSize: 12, color: '#718096', marginTop: 2 }}>
+                Automatically alerts users who opted in to &quot;New Audiobook Alerts&quot;
+              </div>
+            </div>
+          </label>
+        )}
+
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button type="submit" disabled={saving} className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <Save size={15} />
+            {saving ? 'Saving…' : mode === 'edit' ? 'Save Changes' : 'Create Audiobook'}
+          </button>
+          <a href="/admin/audiobooks" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <X size={14} /> Cancel
+          </a>
+        </div>
       </div>
     </form>
   );

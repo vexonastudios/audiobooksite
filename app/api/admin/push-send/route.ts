@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
   try {
     await requireAdmin();
 
-    const payload: PushPayload & { trigger?: string } = await req.json();
-    const { title, body, link, imageUrl, trigger = 'manual' } = payload;
+    const payload: PushPayload & { trigger?: string; topic?: string } = await req.json();
+    const { title, body, link, imageUrl, trigger = 'manual', topic = 'all-users' } = payload;
 
     if (!title || !body) {
       return NextResponse.json({ error: 'title and body are required' }, { status: 400 });
@@ -29,8 +29,8 @@ export async function POST(req: NextRequest) {
     `;
     const subscriberCount = parseInt((countResult[0] as any)?.count ?? '0', 10);
 
-    // Send via Firebase to the topic
-    const messageId = await sendPushToTopic('all-users', { title, body, link, imageUrl });
+    // Send via Firebase to the specified topic
+    const messageId = await sendPushToTopic(topic, { title, body, link, imageUrl });
 
     // Log to audit table
     await sql`

@@ -27,6 +27,10 @@ interface UserState {
   pushEnabled: boolean;
   setPushEnabled: (v: boolean) => void;
 
+  // Topic: new audiobook alerts
+  newBookAlertsEnabled: boolean;
+  setNewBookAlertsEnabled: (v: boolean) => void;
+
   // Notifications (in-app audio banner)
   notificationsEnabled: boolean;
   heardNotificationIds: string[];
@@ -111,6 +115,7 @@ export const useUserStore = create<UserState>()(
       notificationsEnabled: true,
       heardNotificationIds: [],
       pushEnabled: false,
+      newBookAlertsEnabled: true,
       colorScheme: 'system' as const,
       setColorScheme: (scheme) => set({ colorScheme: scheme }),
       playerQuickActions: ['chapters', 'bookmark', 'quote', 'readalong'],
@@ -219,6 +224,7 @@ export const useUserStore = create<UserState>()(
       })),
 
       setPushEnabled: (v) => set({ pushEnabled: v }),
+      setNewBookAlertsEnabled: (v) => set({ newBookAlertsEnabled: v }),
 
       toggleScrollRadio: () => set((state) => ({
         scrollRadioEnabled: !state.scrollRadioEnabled,
@@ -336,7 +342,7 @@ export const useUserStore = create<UserState>()(
     {
       name: 'scrollreader-user', // localStorage key
       skipHydration: true,       // prevent SSR/client mismatch that breaks React event system
-      version: 6,
+      version: 7,
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
@@ -373,6 +379,10 @@ export const useUserStore = create<UserState>()(
         // v5 → v6: Add pushEnabled (off by default)
         if (fromVersion < 6) {
           persistedState.pushEnabled = false;
+        }
+        // v6 → v7: Add newBookAlertsEnabled (on by default)
+        if (fromVersion < 7) {
+          persistedState.newBookAlertsEnabled = true;
         }
         return persistedState;
       },

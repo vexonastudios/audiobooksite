@@ -213,7 +213,28 @@ export default function SettingsPage() {
     quoteSettings, updateQuoteSettings,
     readAlongFontSize, setReadAlongFontSize,
     colorScheme, setColorScheme,
+    newBookAlertsEnabled, setNewBookAlertsEnabled,
   } = useUserStore();
+
+  const [newBookLoading, setNewBookLoading] = useState(false);
+
+  async function toggleNewBookAlerts() {
+    if (!pushEnabled) return; // must have push enabled first
+    const next = !newBookAlertsEnabled;
+    setNewBookLoading(true);
+    setNewBookAlertsEnabled(next);
+    try {
+      await fetch('/api/user/push-topic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: 'new-audiobooks', action: next ? 'subscribe' : 'unsubscribe' }),
+      });
+    } catch {
+      // Best effort — store already updated
+    } finally {
+      setNewBookLoading(false);
+    }
+  }
 
   return (
     <div className="page pb-24" style={{ maxWidth: 680, margin: '0 auto' }}>
@@ -287,6 +308,52 @@ export default function SettingsPage() {
                 <div style={{
                   position: 'absolute',
                   top: 3, left: pushEnabled ? 21 : 3,
+                  width: 20, height: 20, borderRadius: '50%',
+                  background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                  transition: 'left 0.2s',
+                }} />
+              )}
+            </button>
+          </label>
+
+          {/* New Audiobook Alerts */}
+          <label
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px', cursor: pushEnabled ? 'pointer' : 'not-allowed', gap: 12,
+              borderBottom: '1px solid var(--color-border)',
+              opacity: pushEnabled ? 1 : 0.45,
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600, fontSize: '0.9375rem', marginBottom: 2 }}>
+                <BookOpen size={14} color={newBookAlertsEnabled && pushEnabled ? 'var(--color-brand)' : 'var(--color-text-secondary)'} />
+                New Audiobook Alerts
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                {pushEnabled
+                  ? 'Get notified the moment a new audiobook is published'
+                  : 'Enable Push Notifications above to use this setting'}
+              </div>
+            </div>
+            <button
+              onClick={async (e) => { e.preventDefault(); await toggleNewBookAlerts(); }}
+              disabled={!pushEnabled || newBookLoading}
+              style={{
+                width: 44, height: 26, borderRadius: 13, flexShrink: 0,
+                border: 'none',
+                background: newBookAlertsEnabled && pushEnabled ? 'var(--color-brand)' : 'var(--color-surface-2)',
+                position: 'relative', cursor: pushEnabled ? 'pointer' : 'not-allowed',
+                transition: 'background 0.2s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              {newBookLoading ? (
+                <Loader2 size={14} className="spin" color="var(--color-text-secondary)" />
+              ) : (
+                <div style={{
+                  position: 'absolute',
+                  top: 3, left: newBookAlertsEnabled && pushEnabled ? 21 : 3,
                   width: 20, height: 20, borderRadius: '50%',
                   background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
                   transition: 'left 0.2s',
