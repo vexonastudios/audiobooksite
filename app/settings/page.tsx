@@ -235,9 +235,100 @@ export default function SettingsPage() {
       </div>
 
       {/* ──────────────────────────────────────────────────────────────────── */}
-      {/* Section: Appearance                                                 */}
+      {/* Section: Notifications                                              */}
       {/* ──────────────────────────────────────────────────────────────────── */}
       <section style={{ marginBottom: 32 }}>
+        <h2 style={{ fontSize: '0.875rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-muted)', marginBottom: 4 }}>
+          Notifications
+        </h2>
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
+          Manage your alerts and in-app announcements.
+        </p>
+        <div className="card" style={{ padding: '4px 8px' }}>
+          {/* Push Notifications Toggle */}
+          <label
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px', cursor: isBlocked ? 'not-allowed' : 'pointer', gap: 12,
+              borderBottom: '1px solid var(--color-border)',
+              opacity: isBlocked ? 0.6 : 1,
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600, fontSize: '0.9375rem', marginBottom: 2 }}>
+                <Bell size={14} color={pushEnabled ? 'var(--color-brand)' : 'var(--color-text-secondary)'} />
+                Push Notifications
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                {isBlocked
+                  ? 'Blocked by browser — tap the lock icon in your address bar to re-enable'
+                  : 'Get alerts for new audiobooks even when the app is closed'}
+              </div>
+            </div>
+            <button
+              onClick={async (e) => {
+                e.preventDefault();
+                if (isBlocked) return;
+                await togglePush();
+              }}
+              disabled={pushLoading || isBlocked}
+              style={{
+                width: 44, height: 26, borderRadius: 13, flexShrink: 0,
+                border: 'none',
+                background: pushEnabled ? 'var(--color-brand)' : 'var(--color-surface-2)',
+                position: 'relative', cursor: isBlocked ? 'not-allowed' : 'pointer',
+                transition: 'background 0.2s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              {pushLoading ? (
+                <Loader2 size={14} className="spin" color={pushEnabled ? 'white' : 'var(--color-text-secondary)'} />
+              ) : (
+                <div style={{
+                  position: 'absolute',
+                  top: 3, left: pushEnabled ? 21 : 3,
+                  width: 20, height: 20, borderRadius: '50%',
+                  background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                  transition: 'left 0.2s',
+                }} />
+              )}
+            </button>
+          </label>
+
+          {/* Announcement Alerts (In-app audio) */}
+          <label
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px', cursor: 'pointer', gap: 12,
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.9375rem', marginBottom: 2 }}>Announcement alerts</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Play audio announcements on the home screen</div>
+            </div>
+            <div
+              onClick={toggleNotifications}
+              style={{
+                width: 44, height: 26, borderRadius: 13, flexShrink: 0,
+                background: notificationsEnabled ? 'var(--color-brand)' : 'var(--color-surface-2)',
+                position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
+              }}
+            >
+              <div style={{
+                position: 'absolute',
+                top: 3, left: notificationsEnabled ? 21 : 3,
+                width: 20, height: 20, borderRadius: '50%',
+                background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                transition: 'left 0.2s',
+              }} />
+            </div>
+          </label>
+        </div>
+      </section>
+
+      {/* ──────────────────────────────────────────────────────────────────── */}
+      {/* Section: Appearance                                                 */}
+      {/* ──────────────────────────────────────────────────────────────────── */}
         <h2 style={{ fontSize: '0.875rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-text-muted)', marginBottom: 4 }}>
           Appearance
         </h2>
@@ -311,7 +402,7 @@ export default function SettingsPage() {
           Playback
         </h2>
         <div className="card" style={{ padding: '4px 8px' }}>
-          <div style={{ padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div style={{ padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderBottom: '1px solid var(--color-border)' }}>
             <div>
               <div style={{ fontWeight: 600, fontSize: '0.9375rem', marginBottom: 2 }}>Skip Interval</div>
               <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
@@ -337,6 +428,34 @@ export default function SettingsPage() {
               ))}
             </div>
           </div>
+
+          <label
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px', cursor: 'pointer', gap: 12,
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.9375rem', marginBottom: 2 }}>Scroll Radio button</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Show "Now Playing" in the top menu during broadcasts</div>
+            </div>
+            <div
+              onClick={toggleScrollRadio}
+              style={{
+                width: 44, height: 26, borderRadius: 13, flexShrink: 0,
+                background: scrollRadioEnabled ? 'var(--color-brand)' : 'var(--color-surface-2)',
+                position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
+              }}
+            >
+              <div style={{
+                position: 'absolute',
+                top: 3, left: scrollRadioEnabled ? 21 : 3,
+                width: 20, height: 20, borderRadius: '50%',
+                background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                transition: 'left 0.2s',
+              }} />
+            </div>
+          </label>
         </div>
       </section>
 
@@ -450,7 +569,7 @@ export default function SettingsPage() {
             </label>
           ))}
           
-          <div style={{ padding: '14px 16px', background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border)' }}>
+          <div style={{ padding: '14px 16px', background: 'var(--color-surface-2)' }}>
             <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Example output</div>
             <div style={{ fontSize: '0.9rem', color: 'var(--color-text-primary)', lineHeight: 1.6, fontFamily: 'monospace' }}>
               {quoteSettings.useQuotes ? '"For God so loved the world..."' : 'For God so loved the world...'}
@@ -458,114 +577,6 @@ export default function SettingsPage() {
               {quoteSettings.includeLink && ' Listen at: https://scrollreader.com'}
             </div>
           </div>
-
-          {/* Push Notifications Toggle */}
-          <label
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '14px', cursor: isBlocked ? 'not-allowed' : 'pointer', gap: 12,
-              borderBottom: '1px solid var(--color-border)',
-              opacity: isBlocked ? 0.6 : 1,
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600, fontSize: '0.9375rem', marginBottom: 2 }}>
-                <Bell size={14} color={pushEnabled ? 'var(--color-brand)' : 'var(--color-text-secondary)'} />
-                Push Notifications
-              </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-                {isBlocked
-                  ? 'Blocked by browser — tap the lock icon in your address bar to re-enable'
-                  : 'Get alerts for new audiobooks even when the app is closed'}
-              </div>
-            </div>
-            <button
-              onClick={async (e) => {
-                e.preventDefault();
-                if (isBlocked) return;
-                await togglePush();
-              }}
-              disabled={pushLoading || isBlocked}
-              style={{
-                width: 44, height: 26, borderRadius: 13, flexShrink: 0,
-                border: 'none',
-                background: pushEnabled ? 'var(--color-brand)' : 'var(--color-surface-2)',
-                position: 'relative', cursor: isBlocked ? 'not-allowed' : 'pointer',
-                transition: 'background 0.2s',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              {pushLoading ? (
-                <Loader2 size={14} className="spin" color={pushEnabled ? 'white' : 'var(--color-text-secondary)'} />
-              ) : (
-                <div style={{
-                  position: 'absolute',
-                  top: 3, left: pushEnabled ? 21 : 3,
-                  width: 20, height: 20, borderRadius: '50%',
-                  background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-                  transition: 'left 0.2s',
-                }} />
-              )}
-            </button>
-          </label>
-
-          {/* Announcement Alerts (In-app audio) */}
-          <label
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '14px', cursor: 'pointer', gap: 12,
-              borderBottom: '1px solid var(--color-border)',
-            }}
-          >
-            <div>
-              <div style={{ fontWeight: 600, fontSize: '0.9375rem', marginBottom: 2 }}>Announcement alerts</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Play audio notifications on the home screen</div>
-            </div>
-            <div
-              onClick={toggleNotifications}
-              style={{
-                width: 44, height: 26, borderRadius: 13, flexShrink: 0,
-                background: notificationsEnabled ? 'var(--color-brand)' : 'var(--color-surface-2)',
-                position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
-              }}
-            >
-              <div style={{
-                position: 'absolute',
-                top: 3, left: notificationsEnabled ? 21 : 3,
-                width: 20, height: 20, borderRadius: '50%',
-                background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-                transition: 'left 0.2s',
-              }} />
-            </div>
-          </label>
-
-          <label
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '14px', cursor: 'pointer', gap: 12,
-            }}
-          >
-            <div>
-              <div style={{ fontWeight: 600, fontSize: '0.9375rem', marginBottom: 2 }}>Scroll Radio button</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Show "Now Playing" in the top menu during broadcasts</div>
-            </div>
-            <div
-              onClick={toggleScrollRadio}
-              style={{
-                width: 44, height: 26, borderRadius: 13, flexShrink: 0,
-                background: scrollRadioEnabled ? 'var(--color-brand)' : 'var(--color-surface-2)',
-                position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
-              }}
-            >
-              <div style={{
-                position: 'absolute',
-                top: 3, left: scrollRadioEnabled ? 21 : 3,
-                width: 20, height: 20, borderRadius: '50%',
-                background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-                transition: 'left 0.2s',
-              }} />
-            </div>
-          </label>
         </div>
       </section>
 
