@@ -5,9 +5,10 @@ import { useUserStore } from '@/lib/store/userStore';
 import {
   Settings, GripVertical, Check, List, BookmarkPlus, Heart,
   Share2, Moon, BookOpen, ChevronRight, Gauge, Info,
-  Home, Quote, Clock, User, Sun, Monitor
+  Home, Quote, Clock, User, Sun, Monitor, Bell, Loader2
 } from 'lucide-react';
 import Link from 'next/link';
+import { usePushNotifications } from '@/lib/hooks/usePushNotifications';
 
 // All possible quick-action buttons
 const ALL_ACTIONS = [
@@ -202,6 +203,7 @@ function ActionPickerSection({
 }
 
 export default function SettingsPage() {
+  const { pushEnabled, togglePush, isLoading: pushLoading, permissionState } = usePushNotifications();
   const {
     skipInterval, setSkipInterval,
     playerQuickActions, setPlayerQuickActions,
@@ -457,6 +459,58 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          {/* Push Notifications Toggle */}
+          <label
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px', cursor: permissionState === 'unsupported' ? 'not-allowed' : 'pointer', gap: 12,
+              borderBottom: '1px solid var(--color-border)',
+              opacity: permissionState === 'unsupported' ? 0.6 : 1,
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600, fontSize: '0.9375rem', marginBottom: 2 }}>
+                <Bell size={14} color={pushEnabled ? 'var(--color-brand)' : 'var(--color-text-secondary)'} />
+                Push Notifications
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                {permissionState === 'unsupported' 
+                  ? 'Not supported on this device/browser'
+                  : permissionState === 'denied'
+                  ? 'Blocked by browser settings (enable in URL bar)'
+                  : 'Get alerts for new audiobooks when app is closed'}
+              </div>
+            </div>
+            <button
+              onClick={async (e) => {
+                e.preventDefault();
+                if (permissionState === 'unsupported' || permissionState === 'denied') return;
+                await togglePush();
+              }}
+              disabled={pushLoading || permissionState === 'unsupported' || permissionState === 'denied'}
+              style={{
+                width: 44, height: 26, borderRadius: 13, flexShrink: 0,
+                border: 'none',
+                background: pushEnabled ? 'var(--color-brand)' : 'var(--color-surface-2)',
+                position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}
+            >
+              {pushLoading ? (
+                <Loader2 size={14} className="spin" color={pushEnabled ? 'white' : 'var(--color-text-secondary)'} />
+              ) : (
+                <div style={{
+                  position: 'absolute',
+                  top: 3, left: pushEnabled ? 21 : 3,
+                  width: 20, height: 20, borderRadius: '50%',
+                  background: 'white', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                  transition: 'left 0.2s',
+                }} />
+              )}
+            </button>
+          </label>
+
+          {/* Announcement Alerts (In-app audio) */}
           <label
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',

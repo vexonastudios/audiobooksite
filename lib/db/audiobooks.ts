@@ -23,6 +23,8 @@ interface AudiobookRow {
   buy_link: string | null;
   vtt_url: string | null;
   generated_colors: string | null;
+  meta_description: string | null;
+  focus_keyword: string | null;
   plays: number;
   published: boolean;
   categories: string[];
@@ -62,6 +64,8 @@ function rowToAudiobook(row: AudiobookRow, chapters: ChapterRow[] = []): Audiobo
     buyLink: row.buy_link,
     vttUrl: row.vtt_url,
     generatedColors: row.generated_colors,
+    metaDescription: row.meta_description || '',
+    focusKeyword: row.focus_keyword || '',
     plays: row.plays,
     categories: row.categories ?? [],
     topics: row.topics ?? [],
@@ -141,7 +145,8 @@ export async function createAudiobook(data: AudiobookInput): Promise<string> {
       id, slug, title, excerpt, description, pub_date, author_name,
       cover_image, thumbnail_url, mp3_url, mp3_url_low, total_duration,
       length_str, duration_secs, original_year, youtube_link, spotify_link,
-      buy_link, vtt_url, generated_colors, plays, published, categories, topics
+      buy_link, vtt_url, generated_colors, meta_description, focus_keyword,
+      plays, published, categories, topics
     ) VALUES (
       ${id}, ${data.slug}, ${data.title}, ${data.excerpt ?? ''}, ${data.description ?? ''},
       ${data.pubDate ?? new Date().toISOString()}, ${data.authorName},
@@ -149,6 +154,7 @@ export async function createAudiobook(data: AudiobookInput): Promise<string> {
       ${data.mp3UrlLow ?? ''}, ${data.totalDuration ?? ''}, ${data.lengthStr ?? ''},
       ${data.durationSecs ?? 0}, ${data.originalYear ?? null}, ${data.youtubeLink ?? null},
       ${data.spotifyLink ?? null}, ${data.buyLink ?? null}, ${data.vttUrl ?? null}, ${data.generatedColors ?? null},
+      ${data.metaDescription ?? ''}, ${data.focusKeyword ?? ''},
       ${data.plays ?? 0}, ${data.published ?? true},
       ${data.categories ?? []}, ${data.topics ?? []}
     )
@@ -189,6 +195,8 @@ export async function updateAudiobook(id: string, data: Partial<AudiobookInput>)
       buy_link        = COALESCE(${data.buyLink ?? null}, buy_link),
       vtt_url         = COALESCE(${data.vttUrl ?? null}, vtt_url),
       generated_colors = COALESCE(${data.generatedColors ?? null}, generated_colors),
+      meta_description = COALESCE(${data.metaDescription ?? null}, meta_description),
+      focus_keyword    = COALESCE(${data.focusKeyword ?? null}, focus_keyword),
       plays           = COALESCE(${data.plays ?? null}, plays),
       published       = COALESCE(${data.published ?? null}, published),
       categories      = COALESCE(${data.categories ?? null}, categories),
@@ -240,6 +248,8 @@ export interface AudiobookInput {
   buyLink?: string | null;
   vttUrl?: string | null;
   generatedColors?: string | null;
+  metaDescription?: string;
+  focusKeyword?: string;
   plays?: number;
   published?: boolean;
   categories?: string[];

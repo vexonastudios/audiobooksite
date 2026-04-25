@@ -12,6 +12,7 @@ import { GlobalAudioPlayer } from '@/components/player/GlobalAudioPlayer';
 import { TabBar } from '@/components/layout/TabBar';
 import { PWAUpdater } from '@/components/ui/PWAUpdater';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { PushNotificationProvider } from '@/components/ui/PushNotificationProvider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -116,6 +117,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
             {/* PWA update toast — shown when a new SW version is waiting */}
             <PWAUpdater />
+
+            {/* Foreground push notification toast */}
+            <PushNotificationProvider />
           </LibraryProvider>
         </ClerkProvider>
       </body>

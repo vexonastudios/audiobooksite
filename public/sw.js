@@ -5,7 +5,71 @@
  *   - Audio files (audio.scrollreader.com / .mp3)   → Cache-first  (offline listening)
  *   - Next.js static assets (/_next/static/)         → Cache-first  (content-hashed, immutable)
  *   - Navigation (HTML pages)                        → Network-first, cache fallback (offline shell)
+ *
+ * Push notifications:
+ *   - Handled via Firebase Cloud Messaging (FCM)
+ *   - The firebase-messaging-sw.js compat script is imported below
  */
+
+// ── Firebase Cloud Messaging ──────────────────────────────────────────────────
+// FCM requires this exact import to receive background messages via the SW.
+// Step 1: Load the server-generated config (injects FIREBASE_* globals)
+importScripts('/api/firebase-sw-config');
+// Step 2: Load the Firebase compat libs
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
+
+// This config is public — no secrets here.
+firebase.initializeApp({
+  apiKey:            self.FIREBASE_API_KEY            || '',
+  authDomain:        self.FIREBASE_AUTH_DOMAIN        || '',
+  projectId:         self.FIREBASE_PROJECT_ID         || '',
+  storageBucket:     self.FIREBASE_STORAGE_BUCKET     || '',
+  messagingSenderId: self.FIREBASE_MESSAGING_SENDER_ID|| '',
+  appId:             self.FIREBASE_APP_ID             || '',
+});
+
+// FCM messaging instance — handles background messages automatically
+const _fcmMessaging = firebase.messaging();
+
+// ── Push event (non-FCM fallback, or when FCM data-only) ─────────────────────
+self.addEventListener('push', (event) => {
+  // FCM compat lib handles most pushes; this is a fallback for data-only messages
+  if (!event.data) return;
+  let data = {};
+  try { data = event.data.json(); } catch { return; }
+
+  const title = data.title || 'Scroll Reader';
+  const options = {
+    body:    data.body || '',
+    icon:    '/icon-192x192.png',
+    badge:   '/icon-192x192.png',
+    data:    { url: data.link || data.data?.link || '/' },
+    vibrate: [200, 100, 200],
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// ── Notification click → navigate to link ────────────────────────────────────
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // Focus an existing tab if we have one, otherwise open a new window
+      for (const client of windowClients) {
+        if ('focus' in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      return clients.openWindow(url);
+    })
+  );
+});
+
 
 const AUDIO_CACHE    = 'scrollreader-audio-v1';
 const STATIC_CACHE   = 'scrollreader-static-v1';

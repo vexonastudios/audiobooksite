@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft, Mic, Play, Upload, Eye, EyeOff,
-  Save, Calendar, Volume2, CheckCircle, Loader2,
+  Save, Calendar, Volume2, CheckCircle, Loader2, Bell,
 } from 'lucide-react';
 
 export interface NotifData {
@@ -54,6 +54,10 @@ export default function NotificationForm({
 
   // Save draft id once created
   const [savedId, setSavedId] = useState(initialData?.id ?? '');
+
+  // Push notification state
+  const [pushSending, setPushSending] = useState(false);
+  const [pushResult, setPushResult] = useState<{ count?: number; error?: string } | null>(null);
 
   useEffect(() => {
     // cleanup blob URL on unmount
@@ -216,6 +220,35 @@ export default function NotificationForm({
       body: JSON.stringify({ published: false }),
     });
     setPublished(false);
+  };
+
+  // ── Send Push Notification ────────────────────────────────────────────────
+  const handleSendPush = async () => {
+    if (!title.trim() || !bodyText.trim()) {
+      setErrorMsg('Title and body text are required before sending a push notification.');
+      return;
+    }
+    setPushSending(true);
+    setPushResult(null);
+    try {
+      const res = await fetch('/api/admin/push-send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          body: bodyText.trim(),
+          link: '/',
+          trigger: 'manual',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Push failed');
+      setPushResult({ count: data.subscriberCount });
+    } catch (e: unknown) {
+      setPushResult({ error: e instanceof Error ? e.message : 'Push failed' });
+    } finally {
+      setPushSending(false);
+    }
   };
 
   return (
@@ -408,6 +441,43 @@ export default function NotificationForm({
                 After this date/time the banner will stop showing automatically. Leave blank for no expiry.
               </p>
             </div>
+          </div>
+
+          {/* Push Notifications */}
+          <div className="card" style={{ borderColor: '#A78BFA' }}>
+            <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#5B4CF5' }}>
+              <Bell size={13} /> Push Notification
+            </h2>
+            <p style={{ fontSize: 12, color: '#718096', marginBottom: 14, lineHeight: 1.6 }}>
+              Send a device push notification to all users who have opted in. Uses the title and script text above.
+            </p>
+
+            <button
+              onClick={handleSendPush}
+              disabled={pushSending}
+              className="btn-primary"
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', gap: 8, padding: '12px',
+                background: 'linear-gradient(135deg, #5B4CF5, #7c3aed)',
+              }}
+            >
+              {pushSending ? <Loader2 size={16} className="spin" /> : <Bell size={16} />}
+              {pushSending ? 'Sending…' : '🔔 Send Push to All Users'}
+            </button>
+
+            {pushResult && (
+              <div style={{
+                marginTop: 10, padding: '10px 14px', borderRadius: 8, fontSize: 13,
+                background: pushResult.error ? '#FEE2E2' : '#D1FAE5',
+                color: pushResult.error ? '#991B1B' : '#065F46',
+                fontWeight: 500,
+              }}>
+                {pushResult.error
+                  ? `❌ ${pushResult.error}`
+                  : `✅ Sent to ${pushResult.count ?? 0} subscriber${pushResult.count !== 1 ? 's' : ''}`}
+              </div>
+            )}
           </div>
 
           {/* Voice info */}

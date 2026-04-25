@@ -20,12 +20,12 @@ const nextConfig = {
   },
 
   // Prevent Next.js from bundling packages that ship native binaries.
-  serverExternalPackages: ['fluent-ffmpeg', 'ffmpeg-static'],
+  serverExternalPackages: ['fluent-ffmpeg', 'ffmpeg-static', '@ffprobe-installer/ffprobe'],
 
   // Moved from experimental (was deprecated in Next.js 16)
   outputFileTracingIncludes: {
-    '/api/admin/generate-64k':   ['./node_modules/ffmpeg-static/**/*'],
-    '/api/admin/process-audio':  ['./node_modules/ffmpeg-static/**/*'],
+    '/api/admin/generate-64k':   ['./node_modules/ffmpeg-static/**/*', './node_modules/@ffprobe-installer/**/*'],
+    '/api/admin/process-audio':  ['./node_modules/ffmpeg-static/**/*', './node_modules/@ffprobe-installer/**/*'],
   },
 }
 

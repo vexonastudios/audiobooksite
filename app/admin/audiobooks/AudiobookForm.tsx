@@ -6,6 +6,7 @@ import {
   Upload, Music, ImagePlus, Link2, Tag, User, Settings,
   ListOrdered, Save, X, Plus, Trash2, ChevronDown,
   Clock, BarChart2, ExternalLink, FileText, BookMarked,
+  Sparkles, Palette,
 } from 'lucide-react';
 
 interface Chapter {
@@ -18,6 +19,7 @@ interface FormData {
   title: string; slug: string; authorName: string; originalYear: string;
   pubDate: string; published: boolean;
   excerpt: string; description: string;
+  metaDescription: string; focusKeyword: string;
   coverImage: string; thumbnailUrl: string;
   mp3Url: string; mp3UrlLow: string;
   totalDuration: string; lengthStr: string; durationSecs: number;
@@ -44,6 +46,7 @@ const DEFAULT: FormData = {
   title: '', slug: '', authorName: '', originalYear: '',
   pubDate: getLocalDateString(), published: true,
   excerpt: '', description: '',
+  metaDescription: '', focusKeyword: '',
   coverImage: '', thumbnailUrl: '',
   mp3Url: '', mp3UrlLow: '',
   totalDuration: '', lengthStr: '', durationSecs: 0,
@@ -331,6 +334,8 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
   const [audioUploading, setAudioUploading] = useState(false);
   const [audioProgress, setAudioProgress] = useState('');
   const [timestampPaste, setTimestampPaste] = useState('');
+  const [aiSeoLoading, setAiSeoLoading] = useState(false);
+  const [colorsLoading, setColorsLoading] = useState(false);
 
   useEffect(() => {
     fetch('/api/admin/metadata').then(r => r.json()).then(setMeta).catch(() => {});
@@ -392,6 +397,52 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
   const updateChapter = useCallback((i: number, field: keyof Chapter, val: unknown) => {
     setForm(f => { const ch = [...f.chapters]; ch[i] = { ...ch[i], [field]: val }; return { ...f, chapters: ch }; });
   }, []);
+
+  // ── AI SEO (Gemini) ──────────────────────────────────────────────────────
+  const handleAiSeo = async () => {
+    if (!form.title) { alert('Please enter a title first.'); return; }
+    setAiSeoLoading(true);
+    try {
+      const res = await fetch('/api/admin/ai-seo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: form.title, description: form.description, authorName: form.authorName }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setForm(f => ({
+        ...f,
+        excerpt: data.excerpt || f.excerpt,
+        metaDescription: data.metaDescription || f.metaDescription,
+        focusKeyword: data.focusKeyword || f.focusKeyword,
+      }));
+    } catch (e) {
+      alert(`AI SEO failed: ${String(e)}`);
+    } finally {
+      setAiSeoLoading(false);
+    }
+  };
+
+  // ── Generate Colors ──────────────────────────────────────────────────────
+  const handleGenerateColors = async () => {
+    const imageUrl = form.coverImage || form.thumbnailUrl;
+    if (!imageUrl) { alert('Upload a cover image first.'); return; }
+    setColorsLoading(true);
+    try {
+      const res = await fetch('/api/admin/generate-colors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageUrl }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const { generatedColors } = await res.json();
+      set('generatedColors', generatedColors);
+    } catch (e) {
+      alert(`Color generation failed: ${String(e)}`);
+    } finally {
+      setColorsLoading(false);
+    }
+  };
 
   // ── Save ──────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
@@ -465,7 +516,9 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
         </div>
         <div className="form-group">
           <label>Publish Date</label>
-          <input type="date" value={form.pubDate?.split('T')[0] || ''} onChange={e => set('pubDate', e.target.value)} />
+          <input type="date" key={form.pubDate?.split('T')[0] || 'empty'} defaultValue={form.pubDate?.split('T')[0] || ''}
+            onBlur={e => set('pubDate', e.target.value)}
+            onChange={e => set('pubDate', e.target.value)} />
         </div>
       </Row2>
 
@@ -481,13 +534,46 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
       {/* ── Content ─────────────────────────────────────────────────── */}
       <Section icon={<FileText size={14} />} title="Content" />
       <div className="form-group">
-        <label>Excerpt (short teaser)</label>
-        <textarea value={form.excerpt} onChange={e => set('excerpt', e.target.value)} rows={3} />
-      </div>
-      <div className="form-group">
         <label>Full Description (HTML allowed)</label>
         <textarea value={form.description} onChange={e => set('description', e.target.value)} rows={8} />
       </div>
+
+      {/* AI SEO Button */}
+      <div style={{ marginBottom: 18 }}>
+        <button type="button" onClick={handleAiSeo} disabled={aiSeoLoading}
+          className="btn-secondary" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 7,
+            background: aiSeoLoading ? '#F0F4F8' : 'linear-gradient(135deg, #EFF6FF, #F0FDF4)',
+            border: '1px solid #93C5FD',
+            color: '#1D4ED8', fontWeight: 600,
+          }}>
+          <Sparkles size={15} />
+          {aiSeoLoading ? 'Generating SEO…' : '✨ AI Generate SEO (Gemini)'}
+        </button>
+        <span style={{ fontSize: 12, color: '#718096', marginLeft: 10 }}>
+          Reads title + description → fills excerpt, meta description & focus keyword
+        </span>
+      </div>
+
+      <div className="form-group">
+        <label>Excerpt (short teaser)</label>
+        <textarea value={form.excerpt} onChange={e => set('excerpt', e.target.value)} rows={3} />
+      </div>
+      <Row2>
+        <div className="form-group">
+          <label>Meta Description (SEO)</label>
+          <input value={form.metaDescription} onChange={e => set('metaDescription', e.target.value)}
+            placeholder="Under 155 characters for search results…" maxLength={160} />
+          <span style={{ fontSize: 11, color: form.metaDescription.length > 155 ? '#DC2626' : '#A0AEB0' }}>
+            {form.metaDescription.length}/155
+          </span>
+        </div>
+        <div className="form-group">
+          <label>Focus Keyword</label>
+          <input value={form.focusKeyword} onChange={e => set('focusKeyword', e.target.value)}
+            placeholder="e.g. free christian audiobook" />
+        </div>
+      </Row2>
 
       {/* ── Cover Images ─────────────────────────────────────────────── */}
       <Section icon={<ImagePlus size={14} />} title="Cover Images" />
@@ -498,7 +584,7 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
         <div className="card" style={{ padding: 16 }}>
           <CoverUploader
             label="Tall Cover"
-            hint="800 × 1200 px — t-{slug}.webp"
+            hint="max 600×800 px — t-{slug}.webp"
             variant="portrait"
             slug={form.slug}
             value={form.coverImage}
@@ -557,7 +643,8 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
         </div>
         <div className="form-group">
           <label>Length Display</label>
-          <input value={form.lengthStr} onChange={e => set('lengthStr', e.target.value)} placeholder="5h 47m" />
+          <input key={`len-${form.lengthStr}`} defaultValue={form.lengthStr}
+            onBlur={e => set('lengthStr', e.target.value)} placeholder="5h 47m" />
         </div>
       </Row2>
 
@@ -604,8 +691,27 @@ export function AudiobookForm({ initialData, mode }: { initialData?: AudiobookFo
           <input type="number" value={form.plays} onChange={e => set('plays', Number(e.target.value))} />
         </div>
         <div className="form-group">
-          <label>Generated Colors (CSS gradient)</label>
-          <input value={form.generatedColors} onChange={e => set('generatedColors', e.target.value)} placeholder="linear-gradient(to bottom, …)" />
+          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>Generated Colors (CSS gradient)
+            {form.generatedColors && (
+              <span style={{
+                display: 'inline-block', width: 60, height: 16, borderRadius: 4, marginLeft: 8,
+                background: form.generatedColors, border: '1px solid #E2E8F0',
+              }} />
+            )}
+          </label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input value={form.generatedColors} onChange={e => set('generatedColors', e.target.value)}
+              placeholder="linear-gradient(to bottom, …)" style={{ flex: 1 }} />
+            <button type="button" onClick={handleGenerateColors} disabled={colorsLoading}
+              className="btn-secondary" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0,
+                background: colorsLoading ? '#F0F4F8' : '#FFF7ED',
+                border: '1px solid #FED7AA', color: '#C2410C',
+              }}>
+              <Palette size={14} />
+              {colorsLoading ? 'Extracting…' : 'Generate'}
+            </button>
+          </div>
         </div>
       </Row2>
 

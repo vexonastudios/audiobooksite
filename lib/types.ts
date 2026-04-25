@@ -25,6 +25,8 @@ export interface Audiobook {
   spotifyLink: string | null;
   buyLink: string | null;
   generatedColors: string | null;
+  metaDescription?: string;
+  focusKeyword?: string;
   plays: number;
   chapters: Chapter[];
   vttUrl?: string | null;

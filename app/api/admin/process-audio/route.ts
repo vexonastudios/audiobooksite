@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { requireAdmin, adminForbidden } from '@/lib/admin-auth';
 import ffmpegPath from 'ffmpeg-static';
+import ffprobeInstaller from '@ffprobe-installer/ffprobe';
 import ffmpeg from 'fluent-ffmpeg';
 import { Readable } from 'stream';
 import * as fs from 'fs';
@@ -13,6 +14,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 min max for large files
 
 if (ffmpegPath) ffmpeg.setFfmpegPath(ffmpegPath);
+if (ffprobeInstaller?.path) ffmpeg.setFfprobePath(ffprobeInstaller.path);
 
 const r2 = new S3Client({
   region: 'auto',

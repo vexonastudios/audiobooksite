@@ -67,10 +67,10 @@ export async function POST(req: NextRequest) {
       }));
       return NextResponse.json({ thumbnailUrl: `${base}/${thumbKey}` });
     } else {
-      // Portrait tall cover: 800×1200
+      // Portrait tall cover: max height 800px, maintain aspect ratio
       const buf = await sharp(inputBuf)
-        .resize(800, 1200, { fit: 'cover', position: 'top' })
-        .webp({ quality: 88 })
+        .resize({ width: 600, height: 800, fit: 'inside', withoutEnlargement: true })
+        .webp({ quality: 85 })
         .toBuffer();
       const coverKey = `covers/t-${cleanSlug}.webp`;
       await client.send(new PutObjectCommand({

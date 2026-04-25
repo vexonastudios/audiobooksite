@@ -3,6 +3,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { requireAdmin, adminForbidden } from '@/lib/admin-auth';
 import { getAudiobookById, updateAudiobook } from '@/lib/db/audiobooks';
 import ffmpegPath from 'ffmpeg-static';
+import ffprobeInstaller from '@ffprobe-installer/ffprobe';
 import ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'fs';
 import * as os from 'os';
@@ -13,6 +14,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 300;
 
 if (ffmpegPath) ffmpeg.setFfmpegPath(ffmpegPath);
+if (ffprobeInstaller?.path) ffmpeg.setFfprobePath(ffprobeInstaller.path);
 
 const r2 = new S3Client({
   region: 'auto',

@@ -23,7 +23,11 @@ interface UserState {
   isSignedIn: boolean;
   setSignedIn: (v: boolean) => void;
 
-  // Notifications
+  // Push notifications (Web Push / FCM)
+  pushEnabled: boolean;
+  setPushEnabled: (v: boolean) => void;
+
+  // Notifications (in-app audio banner)
   notificationsEnabled: boolean;
   heardNotificationIds: string[];
 
@@ -106,6 +110,7 @@ export const useUserStore = create<UserState>()(
       quoteSettings: { includeLink: true, includeBook: true, useQuotes: true },
       notificationsEnabled: true,
       heardNotificationIds: [],
+      pushEnabled: false,
       colorScheme: 'system' as const,
       setColorScheme: (scheme) => set({ colorScheme: scheme }),
       playerQuickActions: ['chapters', 'bookmark', 'quote', 'readalong'],
@@ -212,6 +217,8 @@ export const useUserStore = create<UserState>()(
       toggleNotifications: () => set((state) => ({
         notificationsEnabled: !state.notificationsEnabled,
       })),
+
+      setPushEnabled: (v) => set({ pushEnabled: v }),
 
       toggleScrollRadio: () => set((state) => ({
         scrollRadioEnabled: !state.scrollRadioEnabled,
@@ -329,7 +336,7 @@ export const useUserStore = create<UserState>()(
     {
       name: 'scrollreader-user', // localStorage key
       skipHydration: true,       // prevent SSR/client mismatch that breaks React event system
-      version: 5,
+      version: 6,
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
@@ -362,6 +369,10 @@ export const useUserStore = create<UserState>()(
           if (persistedState.colorScheme === undefined) {
             persistedState.colorScheme = 'system';
           }
+        }
+        // v5 → v6: Add pushEnabled (off by default)
+        if (fromVersion < 6) {
+          persistedState.pushEnabled = false;
         }
         return persistedState;
       },
