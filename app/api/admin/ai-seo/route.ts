@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const prompt = `You are an expert SEO copywriter for a Christian audiobook website called "Scroll Reader". 
 Given the following audiobook information, generate SEO-optimized content.
