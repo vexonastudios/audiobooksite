@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin, adminForbidden } from '@/lib/admin-auth';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export const runtime = 'nodejs';
 
@@ -7,9 +8,10 @@ export const runtime = 'nodejs';
  * POST /api/admin/ai-seo
  * Body: { title: string, description: string, authorName: string }
  *
- * Uses Gemini 1.5 Flash via direct REST (v1) to generate SEO-optimized content.
- * We bypass the @google/generative-ai SDK because it targets v1beta where the model
- * is not always available.
+ * Uses Gemini to generate SEO-optimized content:
+ *  - excerpt (2-3 sentence teaser)
+ *  - metaDescription (under 160 chars, compelling)
+ *  - focusKeyword (primary keyword phrase)
  *
  * Returns: { excerpt, metaDescription, focusKeyword }
  */
@@ -24,6 +26,9 @@ export async function POST(req: NextRequest) {
     if (!apiKey) {
       return NextResponse.json({ error: 'GEMINI_API_KEY not configured' }, { status: 500 });
     }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const prompt = `You are an expert SEO copywriter for a Christian audiobook website called "Scroll Reader". 
 Given the following audiobook information, generate SEO-optimized content.
@@ -46,26 +51,8 @@ Important rules:
 - All content should be appropriate for a Christian audience
 - Do NOT include the title verbatim in the excerpt — paraphrase creatively`;
 
-    // Call the Gemini REST API directly on v1 (not v1beta) to avoid model availability issues
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
-        }),
-      }
-    );
-
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      throw new Error(errText);
-    }
-
-    const geminiData = await geminiRes.json();
-    const text: string = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
 
     // Parse the JSON response (handle potential markdown fences)
     const jsonMatch = text.match(/\{[\s\S]*\}/);
