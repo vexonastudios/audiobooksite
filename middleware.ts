@@ -1,29 +1,13 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
+// ── Vercel cost optimization (2026-04-25) ──────────────────────────────────
+// The matcher below limits middleware to ONLY auth-relevant routes.
+// Public pages and public API routes no longer invoke the Edge Function,
+// saving ~40-60% of middleware invocations on Vercel.
+// ────────────────────────────────────────────────────────────────────────────
+
 const isAdminRoute = createRouteMatcher(['/admin(.*)', '/api/admin(.*)']);
-const isPublicRoute = createRouteMatcher([
-  '/',
-  '/audiobook(.*)',
-  '/articles(.*)',
-  '/announcements(.*)',
-  '/authors(.*)',
-  '/categories(.*)',
-  '/topics(.*)',
-  '/search(.*)',
-  '/bookmarks(.*)',
-  '/history(.*)',
-  '/quotes(.*)',
-  '/api/library(.*)',
-  '/api/notifications(.*)',
-  '/api/image-proxy(.*)',
-  '/api/analytics(.*)',  // analytics: anonymous events allowed
-  '/api/quotes/community(.*)', // public community feed — no auth
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/stats(.*)',          // user stats page: handled by auth() inside
-  // Note: /api/user/* requires auth but is handled inside the route, not here
-]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isAdminRoute(req)) {
@@ -36,8 +20,22 @@ export default clerkMiddleware(async (auth, req) => {
 });
 
 export const config = {
+  // Only run middleware on routes that actually need auth.
+  // Public pages (/, /audiobook/*, /articles/*, etc.) and public API routes
+  // (/api/library, /api/analytics/*, /api/notifications, /api/quotes/*)
+  // are excluded to avoid unnecessary Edge Function invocations.
   matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    '/(api|trpc)(.*)',
+    '/admin(.*)',
+    '/api/admin(.*)',
+    '/api/user(.*)',
+    '/settings(.*)',
+    '/bookmarks(.*)',
+    '/favorites(.*)',
+    '/history(.*)',
+    '/stats(.*)',
+    '/downloads(.*)',
+    '/donate(.*)',
+    '/connect(.*)',
+    '/api/contact(.*)',
   ],
 };

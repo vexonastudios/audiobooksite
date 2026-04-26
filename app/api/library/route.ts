@@ -5,7 +5,7 @@ import { getAllAuthors } from '@/lib/db/authors';
 import audiobooksJson from '@/public/data/audiobooks.json';
 import articlesJson from '@/public/data/articles.json';
 
-export const revalidate = 60; // ISR — refresh every 60 seconds
+export const revalidate = 600; // Vercel cost opt: 10 min (was 60s) — library rarely changes
 
 async function getAllArticles() {
     const rows = await sql`
@@ -33,7 +33,7 @@ export async function GET() {
     if (audiobooks.length > 0) {
       return NextResponse.json(
         { audiobooks, articles: articles.length > 0 ? articles : articlesJson, authors },
-        { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } }
+        { headers: { 'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1800' } }
       );
     }
 

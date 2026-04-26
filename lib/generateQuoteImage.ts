@@ -385,18 +385,25 @@ function renderCanvas(opts: RenderOpts): string {
 export async function generateQuoteImage(opts: QuoteImageOptions): Promise<string[]> {
   const { quoteText, bookAuthor, bookTitle, chapterTitle, bookCoverUrl } = opts;
 
-  // Load cover image (try original uncropped WP file first)
+  // Vercel cost opt (2026-04-25): Load images directly from R2 CDN first.
+  // Only fall back to /api/image-proxy if direct CORS loading fails
+  // (e.g. for legacy WordPress images not yet migrated to R2).
   const originalUrl = bookCoverUrl
     ? bookCoverUrl.replace(/-\d+x\d+(?=\.[a-zA-Z]+$)/, '')
     : '';
-  const proxyUrl  = bookCoverUrl ? `/api/image-proxy?url=${encodeURIComponent(bookCoverUrl)}` : null;
-  const proxyOrig = originalUrl && originalUrl !== bookCoverUrl
-    ? `/api/image-proxy?url=${encodeURIComponent(originalUrl)}`
-    : null;
 
   let coverImg: HTMLImageElement | null = null;
-  if (proxyOrig) { try { coverImg = await loadImage(proxyOrig); } catch { /* fall through */ } }
-  if (!coverImg && proxyUrl) { try { coverImg = await loadImage(proxyUrl); } catch { /* no cover */ } }
+
+  // Try direct load first (works for audio.scrollreader.com R2 images)
+  if (originalUrl) { try { coverImg = await loadImage(originalUrl); } catch { /* fall through */ } }
+  if (!coverImg && bookCoverUrl && bookCoverUrl !== originalUrl) {
+    try { coverImg = await loadImage(bookCoverUrl); } catch { /* fall through */ }
+  }
+  // Last resort: proxy (for any non-CORS origins)
+  if (!coverImg && bookCoverUrl) {
+    const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(bookCoverUrl)}`;
+    try { coverImg = await loadImage(proxyUrl); } catch { /* no cover */ }
+  }
 
   const shared = { bookAuthor, bookTitle, chapterTitle, coverImg };
 

@@ -5,7 +5,7 @@ import { getPlaylistBlocks } from '@/lib/db/radio';
 // Returns the currently-playing block derived from the ordered playlist + elapsed time.
 // GET /api/now-playing
 
-export const revalidate = 20; // ISR — rehydrate every 20 seconds
+export const revalidate = 60; // Vercel cost opt: 60s (was 20s) — client interpolates position
 
 export async function GET() {
   try {

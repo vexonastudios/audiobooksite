@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { usePlayerStore } from '@/lib/store/playerStore';
 
-const HEARTBEAT_INTERVAL_MS = 30_000;
+const HEARTBEAT_INTERVAL_MS = 60_000; // Vercel cost opt: 60s instead of 30s — halves invocations
 const PLATFORM = 'web'; // Change to 'ios' or 'android' in Capacitor native wrapper
 
 /** Gets or creates an anonymous session ID for this browser tab. */

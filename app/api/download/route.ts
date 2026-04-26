@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAudiobookById } from '@/lib/db/audiobooks';
 
+/**
+ * GET /api/download?bookId=...&quality=64k|128k
+ *
+ * Vercel cost optimization (2026-04-25):
+ * BEFORE — this route streamed the entire MP3 through Vercel's serverless function,
+ *   causing double-bandwidth charges (R2 → Vercel → User) and burning GB-hours.
+ * AFTER — we redirect to the R2 public URL. R2 has zero egress fees, so the
+ *   audio bytes never touch Vercel at all. Massive bandwidth + duration savings.
+ */
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const bookId = searchParams.get('bookId');
@@ -24,38 +33,11 @@ export async function GET(req: NextRequest) {
       return new NextResponse('Audio file not available for this quality', { status: 404 });
     }
 
-    // Forward any Range header from the client (needed for iOS audio seeking and offline caching)
-    const rangeHeader = req.headers.get('range');
-    const upstreamHeaders: HeadersInit = {};
-    if (rangeHeader) upstreamHeaders['Range'] = rangeHeader;
-
-    const response = await fetch(mp3Url, { headers: upstreamHeaders });
-
-    if (!response.ok && response.status !== 206) {
-      return new NextResponse(`Failed to fetch audio: ${response.statusText}`, { status: 502 });
-    }
-
-    // Build clean filename for download
-    const filename = `${book.slug}-${quality}.mp3`;
-
-    // Pass through relevant headers so progress bars and seeking work
-    const responseHeaders: Record<string, string> = {
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Content-Type': 'audio/mpeg',
-      'Accept-Ranges': 'bytes',
-      'Cache-Control': 'public, max-age=31536000, immutable',
-    };
-
-    const contentLength = response.headers.get('Content-Length');
-    if (contentLength) responseHeaders['Content-Length'] = contentLength;
-
-    const contentRange = response.headers.get('Content-Range');
-    if (contentRange) responseHeaders['Content-Range'] = contentRange;
-
-    return new NextResponse(response.body, {
-      status: response.status, // preserve 206 for range requests
-      headers: responseHeaders,
-    });
+    // Redirect to R2 CDN — zero bandwidth through Vercel.
+    // R2 supports Range requests natively, so seeking still works.
+    // The Content-Disposition header for "download" filename is handled by the
+    // browser when the user right-clicks → Save As, or by the SW for offline caching.
+    return NextResponse.redirect(mp3Url, 302);
 
   } catch (error) {
     console.error('Download error:', error);
